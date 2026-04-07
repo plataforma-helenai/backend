@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Recuperar Senha</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .recuperar-page {
+      min-height: 100vh;
+      background: var(--cinza-azulado);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--espacamento-lg);
+      position: relative;
+    }
+
+    /* Faixa decorativa no topo */
+    .recuperar-page::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 220px;
+      background: var(--gradiente-principal);
+    }
+
+    .recuperar-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      padding: var(--espacamento-2xl);
+      max-width: 440px;
+      width: 100%;
+      box-shadow: var(--sombra-modal);
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .recuperar-card .logo {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto var(--espacamento-lg);
+    }
+
+    .recuperar-card h2 {
+      font-size: var(--fonte-tamanho-2xl);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .recuperar-card .descricao {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: var(--espacamento-xl);
+      line-height: 1.6;
+    }
+
+    .recuperar-card .icone-topo {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--borda-radius-full);
+      background: var(--cinza-azulado);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto var(--espacamento-lg);
+    }
+
+    /* Estado de sucesso */
+    .recuperar-sucesso {
+      display: none;
+    }
+
+    .recuperar-sucesso.visivel {
+      display: block;
+    }
+
+    .recuperar-sucesso .icone-sucesso {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--borda-radius-full);
+      background: #F0FFF4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto var(--espacamento-lg);
+    }
+
+    .recuperar-sucesso h3 {
+      color: var(--cor-sucesso);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .recuperar-sucesso .email-enviado {
+      font-weight: 600;
+      color: var(--azul-medio);
+    }
+
+    .recuperar-sucesso .dica {
+      margin-top: var(--espacamento-lg);
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-align: left;
+    }
+
+    .recuperar-sucesso .dica strong {
+      color: var(--texto-primario);
+    }
+
+    .voltar-login {
+      margin-top: var(--espacamento-lg);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--azul-medio);
+    }
+
+    .voltar-login:hover {
+      color: var(--azul-profundo);
+    }
+
+    .recuperar-footer {
+      margin-top: var(--espacamento-xl);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    /* Form alinhado à esquerda */
+    .recuperar-card form {
+      text-align: left;
+    }
+
+    @media (max-width: 768px) {
+      .recuperar-card {
+        padding: var(--espacamento-xl);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <!-- Ledor Player -->
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <!-- LIBRAS Janela -->
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Página -->
+  <div class="recuperar-page">
+    <div class="recuperar-card">
+
+      <!-- Estado 1: Formulário -->
+      <div id="form-area">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI" class="logo">
+        <div class="icone-topo">🔒</div>
+        <h2>Recuperar senha</h2>
+        <p class="descricao">
+          Digite o email da sua conta e enviaremos um link para redefinir sua senha.
+        </p>
+
+        <form id="form-recuperar" onsubmit="return false;">
+          <div class="form-grupo">
+            <label class="form-label" for="email">Email</label>
+            <input type="email" class="form-input" id="email" placeholder="seu@email.com" required>
+            <span class="form-erro" id="erro-email">Informe um email válido</span>
+          </div>
+
+          <button type="submit" class="btn btn-primario btn-full btn-lg" id="btn-enviar">
+            Enviar link de recuperação
+          </button>
+        </form>
+
+        <a href="/compartilhado/login.html" class="voltar-login">← Voltar ao login</a>
+      </div>
+
+      <!-- Estado 2: Sucesso -->
+      <div class="recuperar-sucesso" id="tela-sucesso">
+        <div class="icone-sucesso">✓</div>
+        <h3>Link enviado!</h3>
+        <p class="descricao">
+          Enviamos um link de recuperação para:<br>
+          <span class="email-enviado" id="email-enviado"></span>
+        </p>
+
+        <div class="dica">
+          <strong>Não recebeu?</strong> Verifique sua caixa de spam ou lixo eletrônico.
+          O link expira em 30 minutos.
+        </div>
+
+        <button class="btn btn-secundario btn-full mt-lg" id="btn-reenviar">
+          Reenviar link
+        </button>
+
+        <a href="/compartilhado/login.html" class="voltar-login">← Voltar ao login</a>
+      </div>
+
+      <div class="recuperar-footer">
+        HelenAI — Educação inclusiva para todos
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script>
+    // Submit
+    document.getElementById('form-recuperar').addEventListener('submit', function (e) {
+      e.preventDefault();
+      enviarRecuperacao();
+    });
+
+    document.getElementById('btn-enviar').addEventListener('click', enviarRecuperacao);
+
+    function enviarRecuperacao() {
+      const email = document.getElementById('email').value.trim();
+      const erroEmail = document.getElementById('erro-email');
+
+      // Reset
+      erroEmail.classList.remove('visivel');
+      document.getElementById('email').classList.remove('erro');
+
+      if (!email || !email.includes('@') || !email.includes('.')) {
+        document.getElementById('email').classList.add('erro');
+        erroEmail.classList.add('visivel');
+        return;
+      }
+
+      // Sempre mostra sucesso (fake)
+      document.getElementById('email-enviado').textContent = email;
+      document.getElementById('form-area').style.display = 'none';
+      document.getElementById('tela-sucesso').classList.add('visivel');
+    }
+
+    // Reenviar
+    document.getElementById('btn-reenviar').addEventListener('click', function () {
+      this.textContent = 'Link reenviado!';
+      this.disabled = true;
+      setTimeout(() => {
+        this.textContent = 'Reenviar link';
+        this.disabled = false;
+      }, 3000);
+    });
+  </script>
+
+</body>
+</html>

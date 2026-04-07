@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Meus Alunos</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .turmas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--espacamento-lg); }
+    .turma-card { background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg); box-shadow: var(--sombra-card); transition: var(--transicao); cursor: pointer; border-top: 4px solid var(--azul-medio); }
+    .turma-card:hover { box-shadow: var(--sombra-card-hover); transform: translateY(-2px); }
+    .turma-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: var(--espacamento-sm); }
+    .turma-nome { font-weight: 700; font-size: var(--fonte-tamanho-lg); color: var(--azul-profundo); }
+    .turma-codigo { font-family: monospace; font-size: var(--fonte-tamanho-xs); background: var(--cinza-azulado); padding: 3px 8px; border-radius: var(--borda-radius); color: var(--azul-medio); font-weight: 600; }
+    .turma-desc { font-size: var(--fonte-tamanho-sm); color: var(--texto-secundario); margin-bottom: var(--espacamento-md); }
+    .turma-stats { display: flex; gap: var(--espacamento-lg); margin-bottom: var(--espacamento-md); }
+    .turma-stat { text-align: center; }
+    .turma-stat .valor { font-size: var(--fonte-tamanho-xl); font-weight: 700; color: var(--azul-profundo); }
+    .turma-stat .label { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .turma-card-footer { display: flex; justify-content: space-between; align-items: center; }
+    .turma-tipo-badge { font-size: var(--fonte-tamanho-xs); padding: 2px 8px; border-radius: var(--borda-radius-full); font-weight: 600; }
+    .turma-publica { background: #C6F6D5; color: #22543D; }
+    .turma-privada { background: #FEFCBF; color: #744210; }
+    .turma-card-nova { border-top-color: var(--ciano); border: 2px dashed var(--azul-claro); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; color: var(--texto-terciario); cursor: pointer; }
+    .turma-card-nova:hover { border-color: var(--azul-medio); color: var(--azul-medio); background: #F7FAFC; }
+    .turma-card-nova .icone { font-size: 2.5rem; margin-bottom: var(--espacamento-sm); }
+    .turma-card-nova .texto { font-weight: 600; }
+
+    /* Detalhe turma */
+    .turma-detalhe-header { background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg); box-shadow: var(--sombra-card); margin-bottom: var(--espacamento-lg); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--espacamento-md); }
+    .turma-detalhe-info { flex: 1; }
+    .turma-codigo-grande { display: flex; align-items: center; gap: var(--espacamento-md); background: var(--cinza-azulado); padding: var(--espacamento-md) var(--espacamento-lg); border-radius: var(--borda-radius-lg); margin-top: var(--espacamento-sm); }
+    .turma-codigo-grande code { font-size: var(--fonte-tamanho-xl); font-weight: 700; color: var(--azul-profundo); letter-spacing: 2px; }
+    .turma-codigo-grande .label-code { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .turma-detalhe-stats { display: flex; gap: var(--espacamento-xl); flex-shrink: 0; }
+
+    /* Seção de solicitações */
+    .solicitacoes-section { margin-bottom: var(--espacamento-lg); }
+    .solicitacoes-section h4 { margin-bottom: var(--espacamento-md); display: flex; align-items: center; gap: var(--espacamento-sm); }
+    .solicitacao-item { background: var(--branco); border-radius: var(--borda-radius); padding: var(--espacamento-md); box-shadow: var(--sombra-card); display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--espacamento-sm); border-left: 3px solid var(--cor-aviso); }
+    .solicitacao-info { display: flex; align-items: center; gap: var(--espacamento-sm); }
+    .solicitacao-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--cor-aviso); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: var(--fonte-tamanho-xs); color: #744210; }
+    .solicitacao-acoes { display: flex; gap: var(--espacamento-xs); }
+
+    /* Alunos */
+    .alunos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--espacamento-lg); }
+    .aluno-card { background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg); box-shadow: var(--sombra-card); transition: var(--transicao); }
+    .aluno-card:hover { box-shadow: var(--sombra-card-hover); }
+    .aluno-card-header { display: flex; align-items: center; gap: var(--espacamento-md); margin-bottom: var(--espacamento-md); }
+    .aluno-avatar { width: 48px; height: 48px; border-radius: var(--borda-radius-full); background: var(--ciano); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fonte-tamanho-lg); color: var(--azul-profundo); }
+    .aluno-nome { font-weight: 600; color: var(--azul-profundo); }
+    .aluno-email { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .aluno-stats { display: flex; flex-direction: column; gap: var(--espacamento-sm); margin-bottom: var(--espacamento-md); font-size: var(--fonte-tamanho-sm); color: var(--texto-secundario); }
+    .aluno-stats span { display: flex; align-items: center; gap: 6px; }
+    .aluno-desempenho-mini { display: flex; gap: 4px; margin-bottom: var(--espacamento-md); }
+    .mini-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--cinza-azulado); overflow: hidden; }
+    .mini-bar-fill { height: 100%; border-radius: 3px; }
+    .aluno-card-acoes { display: flex; gap: var(--espacamento-sm); flex-wrap: wrap; align-items: center; }
+    .aluno-turma-badge { font-size: var(--fonte-tamanho-xs); background: #EBF8FF; color: var(--azul-medio); padding: 2px 8px; border-radius: var(--borda-radius-full); font-weight: 500; }
+    .aluno-pendente { opacity: 0.6; border-left: 3px solid var(--cor-aviso); }
+    .aluno-pendente .aluno-avatar { background: var(--cor-aviso); color: #744210; }
+
+    /* Filtros */
+    .filtros-bar { flex-direction: column !important; gap: var(--espacamento-md) !important; }
+    .filtros-row { display: flex; gap: var(--espacamento-md); width: 100%; align-items: flex-end; }
+    .filtro-grupo { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+    .filtro-label { font-size: var(--fonte-tamanho-xs); font-weight: 600; color: var(--texto-secundario); text-transform: uppercase; letter-spacing: 0.5px; }
+    .filtros-acoes { display: flex; align-items: flex-end; flex-shrink: 0; }
+    .btn-limpar { background: none; border: none; color: var(--cor-erro); font-size: var(--fonte-tamanho-sm); cursor: pointer; padding: 10px 14px; font-family: var(--fonte-principal); font-weight: 500; white-space: nowrap; transition: var(--transicao); border-radius: var(--borda-radius); display: none; }
+    .btn-limpar.visivel { display: inline-flex; }
+    .btn-limpar:hover { background: #FFF5F5; }
+
+    /* Modal desempenho */
+    .desempenho-modal { max-width: 650px; max-height: 90vh; overflow-y: auto; }
+    .desempenho-resumo { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--espacamento-sm); margin-bottom: var(--espacamento-lg); }
+    .desempenho-resumo-item { text-align: center; padding: var(--espacamento-md); background: var(--cinza-azulado); border-radius: var(--borda-radius); }
+    .desempenho-resumo-item .valor { font-size: var(--fonte-tamanho-xl); font-weight: 700; color: var(--azul-profundo); }
+    .desempenho-resumo-item .label { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .desempenho-chart { max-height: 250px; margin-bottom: var(--espacamento-lg); }
+    .desempenho-habilidades { margin-bottom: var(--espacamento-md); }
+    .hab-row { display: flex; align-items: center; gap: var(--espacamento-sm); padding: 6px 0; border-bottom: 1px solid var(--borda-cor); font-size: var(--fonte-tamanho-sm); }
+    .hab-row:last-child { border-bottom: none; }
+    .hab-codigo { font-family: monospace; font-size: var(--fonte-tamanho-xs); color: var(--azul-medio); font-weight: 600; min-width: 100px; }
+    .hab-bar { flex: 1; height: 8px; background: var(--cinza-azulado); border-radius: 4px; overflow: hidden; }
+    .hab-bar-fill { height: 100%; border-radius: 4px; }
+    .hab-pct { font-weight: 600; min-width: 40px; text-align: right; font-size: var(--fonte-tamanho-sm); }
+
+    .resultado-busca { padding: var(--espacamento-sm) 0; border-bottom: 1px solid var(--borda-cor); display: flex; align-items: center; justify-content: space-between; }
+    .resultado-busca:last-child { border-bottom: none; }
+    .resultado-busca-info { display: flex; align-items: center; gap: var(--espacamento-sm); }
+    .resultado-busca-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--azul-claro); display: flex; align-items: center; justify-content: center; font-size: var(--fonte-tamanho-xs); font-weight: 600; color: var(--azul-profundo); }
+
+    .modal-turma { max-width: 480px; }
+    .visibilidade-toggle { display: flex; gap: var(--espacamento-md); margin-top: var(--espacamento-sm); }
+    .visibilidade-option { flex: 1; padding: var(--espacamento-md); border: 2px solid var(--borda-cor); border-radius: var(--borda-radius); cursor: pointer; text-align: center; transition: var(--transicao); }
+    .visibilidade-option:hover { border-color: var(--azul-claro); }
+    .visibilidade-option.selecionado { border-color: var(--azul-medio); background: #EBF8FF; }
+    .visibilidade-option .vis-icone { font-size: 1.5rem; margin-bottom: 4px; }
+    .visibilidade-option .vis-titulo { font-weight: 600; font-size: var(--fonte-tamanho-sm); color: var(--azul-profundo); }
+    .visibilidade-option .vis-desc { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles"><button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button><button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button></div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+  <div class="ledor-player"><button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button><div class="acessibilidade-separador"></div><button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button></div>
+  <div class="libras-janela"><div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div><div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div></div>
+
+  <!-- Modal Nova Turma -->
+  <div class="modal-overlay" id="modal-nova-turma">
+    <div class="modal modal-turma">
+      <h3 class="modal-titulo">Criar Nova Turma</h3>
+      <div class="form-grupo">
+        <label class="form-label">Nome da turma</label>
+        <input type="text" class="form-input" id="turma-nome" placeholder="Ex: Matemática — Turma A 2026">
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Descrição (opcional)</label>
+        <input type="text" class="form-input" id="turma-desc" placeholder="Ex: Preparação ENEM 2026">
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Visibilidade</label>
+        <div class="visibilidade-toggle">
+          <div class="visibilidade-option selecionado" onclick="selecionarVisibilidade(this, 'privada')">
+            <div class="vis-icone">🔒</div>
+            <div class="vis-titulo">Privada</div>
+            <div class="vis-desc">O professor aprova quem entra</div>
+          </div>
+          <div class="visibilidade-option" onclick="selecionarVisibilidade(this, 'publica')">
+            <div class="vis-icone">🌐</div>
+            <div class="vis-titulo">Pública</div>
+            <div class="vis-desc">Qualquer aluno com o código entra</div>
+          </div>
+        </div>
+        <input type="hidden" id="turma-visibilidade" value="privada">
+      </div>
+      <div class="alerta alerta-info">
+        <span>ℹ</span>
+        <span>Um código único será gerado para os alunos entrarem.</span>
+      </div>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal('modal-nova-turma')">Cancelar</button>
+        <button class="btn btn-sucesso" onclick="criarTurma()">Criar Turma</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Convidar -->
+  <div class="modal-overlay" id="modal-convidar">
+    <div class="modal modal-turma">
+      <h3 class="modal-titulo">Convidar Aluno</h3>
+      <p class="text-muted text-small" style="margin-bottom:var(--espacamento-md);">O aluno receberá um email com convite para entrar nesta turma.</p>
+      <div class="form-grupo">
+        <label class="form-label">Nome</label>
+        <input type="text" class="form-input" id="convidar-nome" placeholder="Nome completo">
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="convidar-email" placeholder="email@aluno.com">
+      </div>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal('modal-convidar')">Cancelar</button>
+        <button class="btn btn-sucesso" onclick="enviarConvite()">Enviar Convite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Vincular -->
+  <div class="modal-overlay" id="modal-vincular">
+    <div class="modal modal-turma">
+      <h3 class="modal-titulo">Vincular Aluno Existente</h3>
+      <div class="form-grupo">
+        <label class="form-label">Buscar por email ou nome</label>
+        <input type="text" class="form-input" placeholder="Digite o email ou nome...">
+      </div>
+      <div>
+        <div class="resultado-busca"><div class="resultado-busca-info"><div class="resultado-busca-avatar">FC</div><div><div style="font-weight:600;font-size:var(--fonte-tamanho-sm);">Fernando Costa</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">fernando@email.com</div></div></div><button class="btn btn-primario btn-sm" onclick="vincularAluno(this)">Vincular</button></div>
+        <div class="resultado-busca"><div class="resultado-busca-info"><div class="resultado-busca-avatar">GL</div><div><div style="font-weight:600;font-size:var(--fonte-tamanho-sm);">Gabriela Lima</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">gabriela@email.com</div></div></div><button class="btn btn-primario btn-sm" onclick="vincularAluno(this)">Vincular</button></div>
+      </div>
+      <div class="modal-acoes"><button class="btn btn-secundario" onclick="fecharModal('modal-vincular')">Fechar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Turma -->
+  <div class="modal-overlay" id="modal-editar-turma">
+    <div class="modal modal-turma">
+      <h3 class="modal-titulo">Editar Turma</h3>
+      <div class="form-grupo"><label class="form-label">Nome</label><input type="text" class="form-input" id="editar-turma-nome"></div>
+      <div class="form-grupo"><label class="form-label">Descrição</label><input type="text" class="form-input" id="editar-turma-desc"></div>
+      <div class="form-grupo">
+        <label class="form-label">Visibilidade</label>
+        <div class="visibilidade-toggle" id="editar-visibilidade-toggle">
+          <div class="visibilidade-option" id="editar-vis-privada" onclick="selecionarVisibilidadeEditar(this, 'privada')"><div class="vis-icone">🔒</div><div class="vis-titulo">Privada</div></div>
+          <div class="visibilidade-option" id="editar-vis-publica" onclick="selecionarVisibilidadeEditar(this, 'publica')"><div class="vis-icone">🌐</div><div class="vis-titulo">Pública</div></div>
+        </div>
+        <input type="hidden" id="editar-turma-visibilidade" value="">
+      </div>
+      <div class="modal-acoes">
+        <button class="btn btn-perigo" onclick="excluirTurma()" style="margin-right:auto;">Excluir</button>
+        <button class="btn btn-secundario" onclick="fecharModal('modal-editar-turma')">Cancelar</button>
+        <button class="btn btn-primario" onclick="salvarTurma()">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Desempenho -->
+  <div class="modal-overlay" id="modal-desempenho">
+    <div class="modal desempenho-modal">
+      <h3 class="modal-titulo" id="desempenho-nome">Desempenho — Aluno</h3>
+      <div class="desempenho-resumo">
+        <div class="desempenho-resumo-item"><div class="valor" id="desemp-simulados">23</div><div class="label">Simulados</div></div>
+        <div class="desempenho-resumo-item"><div class="valor" id="desemp-media">74%</div><div class="label">Média Geral</div></div>
+        <div class="desempenho-resumo-item"><div class="valor" id="desemp-questoes">690</div><div class="label">Questões</div></div>
+      </div>
+      <h4 style="font-size:var(--fonte-tamanho-sm);margin-bottom:var(--espacamento-sm);color:var(--azul-profundo);">Desempenho por Área</h4>
+      <canvas id="chart-desempenho" class="desempenho-chart"></canvas>
+      <h4 style="font-size:var(--fonte-tamanho-sm);margin-bottom:var(--espacamento-sm);color:var(--azul-profundo);">Desempenho por Habilidade</h4>
+      <div class="desempenho-habilidades" id="desempenho-habilidades"></div>
+      <div class="modal-acoes"><button class="btn btn-secundario" onclick="fecharModal('modal-desempenho')">Fechar</button></div>
+    </div>
+  </div>
+
+  <!-- Modal Adicionar Simulado à Turma -->
+  <div class="modal-overlay" id="modal-add-simulado">
+    <div class="modal" style="max-width:500px;">
+      <h3 class="modal-titulo">Adicionar Simulado à Turma</h3>
+      <p class="text-muted text-small" style="margin-bottom:var(--espacamento-md);">Selecione um simulado para disponibilizar aos alunos desta turma.</p>
+      <div class="form-grupo"><label class="form-label">Buscar simulado</label><input type="text" class="form-input" placeholder="Nome do simulado..."></div>
+      <div id="lista-simulados-modal"></div>
+      <div class="modal-acoes"><button class="btn btn-secundario" onclick="fecharModal('modal-add-simulado')">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span></div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item ativo">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <!-- VISTA: Turmas -->
+      <div id="vista-turmas">
+        <div class="conteudo-header">
+          <div><h1 class="conteudo-titulo">Meus Alunos</h1><p class="conteudo-subtitulo">Gerencie suas turmas e alunos</p></div>
+        </div>
+        <div class="tabs">
+          <button class="tab ativo" onclick="mostrarTab('turmas', this)">Turmas</button>
+          <button class="tab" onclick="mostrarTab('todos-alunos', this)">Todos os Alunos</button>
+        </div>
+        <div class="tab-conteudo ativo" id="tab-turmas">
+          <div class="filtros-bar" style="margin-bottom:var(--espacamento-lg);">
+            <div class="filtros-row">
+              <div class="filtro-grupo" style="flex:2;"><label class="filtro-label">Buscar</label><input type="text" class="form-input" id="filtro-busca-turmas" placeholder="Nome da turma..." oninput="verificarFiltrosTurmas()"></div>
+              <div class="filtro-grupo"><label class="filtro-label">Status</label>
+                <select class="form-select" id="filtro-status-turma" onchange="verificarFiltrosTurmas()">
+                  <option value="">Todos</option><option value="ativa">Ativa</option><option value="encerrada">Encerrada</option>
+                </select>
+              </div>
+              <div class="filtro-grupo"><label class="filtro-label">Visibilidade</label>
+                <select class="form-select" id="filtro-vis-turma" onchange="verificarFiltrosTurmas()">
+                  <option value="">Todas</option><option value="publica">Pública</option><option value="privada">Privada</option>
+                </select>
+              </div>
+              <div class="filtros-acoes"><button class="btn-limpar" id="btn-limpar-turmas" onclick="limparFiltrosTurmas()">✕ Limpar filtros</button></div>
+            </div>
+          </div>
+          <div class="turmas-grid" id="turmas-grid"></div>
+        </div>
+        <div class="tab-conteudo" id="tab-todos-alunos">
+          <div class="filtros-bar" style="margin-bottom:var(--espacamento-lg);">
+            <div class="filtros-row">
+              <div class="filtro-grupo" style="flex:2;"><label class="filtro-label">Buscar</label><input type="text" class="form-input" id="filtro-busca-todos" placeholder="Nome ou email..." oninput="verificarFiltrosTodos()"></div>
+              <div class="filtro-grupo"><label class="filtro-label">Turma</label><select class="form-select" id="filtro-turma" onchange="verificarFiltrosTodos()"><option value="">Todas</option></select></div>
+              <div class="filtros-acoes"><button class="btn-limpar" id="btn-limpar-todos" onclick="limparFiltrosTodos()">✕ Limpar filtros</button></div>
+            </div>
+          </div>
+          <div class="alunos-grid" id="todos-alunos-grid"></div>
+        </div>
+      </div>
+
+      <!-- VISTA: Detalhe turma -->
+      <div id="vista-turma-detalhe" style="display:none;">
+        <div class="conteudo-header">
+          <div>
+            <a href="#" onclick="return voltarTurmas()" style="font-size:var(--fonte-tamanho-sm);color:var(--azul-medio);">← Voltar para turmas</a>
+            <h1 class="conteudo-titulo" id="detalhe-turma-nome"></h1>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-secundario btn-sm" onclick="editarTurmaAtual()">Editar Turma</button>
+            <button class="btn btn-secundario" onclick="abrirModal('modal-vincular')">Vincular Existente</button>
+            <button class="btn btn-sucesso" onclick="abrirModal('modal-convidar')">+ Convidar</button>
+          </div>
+        </div>
+
+        <div class="turma-detalhe-header">
+          <div class="turma-detalhe-info">
+            <p id="detalhe-turma-desc" class="text-muted text-small"></p>
+            <div style="display:flex;align-items:center;gap:var(--espacamento-md);margin-top:var(--espacamento-sm);flex-wrap:wrap;">
+              <span class="turma-tipo-badge" id="detalhe-turma-tipo"></span>
+            </div>
+            <div class="turma-codigo-grande">
+              <div><div class="label-code">Código da turma</div><code id="detalhe-turma-codigo"></code></div>
+              <button class="btn btn-secundario btn-sm" onclick="copiarCodigo()">Copiar</button>
+            </div>
+          </div>
+          <div class="turma-detalhe-stats">
+            <div class="turma-stat"><div class="valor" id="detalhe-total-alunos">0</div><div class="label">Alunos</div></div>
+            <div class="turma-stat"><div class="valor" id="detalhe-pendentes">0</div><div class="label">Pendentes</div></div>
+            <div class="turma-stat"><div class="valor" id="detalhe-solicitacoes">0</div><div class="label">Solicitações</div></div>
+          </div>
+        </div>
+
+
+        <!-- Simulados da turma -->
+        <div class="solicitacoes-section" style="margin-bottom:var(--espacamento-lg);">
+          <h4 style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Simulados da Turma</span>
+            <button class="btn btn-primario btn-sm" onclick="abrirModal('modal-add-simulado')">+ Adicionar Simulado</button>
+          </h4>
+          <div id="turma-simulados-lista"></div>
+        </div>
+
+        <h4 style="margin-bottom:var(--espacamento-md);">Alunos</h4>
+        <div class="filtros-bar" style="margin-bottom:var(--espacamento-lg);">
+          <div class="filtros-row">
+            <div class="filtro-grupo" style="flex:2;"><label class="filtro-label">Buscar</label><input type="text" class="form-input" placeholder="Nome ou email..."></div>
+          </div>
+        </div>
+
+        <div class="alunos-grid" id="detalhe-alunos-grid"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const turmas = [
+      {
+        id: 1, nome: 'ENEM 2026 — Intensivo', codigo: 'ENEM-INT-2026', descricao: 'Turma intensiva de preparação para o ENEM 2026', cor: '#2B6CB0', visibilidade: 'privada', status: 'ativa',
+        simulados: [{ nome: 'ENEM 2025 — Caderno Azul', qtd: 45, status: 'publicado' }, { nome: 'Simulado Matemática Básica', qtd: 20, status: 'publicado' }],
+        alunos: [
+          { nome: 'Maria Oliveira', email: 'maria@email.com', simulados: 23, ultimoAcesso: '2026-04-05', media: 74 },
+          { nome: 'Pedro Santos', email: 'pedro@email.com', simulados: 15, ultimoAcesso: '2026-04-04', media: 65 },
+          { nome: 'Ana Beatriz', email: 'anab@email.com', simulados: 31, ultimoAcesso: '2026-04-06', media: 88 },
+        ],
+        pendentes: [{ nome: 'Carlos Neto', email: 'carlos.n@email.com' }],
+        solicitacoes: [
+          { nome: 'Diego Nunes', email: 'diego@email.com', data: '2026-04-05' },
+          { nome: 'Fernanda Lima', email: 'fernanda@email.com', data: '2026-04-06' },
+        ]
+      },
+      {
+        id: 2, nome: 'Matemática Básica', codigo: 'MAT-BAS-2026', descricao: 'Reforço em matemática', cor: '#38A169', visibilidade: 'publica', status: 'ativa',
+        simulados: [{ nome: 'Simulado Matemática Básica', qtd: 20, status: 'publicado' }],
+        alunos: [
+          { nome: 'Juliana Ferreira', email: 'juliana@email.com', simulados: 8, ultimoAcesso: '2026-04-03', media: 55 },
+          { nome: 'Pedro Santos', email: 'pedro@email.com', simulados: 15, ultimoAcesso: '2026-04-04', media: 65 },
+        ],
+        pendentes: [], solicitacoes: []
+      },
+      {
+        id: 3, nome: 'Concurso TRF5', codigo: 'TRF5-2026', descricao: 'Preparação para concurso do TRF 5ª Região', cor: '#6B46C1', visibilidade: 'privada', status: 'encerrada',
+        simulados: [{ nome: 'Revisão Ciências Humanas', qtd: 25, status: 'rascunho' }],
+        alunos: [
+          { nome: 'Maria Oliveira', email: 'maria@email.com', simulados: 23, ultimoAcesso: '2026-04-05', media: 74 },
+          { nome: 'Ana Beatriz', email: 'anab@email.com', simulados: 31, ultimoAcesso: '2026-04-06', media: 88 },
+          { nome: 'Juliana Ferreira', email: 'juliana@email.com', simulados: 8, ultimoAcesso: '2026-04-03', media: 55 },
+          { nome: 'Roberto Silva', email: 'roberto@email.com', simulados: 12, ultimoAcesso: '2026-04-02', media: 62 },
+        ],
+        pendentes: [{ nome: 'Letícia Souza', email: 'leticia@email.com' }],
+        solicitacoes: [{ nome: 'Thiago Rocha', email: 'thiago@email.com', data: '2026-04-04' }]
+      }
+    ];
+
+    let turmaAtualId = null;
+    let chartDesempenho = null;
+    const desempenhoFake = [
+      { mat: 72, lng: 80, cnt: 65, chs: 75 }, { mat: 55, lng: 68, cnt: 72, chs: 60 },
+      { mat: 80, lng: 45, cnt: 58, chs: 90 }, { mat: 68, lng: 72, cnt: 80, chs: 55 },
+    ];
+    const habsFake = [
+      { cod: 'EM13MAT101', pct: 72 }, { cod: 'EM13MAT301', pct: 58 },
+      { cod: 'EM13LGG101', pct: 85 }, { cod: 'EM13CNT101', pct: 60 },
+      { cod: 'EM13CHS101', pct: 78 }, { cod: 'EM13CHS301', pct: 45 },
+    ];
+
+    function getIniciais(n) { return n.split(' ').map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase(); }
+    function diasAtras(d) { const diff = Math.floor((new Date('2026-04-06') - new Date(d)) / 86400000); return diff === 0 ? 'Hoje' : diff === 1 ? 'Ontem' : diff + ' dias atrás'; }
+
+    // TABS
+    function mostrarTab(id, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+      document.querySelectorAll('.tab-conteudo').forEach(t => t.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      document.getElementById('tab-' + id).classList.add('ativo');
+      if (id === 'todos-alunos') renderTodosAlunos();
+    }
+
+    // RENDER TURMAS
+    function renderTurmas() {
+      const grid = document.getElementById('turmas-grid');
+      grid.innerHTML = '';
+      turmas.forEach(t => {
+        const tipoBadge = t.visibilidade === 'publica' ? '<span class="turma-tipo-badge turma-publica">🌐 Pública</span>' : '<span class="turma-tipo-badge turma-privada">🔒 Privada</span>';
+        const statusBadge = t.status === 'ativa' ? '<span class="badge badge-ativo">Ativa</span>' : '<span class="badge badge-bloqueado">Encerrada</span>';
+        const solCount = t.solicitacoes.length;
+        const solBadge = solCount > 0 ? `<span class="badge badge-pendente">${solCount} solicitação${solCount > 1 ? 'ões' : ''}</span>` : '';
+        const opacity = t.status === 'encerrada' ? 'opacity:0.7;' : '';
+        grid.innerHTML += `
+          <div class="turma-card" onclick="abrirTurma(${t.id})" style="border-top-color:${t.cor};${opacity}">
+            <div class="turma-card-header"><div class="turma-nome">${t.nome}</div><span class="turma-codigo">${t.codigo}</span></div>
+            <div class="turma-desc">${t.descricao}</div>
+            <div style="margin-bottom:var(--espacamento-sm);display:flex;gap:var(--espacamento-xs);flex-wrap:wrap;">${statusBadge} ${tipoBadge} ${solBadge}</div>
+            <div class="turma-stats">
+              <div class="turma-stat"><div class="valor">${t.alunos.length}</div><div class="label">Alunos</div></div>
+              <div class="turma-stat"><div class="valor">${t.simulados.length}</div><div class="label">Simulados</div></div>
+              <div class="turma-stat"><div class="valor">${t.pendentes.length}</div><div class="label">Pendentes</div></div>
+            </div>
+            <div class="turma-card-footer"><span class="text-small text-muted">Clique para ver</span><span style="color:var(--azul-medio);">→</span></div>
+          </div>`;
+      });
+      grid.innerHTML = `<div class="turma-card turma-card-nova" onclick="abrirModal('modal-nova-turma')"><span class="icone">+</span><span class="texto">Criar Nova Turma</span></div>` + grid.innerHTML;
+      const sel = document.getElementById('filtro-turma');
+      sel.innerHTML = '<option value="">Todas</option>';
+      turmas.forEach(t => sel.innerHTML += `<option value="${t.id}">${t.nome}</option>`);
+    }
+
+    function verificarFiltrosTurmas() {
+      const b = document.getElementById('filtro-busca-turmas').value.trim();
+      const s = document.getElementById('filtro-status-turma').value;
+      const v = document.getElementById('filtro-vis-turma').value;
+      document.getElementById('btn-limpar-turmas').classList.toggle('visivel', b.length > 0 || !!s || !!v);
+    }
+    function limparFiltrosTurmas() {
+      document.getElementById('filtro-busca-turmas').value = '';
+      document.getElementById('filtro-status-turma').value = '';
+      document.getElementById('filtro-vis-turma').value = '';
+      verificarFiltrosTurmas();
+    }
+
+    // ABRIR TURMA
+    function abrirTurma(id) {
+      turmaAtualId = id;
+      const t = turmas.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('vista-turmas').style.display = 'none';
+      document.getElementById('vista-turma-detalhe').style.display = 'block';
+      document.getElementById('detalhe-turma-nome').textContent = t.nome;
+      document.getElementById('detalhe-turma-desc').textContent = t.descricao;
+      document.getElementById('detalhe-turma-codigo').textContent = t.codigo;
+      document.getElementById('detalhe-total-alunos').textContent = t.alunos.length;
+      document.getElementById('detalhe-pendentes').textContent = t.pendentes.length;
+      document.getElementById('detalhe-solicitacoes').textContent = t.solicitacoes.length;
+      document.getElementById('detalhe-turma-tipo').className = 'turma-tipo-badge ' + (t.visibilidade === 'publica' ? 'turma-publica' : 'turma-privada');
+      document.getElementById('detalhe-turma-tipo').textContent = t.visibilidade === 'publica' ? '🌐 Pública — qualquer aluno entra' : '🔒 Privada — requer aprovação';
+
+      // Simulados da turma
+      const simLista = document.getElementById('turma-simulados-lista');
+      if (t.simulados.length === 0) {
+        simLista.innerHTML = '<p class="text-muted text-small">Nenhum simulado vinculado. Adicione simulados para disponibilizar aos alunos.</p>';
+      } else {
+        simLista.innerHTML = t.simulados.map((s, i) => {
+          const sBadge = s.status === 'publicado' ? '<span class="badge badge-publicado">Publicado</span>' : '<span class="badge badge-rascunho">Rascunho</span>';
+          return `<div class="solicitacao-item" style="border-left-color:var(--azul-medio);">
+            <div class="solicitacao-info">
+              <div class="solicitacao-avatar" style="background:#EBF8FF;color:var(--azul-medio);">📝</div>
+              <div><div style="font-weight:600;font-size:var(--fonte-tamanho-sm);">${s.nome}</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">${s.qtd} questões · ${sBadge}</div></div>
+            </div>
+            <div style="display:flex;gap:var(--espacamento-xs);">
+              <a href="/conteudista/simulado-resultados.html" target="_blank" class="btn btn-primario btn-sm">Resultados</a>
+              <button class="btn btn-perigo btn-sm" onclick="this.closest('.solicitacao-item').remove()">Remover</button>
+            </div>
+          </div>`;
+        }).join('');
+      }
+
+      // Modal de adicionar simulado
+      const modalSimLista = document.getElementById('lista-simulados-modal');
+      const simuladosDisp = [
+        { nome: 'ENEM 2025 — Caderno Azul', qtd: 45 },
+        { nome: 'Simulado Matemática Básica', qtd: 20 },
+        { nome: 'Linguagens — Interpretação', qtd: 15 },
+        { nome: 'Revisão Ciências Humanas', qtd: 25 },
+      ];
+      modalSimLista.innerHTML = simuladosDisp.map(s => {
+        const jaVinculado = t.simulados.some(ts => ts.nome === s.nome);
+        return `<div class="resultado-busca">
+          <div class="resultado-busca-info"><div class="resultado-busca-avatar">📝</div><div><div style="font-weight:600;font-size:var(--fonte-tamanho-sm);">${s.nome}</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">${s.qtd} questões</div></div></div>
+          ${jaVinculado ? '<span class="badge badge-publicado">Vinculado</span>' : `<button class="btn btn-primario btn-sm" onclick="vincularSimulado(this, '${s.nome}', ${s.qtd})">Adicionar</button>`}
+        </div>`;
+      }).join('');
+
+      renderAlunosTurma(t);
+    }
+
+    function vincularSimulado(btn, nome, qtd) {
+      const t = turmas.find(x => x.id === turmaAtualId);
+      if (t) t.simulados.push({ nome, qtd, status: 'publicado' });
+      btn.textContent = 'Adicionado ✓';
+      btn.disabled = true;
+      btn.classList.remove('btn-primario');
+      btn.classList.add('btn-sucesso');
+      // Atualizar lista
+      setTimeout(() => abrirTurma(turmaAtualId), 500);
+    }
+
+    function voltarTurmas() { document.getElementById('vista-turmas').style.display = 'block'; document.getElementById('vista-turma-detalhe').style.display = 'none'; turmaAtualId = null; renderTurmas(); return false; }
+
+    function renderAlunosTurma(t) {
+      const grid = document.getElementById('detalhe-alunos-grid');
+      grid.innerHTML = '';
+
+      // Solicitações primeiro (aluno usou código, aguarda aprovação)
+      t.solicitacoes.forEach((a, i) => {
+        grid.innerHTML += `
+          <div class="aluno-card" style="border-left:3px solid #D53F8C;">
+            <div class="aluno-card-header">
+              <div class="aluno-avatar" style="background:#FED7E2;color:#97266D;">${getIniciais(a.nome)}</div>
+              <div><div class="aluno-nome">${a.nome}</div><div class="aluno-email">${a.email}</div></div>
+            </div>
+            <div style="margin-bottom:var(--espacamento-sm);"><span class="badge badge-pendente" style="background:#FED7E2;color:#97266D;">🔔 Solicitou entrada · ${a.data.split('-').reverse().join('/')}</span></div>
+            <div class="aluno-stats"><span style="color:var(--texto-terciario);font-style:italic;">Aguardando aprovação do professor</span></div>
+            <div class="aluno-card-acoes">
+              <button class="btn btn-sucesso btn-sm" onclick="aprovarSolicitacao(${t.id}, ${i})">Aprovar</button>
+              <button class="btn btn-perigo btn-sm" onclick="rejeitarSolicitacao(${t.id}, ${i})">Rejeitar</button>
+            </div>
+          </div>`;
+      });
+
+      // Pendentes (professor convidou, aluno não aceitou ainda)
+      t.pendentes.forEach((a, i) => {
+        grid.innerHTML += `
+          <div class="aluno-card aluno-pendente">
+            <div class="aluno-card-header">
+              <div class="aluno-avatar">${getIniciais(a.nome)}</div>
+              <div><div class="aluno-nome">${a.nome}</div><div class="aluno-email">${a.email}</div></div>
+            </div>
+            <div style="margin-bottom:var(--espacamento-sm);"><span class="badge badge-pendente">📩 Convite enviado</span></div>
+            <div class="aluno-stats"><span style="color:var(--texto-terciario);font-style:italic;">Aguardando o aluno aceitar o convite</span></div>
+            <div class="aluno-card-acoes">
+              <button class="btn btn-secundario btn-sm">Reenviar Convite</button>
+              <button class="btn btn-perigo btn-sm" onclick="desvincular(this)">Cancelar Convite</button>
+            </div>
+          </div>`;
+      });
+
+      // Alunos ativos
+      t.alunos.forEach((a, i) => {
+        const d = desempenhoFake[i % desempenhoFake.length];
+        const cores = ['#2B6CB0', '#3CC8D0', '#38A169', '#ECC94B'];
+        const vals = [d.mat, d.lng, d.cnt, d.chs];
+        const bars = vals.map((v, j) => `<div class="mini-bar"><div class="mini-bar-fill" style="width:${v}%;background:${cores[j]}"></div></div>`).join('');
+        grid.innerHTML += `
+          <div class="aluno-card">
+            <div class="aluno-card-header"><div class="aluno-avatar">${getIniciais(a.nome)}</div><div><div class="aluno-nome">${a.nome}</div><div class="aluno-email">${a.email}</div></div></div>
+            <div style="margin-bottom:var(--espacamento-sm);"><span class="badge badge-ativo">✓ Ativo</span></div>
+            <div class="aluno-stats"><span>📅 ${diasAtras(a.ultimoAcesso)}</span><span>📝 ${a.simulados} simulados · Média ${a.media}%</span></div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);margin-bottom:4px;">Mat · Lng · C.Nat · C.Hum</div>
+            <div class="aluno-desempenho-mini">${bars}</div>
+            <div class="aluno-card-acoes">
+              <button class="btn btn-primario btn-sm" onclick="verDesempenho('${a.nome}', ${a.simulados}, ${a.media})">Ver Desempenho</button>
+              <button class="btn btn-perigo btn-sm" onclick="desvincular(this)">Desvincular</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    // TODOS OS ALUNOS
+    function renderTodosAlunos() {
+      const grid = document.getElementById('todos-alunos-grid');
+      grid.innerHTML = '';
+
+      // Juntar todos: ativos, pendentes (convite), solicitações
+      const todosMap = {};
+
+      turmas.forEach(t => {
+        // Alunos ativos
+        t.alunos.forEach(a => {
+          if (!todosMap[a.email]) todosMap[a.email] = { ...a, turmasAtivo: [], turmasPendente: [], turmasSolicitacao: [] };
+          todosMap[a.email].turmasAtivo.push(t.nome);
+        });
+        // Convites pendentes (professor convidou)
+        t.pendentes.forEach(a => {
+          if (!todosMap[a.email]) todosMap[a.email] = { nome: a.nome, email: a.email, simulados: 0, ultimoAcesso: null, media: 0, turmasAtivo: [], turmasPendente: [], turmasSolicitacao: [] };
+          todosMap[a.email].turmasPendente.push(t.nome);
+        });
+        // Solicitações (aluno pediu via código)
+        t.solicitacoes.forEach(a => {
+          if (!todosMap[a.email]) todosMap[a.email] = { nome: a.nome, email: a.email, simulados: 0, ultimoAcesso: null, media: 0, turmasAtivo: [], turmasPendente: [], turmasSolicitacao: [] };
+          todosMap[a.email].turmasSolicitacao.push({ turma: t.nome, turmaId: t.id });
+        });
+      });
+
+      // Ordenar: solicitações primeiro, depois pendentes, depois ativos
+      const todos = Object.values(todosMap).sort((a, b) => {
+        const aPrio = a.turmasSolicitacao.length > 0 ? 0 : a.turmasPendente.length > 0 ? 1 : 2;
+        const bPrio = b.turmasSolicitacao.length > 0 ? 0 : b.turmasPendente.length > 0 ? 1 : 2;
+        return aPrio - bPrio;
+      });
+
+      todos.forEach((a, i) => {
+        const d = desempenhoFake[i % desempenhoFake.length];
+        const cores = ['#2B6CB0', '#3CC8D0', '#38A169', '#ECC94B'];
+        const vals = [d.mat, d.lng, d.cnt, d.chs];
+        const bars = vals.map((v, j) => `<div class="mini-bar"><div class="mini-bar-fill" style="width:${v}%;background:${cores[j]}"></div></div>`).join('');
+
+        // Badges de turma com status
+        let badgesHtml = '';
+        a.turmasAtivo.forEach(t => { badgesHtml += `<span class="aluno-turma-badge">${t}</span>`; });
+        a.turmasPendente.forEach(t => { badgesHtml += `<span class="aluno-turma-badge" style="background:#FEFCBF;color:#744210;">📩 ${t} <small>(convite)</small></span>`; });
+        a.turmasSolicitacao.forEach(s => { badgesHtml += `<span class="aluno-turma-badge" style="background:#FED7E2;color:#97266D;">🔔 ${s.turma} <small>(solicitação)</small></span>`; });
+
+        const temSolicitacao = a.turmasSolicitacao.length > 0;
+        const temPendente = a.turmasPendente.length > 0 && a.turmasAtivo.length === 0;
+        const cardClass = temSolicitacao ? 'aluno-card' : temPendente ? 'aluno-card aluno-pendente' : 'aluno-card';
+        const borderStyle = temSolicitacao ? 'border-left:3px solid #D53F8C;' : '';
+
+        // Ações
+        let acoesHtml = '';
+        if (temSolicitacao) {
+          a.turmasSolicitacao.forEach(s => {
+            acoesHtml += `<button class="btn btn-sucesso btn-sm" onclick="aprovarSolicitacaoTodos(this, '${a.email}', ${s.turmaId})">Aprovar</button>`;
+            acoesHtml += `<button class="btn btn-perigo btn-sm" onclick="rejeitarSolicitacaoTodos(this, '${a.email}', ${s.turmaId})">Rejeitar</button>`;
+          });
+        } else if (a.turmasAtivo.length > 0) {
+          acoesHtml = `<button class="btn btn-primario btn-sm" onclick="verDesempenho('${a.nome}', ${a.simulados}, ${a.media})">Ver Desempenho</button>`;
+        } else if (temPendente) {
+          acoesHtml = `<button class="btn btn-secundario btn-sm">Reenviar Convite</button>`;
+        }
+
+        // Stats
+        const statsHtml = a.ultimoAcesso
+          ? `<span>📅 ${diasAtras(a.ultimoAcesso)}</span><span>📝 ${a.simulados} simulados · Média ${a.media}%</span>`
+          : `<span style="color:var(--texto-terciario);font-style:italic;">Ainda não acessou a plataforma</span>`;
+
+        // Desempenho mini (só para ativos)
+        const desempHtml = a.turmasAtivo.length > 0
+          ? `<div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);margin-bottom:4px;">Mat · Lng · C.Nat · C.Hum</div><div class="aluno-desempenho-mini">${bars}</div>`
+          : '';
+
+        grid.innerHTML += `
+          <div class="${cardClass}" style="${borderStyle}">
+            <div class="aluno-card-header"><div class="aluno-avatar" ${temSolicitacao ? 'style="background:#FED7E2;color:#97266D;"' : ''}>${getIniciais(a.nome)}</div><div><div class="aluno-nome">${a.nome}</div><div class="aluno-email">${a.email}</div></div></div>
+            <div style="margin-bottom:var(--espacamento-sm);display:flex;gap:4px;flex-wrap:wrap;">${badgesHtml}</div>
+            <div class="aluno-stats">${statsHtml}</div>
+            ${desempHtml}
+            <div class="aluno-card-acoes">${acoesHtml}</div>
+          </div>`;
+      });
+    }
+
+    function aprovarSolicitacaoTodos(btn, email, turmaId) {
+      const t = turmas.find(x => x.id === turmaId);
+      if (!t) return;
+      const idx = t.solicitacoes.findIndex(s => s.email === email);
+      if (idx >= 0) {
+        const sol = t.solicitacoes[idx];
+        t.alunos.push({ nome: sol.nome, email: sol.email, simulados: 0, ultimoAcesso: '2026-04-06', media: 0 });
+        t.solicitacoes.splice(idx, 1);
+      }
+      renderTodosAlunos();
+    }
+
+    function rejeitarSolicitacaoTodos(btn, email, turmaId) {
+      const t = turmas.find(x => x.id === turmaId);
+      if (!t) return;
+      const idx = t.solicitacoes.findIndex(s => s.email === email);
+      if (idx >= 0) t.solicitacoes.splice(idx, 1);
+      renderTodosAlunos();
+    }
+
+    // DESEMPENHO
+    function verDesempenho(nome, simulados, media) {
+      document.getElementById('desempenho-nome').textContent = 'Desempenho — ' + nome;
+      document.getElementById('desemp-simulados').textContent = simulados;
+      document.getElementById('desemp-media').textContent = media + '%';
+      document.getElementById('desemp-questoes').textContent = simulados * 30;
+
+      if (chartDesempenho) chartDesempenho.destroy();
+      chartDesempenho = new Chart(document.getElementById('chart-desempenho'), {
+        type: 'radar',
+        data: {
+          labels: ['Matemática', 'Linguagens', 'Ciên. Natureza', 'Ciên. Humanas'],
+          datasets: [{ label: 'Acerto (%)', data: [72, 80, 65, 75], borderColor: '#2B6CB0', backgroundColor: 'rgba(43,108,176,0.15)', pointBackgroundColor: '#2B6CB0', pointRadius: 4 }]
+        },
+        options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+      });
+
+      const habDiv = document.getElementById('desempenho-habilidades');
+      habDiv.innerHTML = '';
+      habsFake.forEach(h => {
+        const cor = h.pct >= 70 ? '#38A169' : h.pct >= 50 ? '#ECC94B' : '#E53E3E';
+        habDiv.innerHTML += `<div class="hab-row"><span class="hab-codigo">${h.cod}</span><div class="hab-bar"><div class="hab-bar-fill" style="width:${h.pct}%;background:${cor}"></div></div><span class="hab-pct">${h.pct}%</span></div>`;
+      });
+      abrirModal('modal-desempenho');
+    }
+
+    // SOLICITAÇÕES
+    function aprovarSolicitacao(turmaId, idx) {
+      const t = turmas.find(x => x.id === turmaId);
+      const sol = t.solicitacoes[idx];
+      t.alunos.push({ ...sol, simulados: 0, ultimoAcesso: '2026-04-06', media: 0 });
+      t.solicitacoes.splice(idx, 1);
+      abrirTurma(turmaId);
+    }
+    function rejeitarSolicitacao(turmaId, idx) {
+      const t = turmas.find(x => x.id === turmaId);
+      t.solicitacoes.splice(idx, 1);
+      abrirTurma(turmaId);
+    }
+
+    // AÇÕES
+    function abrirModal(id) { document.getElementById(id).classList.add('visivel'); }
+    function fecharModal(id) { document.getElementById(id).classList.remove('visivel'); }
+
+    function selecionarVisibilidade(el, tipo) {
+      el.parentElement.querySelectorAll('.visibilidade-option').forEach(o => o.classList.remove('selecionado'));
+      el.classList.add('selecionado');
+      document.getElementById('turma-visibilidade').value = tipo;
+    }
+    function selecionarVisibilidadeEditar(el, tipo) {
+      el.parentElement.querySelectorAll('.visibilidade-option').forEach(o => o.classList.remove('selecionado'));
+      el.classList.add('selecionado');
+      document.getElementById('editar-turma-visibilidade').value = tipo;
+    }
+
+    function criarTurma() {
+      const nome = document.getElementById('turma-nome').value.trim();
+      if (!nome) { alert('Informe o nome.'); return; }
+      const desc = document.getElementById('turma-desc').value.trim();
+      const vis = document.getElementById('turma-visibilidade').value;
+      const codigo = nome.toUpperCase().replace(/[^A-Z0-9]/g, '-').substring(0, 12) + '-' + Math.floor(Math.random() * 1000);
+      const cores = ['#2B6CB0', '#38A169', '#6B46C1', '#E53E3E', '#ECC94B', '#3CC8D0'];
+      turmas.push({ id: turmas.length + 10, nome, codigo, descricao: desc, cor: cores[turmas.length % cores.length], visibilidade: vis, alunos: [], pendentes: [], solicitacoes: [] });
+      document.getElementById('turma-nome').value = '';
+      document.getElementById('turma-desc').value = '';
+      fecharModal('modal-nova-turma');
+      renderTurmas();
+    }
+
+    function enviarConvite() {
+      const nome = document.getElementById('convidar-nome').value.trim();
+      const email = document.getElementById('convidar-email').value.trim();
+      if (!nome || !email) { alert('Preencha nome e email.'); return; }
+      if (turmaAtualId) { const t = turmas.find(x => x.id === turmaAtualId); if (t) t.pendentes.push({ nome, email }); }
+      fecharModal('modal-convidar');
+      document.getElementById('convidar-nome').value = '';
+      document.getElementById('convidar-email').value = '';
+      if (turmaAtualId) abrirTurma(turmaAtualId);
+    }
+
+    function vincularAluno(btn) { btn.textContent = 'Vinculado ✓'; btn.disabled = true; btn.classList.remove('btn-primario'); btn.classList.add('btn-sucesso'); }
+    function desvincular(btn) { if (confirm('Desvincular este aluno?')) { const c = btn.closest('.aluno-card'); c.style.opacity = '0'; setTimeout(() => c.remove(), 300); } }
+
+    function editarTurmaAtual() {
+      const t = turmas.find(x => x.id === turmaAtualId);
+      if (!t) return;
+      document.getElementById('editar-turma-nome').value = t.nome;
+      document.getElementById('editar-turma-desc').value = t.descricao;
+      document.getElementById('editar-turma-visibilidade').value = t.visibilidade;
+      document.querySelectorAll('#editar-visibilidade-toggle .visibilidade-option').forEach(o => o.classList.remove('selecionado'));
+      document.getElementById('editar-vis-' + t.visibilidade).classList.add('selecionado');
+      abrirModal('modal-editar-turma');
+    }
+    function salvarTurma() {
+      const t = turmas.find(x => x.id === turmaAtualId);
+      t.nome = document.getElementById('editar-turma-nome').value.trim();
+      t.descricao = document.getElementById('editar-turma-desc').value.trim();
+      t.visibilidade = document.getElementById('editar-turma-visibilidade').value;
+      fecharModal('modal-editar-turma');
+      abrirTurma(turmaAtualId);
+    }
+    function excluirTurma() {
+      if (confirm('Excluir esta turma?')) { turmas.splice(turmas.findIndex(x => x.id === turmaAtualId), 1); fecharModal('modal-editar-turma'); voltarTurmas(); }
+    }
+    function copiarCodigo() {
+      navigator.clipboard.writeText(document.getElementById('detalhe-turma-codigo').textContent).then(() => {
+        event.target.textContent = 'Copiado!';
+        setTimeout(() => event.target.textContent = 'Copiar', 2000);
+      });
+    }
+    function verificarFiltrosTodos() {
+      const b = document.getElementById('filtro-busca-todos').value.trim();
+      const t = document.getElementById('filtro-turma').value;
+      document.getElementById('btn-limpar-todos').classList.toggle('visivel', b.length > 0 || !!t);
+    }
+    function limparFiltrosTodos() { document.getElementById('filtro-busca-todos').value = ''; document.getElementById('filtro-turma').value = ''; verificarFiltrosTodos(); }
+
+    // Fechar modais
+    ['modal-nova-turma','modal-convidar','modal-vincular','modal-editar-turma','modal-desempenho','modal-add-simulado'].forEach(id => {
+      document.getElementById(id).addEventListener('click', function(e) { if (e.target === this) this.classList.remove('visivel'); });
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') ['modal-nova-turma','modal-convidar','modal-vincular','modal-editar-turma','modal-desempenho','modal-add-simulado'].forEach(fecharModal); });
+
+    renderTurmas();
+  </script>
+</body>
+</html>

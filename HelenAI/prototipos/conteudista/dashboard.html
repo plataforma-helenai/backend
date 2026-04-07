@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Dashboard Conteudista</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .graficos-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .grafico-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+    }
+
+    .grafico-card h4 {
+      font-size: var(--fonte-tamanho-base);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .grafico-card canvas {
+      max-height: 280px;
+    }
+
+    .grafico-full {
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .graficos-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Conteudista -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item ativo">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">
+          ✅ Curadoria
+          <span class="notificacao">3</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Meu Painel</h1>
+          <p class="conteudo-subtitulo">Visão geral das suas atividades</p>
+        </div>
+      </div>
+
+      <!-- Métricas -->
+      <div class="metricas-grid">
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #EBF8FF; color: var(--azul-medio);">📄</div>
+          <div class="metrica-valor">342</div>
+          <div class="metrica-label">Questões Importadas</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #C6F6D5; color: var(--cor-sucesso);">📝</div>
+          <div class="metrica-valor">8</div>
+          <div class="metrica-label">Simulados Públicos</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #E9D8FD; color: #6B46C1;">🔒</div>
+          <div class="metrica-valor">4</div>
+          <div class="metrica-label">Simulados Privados</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #FEFCBF; color: #B7791F;">👥</div>
+          <div class="metrica-valor">45</div>
+          <div class="metrica-label">Alunos Vinculados</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #BEE3F8; color: #2A4365;">🌐</div>
+          <div class="metrica-valor">1.247</div>
+          <div class="metrica-label">Alunos na Plataforma</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #C6F6D5; color: var(--cor-sucesso);">✅</div>
+          <div class="metrica-valor">312</div>
+          <div class="metrica-label">Alunos que Realizaram</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #FED7D7; color: var(--cor-erro);">⏳</div>
+          <div class="metrica-valor">3</div>
+          <div class="metrica-label">Pendentes Curadoria</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="graficos-row">
+        <div class="grafico-card">
+          <h4>Questões por Área BNCC</h4>
+          <canvas id="grafico-areas"></canvas>
+        </div>
+        <div class="grafico-card">
+          <h4>Simulados Mais Realizados</h4>
+          <canvas id="grafico-simulados"></canvas>
+        </div>
+      </div>
+
+      <div class="graficos-row">
+        <div class="grafico-card grafico-full">
+          <h4>Desempenho dos Alunos por Habilidade BNCC</h4>
+          <canvas id="grafico-desempenho"></canvas>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Gráfico — Questões por Área BNCC
+    new Chart(document.getElementById('grafico-areas'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Matemática', 'Linguagens', 'Ciências da Natureza', 'Ciências Humanas'],
+        datasets: [{
+          data: [120, 85, 72, 65],
+          backgroundColor: ['#2B6CB0', '#3CC8D0', '#38A169', '#ECC94B'],
+          borderWidth: 0,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10 } }
+        }
+      }
+    });
+
+    // Gráfico — Simulados mais realizados
+    new Chart(document.getElementById('grafico-simulados'), {
+      type: 'bar',
+      data: {
+        labels: ['ENEM 2025', 'Mat. Básica', 'Linguagens', 'Ciên. Humanas', 'Ciên. Natureza'],
+        datasets: [{
+          label: 'Realizações',
+          data: [89, 67, 54, 42, 38],
+          backgroundColor: '#3CC8D0',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { display: false } }
+        }
+      }
+    });
+
+    // Gráfico — Desempenho por habilidade
+    new Chart(document.getElementById('grafico-desempenho'), {
+      type: 'radar',
+      data: {
+        labels: ['EM13MAT101', 'EM13MAT301', 'EM13LGG101', 'EM13LGG301', 'EM13CNT101', 'EM13CNT301', 'EM13CHS101', 'EM13CHS301'],
+        datasets: [{
+          label: 'Média dos Alunos (%)',
+          data: [72, 65, 80, 58, 70, 55, 75, 62],
+          borderColor: '#2B6CB0',
+          backgroundColor: 'rgba(43, 108, 176, 0.15)',
+          pointBackgroundColor: '#2B6CB0',
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } }
+        },
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  </script>
+
+</body>
+</html>

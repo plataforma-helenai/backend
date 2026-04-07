@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Criar Conta</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .cadastro-page {
+      display: flex;
+      min-height: 100vh;
+      background: var(--cinza-azulado);
+    }
+
+    /* Lado esquerdo — branding */
+    .cadastro-branding {
+      flex: 1;
+      background: var(--gradiente-principal);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--espacamento-2xl);
+      color: var(--branco);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cadastro-branding::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.15);
+      top: -100px;
+      right: -150px;
+    }
+
+    .cadastro-branding::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      bottom: -50px;
+      left: -100px;
+    }
+
+    .cadastro-branding .logo-grande {
+      width: 120px;
+      height: 120px;
+      margin-bottom: var(--espacamento-lg);
+      filter: brightness(0) invert(1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .cadastro-branding h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--branco);
+      text-align: center;
+      margin-bottom: var(--espacamento-sm);
+      position: relative;
+      z-index: 1;
+    }
+
+    .cadastro-branding .slogan {
+      font-size: var(--fonte-tamanho-lg);
+      opacity: 0.9;
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cadastro-branding .beneficios {
+      margin-top: var(--espacamento-xl);
+      list-style: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cadastro-branding .beneficios li {
+      padding: 8px 0;
+      font-size: var(--fonte-tamanho-sm);
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .cadastro-branding .beneficios li .check {
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--borda-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Lado direito — formulário */
+    .cadastro-form-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--espacamento-2xl);
+    }
+
+    .cadastro-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .cadastro-card .logo-mobile {
+      display: none;
+      width: 60px;
+      margin: 0 auto var(--espacamento-md);
+    }
+
+    .cadastro-card h2 {
+      font-size: var(--fonte-tamanho-2xl);
+      margin-bottom: var(--espacamento-xs);
+    }
+
+    .cadastro-card .subtitulo {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    /* Força da senha */
+    .senha-forca {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .senha-forca-barra {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--borda-cor);
+      transition: var(--transicao);
+    }
+
+    .senha-forca-barra.fraca { background: var(--cor-erro); }
+    .senha-forca-barra.media { background: var(--cor-aviso); }
+    .senha-forca-barra.forte { background: var(--cor-sucesso); }
+
+    .senha-forca-texto {
+      font-size: var(--fonte-tamanho-xs);
+      margin-top: 4px;
+      color: var(--texto-terciario);
+    }
+
+    .senha-forca-texto.fraca { color: var(--cor-erro); }
+    .senha-forca-texto.media { color: var(--cor-aviso); }
+    .senha-forca-texto.forte { color: var(--cor-sucesso); }
+
+    /* Senha wrapper */
+    .senha-wrapper {
+      position: relative;
+    }
+
+    .senha-wrapper .form-input {
+      padding-right: 44px;
+    }
+
+    .senha-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--texto-terciario);
+      font-size: 18px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .senha-toggle:hover {
+      color: var(--azul-medio);
+    }
+
+    /* Sucesso */
+    .cadastro-sucesso {
+      display: none;
+      text-align: center;
+      padding: var(--espacamento-xl) 0;
+    }
+
+    .cadastro-sucesso.visivel {
+      display: block;
+    }
+
+    .cadastro-sucesso .icone-sucesso {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--borda-radius-full);
+      background: #F0FFF4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto var(--espacamento-lg);
+    }
+
+    .cadastro-sucesso h3 {
+      color: var(--cor-sucesso);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .cadastro-sucesso p {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .cadastro-footer {
+      text-align: center;
+      margin-top: var(--espacamento-xl);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    @media (max-width: 768px) {
+      .cadastro-page { flex-direction: column; }
+      .cadastro-branding { display: none; }
+      .cadastro-card .logo-mobile { display: block; }
+      .cadastro-form-area { padding: var(--espacamento-lg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <!-- Ledor Player -->
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <!-- LIBRAS Janela -->
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Página de Cadastro -->
+  <div class="cadastro-page">
+
+    <!-- Lado esquerdo — Branding -->
+    <div class="cadastro-branding">
+      <img src="/assets/img/logo-helen.png" alt="HelenAI Logo" class="logo-grande">
+      <h1>helen.ai</h1>
+      <p class="slogan">Aprendizado sem barreiras</p>
+
+      <ul class="beneficios">
+        <li><span class="check">✓</span> Simulados personalizados para você</li>
+        <li><span class="check">✓</span> Questões classificadas pela BNCC</li>
+        <li><span class="check">✓</span> Acessibilidade total: LIBRAS, ledor, alto contraste</li>
+        <li><span class="check">✓</span> Gamificação: XP, badges e ranking</li>
+        <li><span class="check">✓</span> 100% gratuito</li>
+      </ul>
+    </div>
+
+    <!-- Lado direito — Formulário -->
+    <div class="cadastro-form-area">
+      <div class="cadastro-card">
+
+        <img src="/assets/img/logo-helen.png" alt="HelenAI" class="logo-mobile">
+
+        <!-- Formulário -->
+        <div id="form-area">
+          <h2>Criar conta</h2>
+          <p class="subtitulo">Junte-se à plataforma de aprendizado inclusivo</p>
+
+          <!-- Alerta de erro -->
+          <div class="alerta alerta-erro" id="alerta-erro" style="display:none;"></div>
+
+          <form id="form-cadastro" onsubmit="return false;">
+
+            <div class="form-grupo">
+              <label class="form-label" for="nome">Nome completo</label>
+              <input type="text" class="form-input" id="nome" placeholder="Seu nome completo" required>
+              <span class="form-erro" id="erro-nome">Informe seu nome completo</span>
+            </div>
+
+            <div class="form-grupo">
+              <label class="form-label" for="email">Email</label>
+              <input type="email" class="form-input" id="email" placeholder="seu@email.com" required>
+              <span class="form-erro" id="erro-email">Informe um email válido</span>
+            </div>
+
+            <div class="form-grupo">
+              <label class="form-label" for="senha">Senha</label>
+              <div class="senha-wrapper">
+                <input type="password" class="form-input" id="senha" placeholder="Mínimo 6 caracteres" required>
+                <button type="button" class="senha-toggle" id="toggle-senha">👁</button>
+              </div>
+              <div class="senha-forca">
+                <div class="senha-forca-barra" id="barra1"></div>
+                <div class="senha-forca-barra" id="barra2"></div>
+                <div class="senha-forca-barra" id="barra3"></div>
+                <div class="senha-forca-barra" id="barra4"></div>
+              </div>
+              <span class="senha-forca-texto" id="forca-texto"></span>
+              <span class="form-erro" id="erro-senha">A senha deve ter no mínimo 6 caracteres</span>
+            </div>
+
+            <div class="form-grupo">
+              <label class="form-label" for="confirmar-senha">Confirmar senha</label>
+              <div class="senha-wrapper">
+                <input type="password" class="form-input" id="confirmar-senha" placeholder="Repita a senha" required>
+                <button type="button" class="senha-toggle" id="toggle-confirmar">👁</button>
+              </div>
+              <span class="form-erro" id="erro-confirmar">As senhas não coincidem</span>
+            </div>
+
+            <button type="submit" class="btn btn-primario btn-full btn-lg mt-md" id="btn-cadastrar">
+              Cadastrar
+            </button>
+          </form>
+
+          <div class="divider">ou</div>
+
+          <button class="btn btn-google btn-full" id="btn-google">
+            <svg viewBox="0 0 24 24" width="20" height="20">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Cadastrar com Google
+          </button>
+
+          <p class="text-center mt-lg text-small">
+            Já tem conta? <a href="/compartilhado/login.html"><strong>Entrar</strong></a>
+          </p>
+        </div>
+
+        <!-- Tela de sucesso -->
+        <div class="cadastro-sucesso" id="tela-sucesso">
+          <div class="icone-sucesso">✓</div>
+          <h3>Conta criada com sucesso!</h3>
+          <p>Você já pode acessar a plataforma HelenAI.</p>
+          <a href="/compartilhado/login.html" class="btn btn-primario btn-lg mt-lg">Ir para o Login</a>
+        </div>
+
+        <div class="cadastro-footer">
+          HelenAI — Educação inclusiva para todos
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script>
+    // Toggle mostrar/ocultar senha
+    document.getElementById('toggle-senha').addEventListener('click', function () {
+      const input = document.getElementById('senha');
+      if (input.type === 'password') { input.type = 'text'; this.textContent = '🙈'; }
+      else { input.type = 'password'; this.textContent = '👁'; }
+    });
+
+    document.getElementById('toggle-confirmar').addEventListener('click', function () {
+      const input = document.getElementById('confirmar-senha');
+      if (input.type === 'password') { input.type = 'text'; this.textContent = '🙈'; }
+      else { input.type = 'password'; this.textContent = '👁'; }
+    });
+
+    // Medidor de força da senha
+    document.getElementById('senha').addEventListener('input', function () {
+      const senha = this.value;
+      const barras = [
+        document.getElementById('barra1'),
+        document.getElementById('barra2'),
+        document.getElementById('barra3'),
+        document.getElementById('barra4')
+      ];
+      const textoEl = document.getElementById('forca-texto');
+
+      // Reset
+      barras.forEach(b => b.className = 'senha-forca-barra');
+      textoEl.className = 'senha-forca-texto';
+      textoEl.textContent = '';
+
+      if (senha.length === 0) return;
+
+      let forca = 0;
+      if (senha.length >= 6) forca++;
+      if (senha.length >= 8) forca++;
+      if (/[A-Z]/.test(senha) && /[a-z]/.test(senha)) forca++;
+      if (/[0-9]/.test(senha)) forca++;
+      if (/[^A-Za-z0-9]/.test(senha)) forca++;
+
+      let nivel, texto;
+      if (forca <= 1) { nivel = 'fraca'; texto = 'Fraca'; }
+      else if (forca <= 3) { nivel = 'media'; texto = 'Média'; }
+      else { nivel = 'forte'; texto = 'Forte'; }
+
+      const qtdBarras = nivel === 'fraca' ? 1 : nivel === 'media' ? 2 : 4;
+      for (let i = 0; i < qtdBarras; i++) {
+        barras[i].classList.add(nivel);
+      }
+      textoEl.classList.add(nivel);
+      textoEl.textContent = texto;
+    });
+
+    // Validação em tempo real — confirmar senha
+    document.getElementById('confirmar-senha').addEventListener('input', function () {
+      const senha = document.getElementById('senha').value;
+      const confirmar = this.value;
+      const erroEl = document.getElementById('erro-confirmar');
+
+      if (confirmar.length > 0 && confirmar !== senha) {
+        this.classList.add('erro');
+        erroEl.classList.add('visivel');
+      } else {
+        this.classList.remove('erro');
+        erroEl.classList.remove('visivel');
+      }
+    });
+
+    // Submit
+    document.getElementById('form-cadastro').addEventListener('submit', function (e) {
+      e.preventDefault();
+      cadastrar();
+    });
+
+    document.getElementById('btn-cadastrar').addEventListener('click', cadastrar);
+
+    function cadastrar() {
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const confirmar = document.getElementById('confirmar-senha').value;
+      const alertaErro = document.getElementById('alerta-erro');
+
+      // Reset erros
+      alertaErro.style.display = 'none';
+      document.querySelectorAll('.form-erro').forEach(e => e.classList.remove('visivel'));
+      document.querySelectorAll('.form-input').forEach(e => e.classList.remove('erro'));
+
+      let valido = true;
+
+      if (!nome || nome.length < 3) {
+        document.getElementById('nome').classList.add('erro');
+        document.getElementById('erro-nome').classList.add('visivel');
+        valido = false;
+      }
+
+      if (!email || !email.includes('@') || !email.includes('.')) {
+        document.getElementById('email').classList.add('erro');
+        document.getElementById('erro-email').classList.add('visivel');
+        valido = false;
+      }
+
+      if (!senha || senha.length < 6) {
+        document.getElementById('senha').classList.add('erro');
+        document.getElementById('erro-senha').classList.add('visivel');
+        valido = false;
+      }
+
+      if (senha !== confirmar) {
+        document.getElementById('confirmar-senha').classList.add('erro');
+        document.getElementById('erro-confirmar').classList.add('visivel');
+        valido = false;
+      }
+
+      // Simular email já existente
+      const existe = HELEN_DATA.usuarios.find(u => u.email === email);
+      if (existe) {
+        alertaErro.textContent = 'Este email já está cadastrado. Tente fazer login.';
+        alertaErro.style.display = 'flex';
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      // Sucesso fake
+      document.getElementById('form-area').style.display = 'none';
+      document.getElementById('tela-sucesso').classList.add('visivel');
+    }
+
+    // Google → direto para aluno
+    document.getElementById('btn-google').addEventListener('click', function () {
+      const alunoUser = HELEN_DATA.usuarios.find(u => u.perfil === 'aluno');
+      localStorage.setItem('helenai_usuario', JSON.stringify(alunoUser));
+      window.location.href = '/aluno/dashboard.html';
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Simulados</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .status-dot {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
+    }
+    .status-dot.rascunho { background: var(--texto-terciario); }
+    .status-dot.publicado { background: var(--cor-sucesso); }
+    .status-dot.encerrado { background: var(--cor-erro); }
+
+    .tabela td .acoes-cell {
+      display: flex; gap: var(--espacamento-xs); flex-wrap: wrap;
+    }
+
+    .tempo-cell { white-space: nowrap; }
+
+    .filtros-bar { flex-direction: column !important; gap: var(--espacamento-md) !important; }
+    .filtros-row { display: flex; gap: var(--espacamento-md); width: 100%; align-items: flex-end; }
+    .filtro-grupo { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+    .filtro-label { font-size: var(--fonte-tamanho-xs); font-weight: 600; color: var(--texto-secundario); text-transform: uppercase; letter-spacing: 0.5px; }
+    .filtros-acoes { display: flex; align-items: flex-end; flex-shrink: 0; }
+    .btn-limpar { background: none; border: none; color: var(--cor-erro); font-size: var(--fonte-tamanho-sm); cursor: pointer; padding: 10px 14px; font-family: var(--fonte-principal); font-weight: 500; white-space: nowrap; transition: var(--transicao); border-radius: var(--borda-radius); display: none; }
+    .btn-limpar.visivel { display: inline-flex; }
+    .btn-limpar:hover { background: #FFF5F5; }
+  </style>
+</head>
+<body>
+
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+  <div class="ledor-player"><button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button><div class="acessibilidade-separador"></div><button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button></div>
+  <div class="libras-janela"><div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div><div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div></div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span></div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item ativo">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Simulados</h1>
+          <p class="conteudo-subtitulo">Gerencie seus simulados</p>
+        </div>
+        <a href="/conteudista/simulado-form.html" class="btn btn-sucesso">+ Novo Simulado</a>
+      </div>
+
+      <div class="filtros-bar">
+        <div class="filtros-row">
+          <div class="filtro-grupo" style="flex:3;">
+            <label class="filtro-label">Buscar</label>
+            <input type="text" class="form-input" id="filtro-busca" placeholder="Nome ou código..." oninput="verificarFiltros()">
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Status</label>
+            <select class="form-select" id="filtro-status">
+              <option value="">Todos</option>
+              <option>Rascunho</option>
+              <option>Publicado</option>
+              <option>Encerrado</option>
+            </select>
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Área BNCC</label>
+            <select class="form-select" id="filtro-area">
+              <option value="">Todas</option>
+              <option>Matemática</option>
+              <option>Linguagens</option>
+              <option>Ciências da Natureza</option>
+              <option>Ciências Humanas</option>
+            </select>
+          </div>
+          <div class="filtros-acoes">
+            <button class="btn-limpar" id="btn-limpar" onclick="limparFiltros()">✕ Limpar filtros</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabela-wrapper">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Questões</th>
+              <th>Tempo</th>
+              <th>Status</th>
+              <th>Data</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-body"></tbody>
+        </table>
+      </div>
+
+      <div class="paginacao">
+        <button class="paginacao-item">←</button>
+        <button class="paginacao-item ativo">1</button>
+        <button class="paginacao-item">2</button>
+        <button class="paginacao-item">→</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal Detalhes -->
+  <div class="modal-overlay" id="modal-detalhes">
+    <div class="modal" style="max-width:550px;">
+      <h3 class="modal-titulo" id="detalhes-titulo">Detalhes do Simulado</h3>
+      <div id="detalhes-corpo"></div>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="document.getElementById('modal-detalhes').classList.remove('visivel')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Publicar -->
+  <div class="modal-overlay" id="modal-publicar">
+    <div class="modal">
+      <h3 class="modal-titulo">Publicar Simulado</h3>
+      <p class="text-muted text-small">Após alunos realizarem este simulado, as questões não poderão ser editadas.</p>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="document.getElementById('modal-publicar').classList.remove('visivel')">Cancelar</button>
+        <button class="btn btn-sucesso" onclick="confirmarPublicar()">Confirmar Publicação</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const tbody = document.getElementById('tabela-body');
+    const simulados = HELEN_DATA.simulados;
+
+    function formatarData(d) { const p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+
+    let simuladoParaPublicar = null;
+
+    simulados.forEach(s => {
+      const statusClass = s.status === 'publicado' ? 'publicado' : s.status === 'rascunho' ? 'rascunho' : 'encerrado';
+      const badgeClass = s.status === 'publicado' ? 'badge-publicado' : s.status === 'rascunho' ? 'badge-rascunho' : 'badge-bloqueado';
+      const tempo = s.tempo ? s.tempo + ' min' : 'Sem limite';
+
+      let acoes = `<button class="btn btn-secundario btn-sm" onclick="abrirDetalhes(${s.id})" style="border-color:var(--ciano);color:var(--ciano);">Detalhes</button>`;
+      acoes += ` <a href="/conteudista/simulado-form.html" class="btn btn-secundario btn-sm">Editar</a>`;
+      if (s.status === 'rascunho') {
+        acoes += ` <button class="btn btn-sucesso btn-sm" onclick="abrirPublicar(${s.id})">Publicar</button>`;
+      }
+      if (s.status === 'publicado') {
+        acoes += ` <a href="/conteudista/simulado-resultados.html" class="btn btn-primario btn-sm">Resultados</a>`;
+      }
+
+      tbody.innerHTML += `
+        <tr>
+          <td><strong>${s.nome}</strong></td>
+          <td><code style="font-size:var(--fonte-tamanho-xs);color:var(--azul-medio);">${s.codigo}</code></td>
+          <td>${s.qtdQuestoes}</td>
+          <td class="tempo-cell">${tempo}</td>
+          <td><span class="status-dot ${statusClass}"></span><span class="badge ${badgeClass}">${s.status}</span></td>
+          <td>${formatarData(s.data)}</td>
+          <td><div class="acoes-cell">${acoes}</div></td>
+        </tr>
+      `;
+    });
+
+    function verificarFiltros() {
+      const busca = document.getElementById('filtro-busca').value.trim();
+      const status = document.getElementById('filtro-status').value;
+      const area = document.getElementById('filtro-area').value;
+      const temFiltro = busca.length > 0 || status || area;
+      document.getElementById('btn-limpar').classList.toggle('visivel', temFiltro);
+    }
+
+    document.getElementById('filtro-status').addEventListener('change', verificarFiltros);
+    document.getElementById('filtro-area').addEventListener('change', verificarFiltros);
+
+    function limparFiltros() {
+      document.getElementById('filtro-busca').value = '';
+      document.getElementById('filtro-status').value = '';
+      document.getElementById('filtro-area').value = '';
+      verificarFiltros();
+    }
+
+    function abrirPublicar(id) {
+      simuladoParaPublicar = id;
+      document.getElementById('modal-publicar').classList.add('visivel');
+    }
+
+    function abrirDetalhes(id) {
+      const s = simulados.find(x => x.id === id);
+      if (!s) return;
+      const tempo = s.tempo ? s.tempo + ' min' : 'Sem limite';
+
+      // Fake composição
+      const composicao = {
+        facil: Math.floor(s.qtdQuestoes * 0.3),
+        medio: Math.floor(s.qtdQuestoes * 0.45),
+        dificil: s.qtdQuestoes - Math.floor(s.qtdQuestoes * 0.3) - Math.floor(s.qtdQuestoes * 0.45),
+        areas: { 'Matemática': Math.floor(s.qtdQuestoes * 0.3), 'Linguagens': Math.floor(s.qtdQuestoes * 0.25), 'Ciên. Natureza': Math.floor(s.qtdQuestoes * 0.2), 'Ciên. Humanas': s.qtdQuestoes - Math.floor(s.qtdQuestoes * 0.3) - Math.floor(s.qtdQuestoes * 0.25) - Math.floor(s.qtdQuestoes * 0.2) },
+        habilidades: 8
+      };
+
+      const pctF = Math.round(composicao.facil / s.qtdQuestoes * 100);
+      const pctM = Math.round(composicao.medio / s.qtdQuestoes * 100);
+      const pctD = Math.round(composicao.dificil / s.qtdQuestoes * 100);
+
+      let areasHtml = Object.entries(composicao.areas).map(([a, v]) => {
+        const pct = Math.round(v / s.qtdQuestoes * 100);
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--borda-cor);font-size:var(--fonte-tamanho-sm);">
+          <span>${a}</span>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:700;">${v}</span>
+            <div style="width:80px;height:6px;background:var(--cinza-azulado);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--azul-medio);border-radius:3px;"></div></div>
+          </div>
+        </div>`;
+      }).join('');
+
+      document.getElementById('detalhes-titulo').textContent = s.nome;
+      document.getElementById('detalhes-corpo').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--espacamento-sm);margin-bottom:var(--espacamento-lg);">
+          <div style="text-align:center;padding:var(--espacamento-md);background:var(--cinza-azulado);border-radius:var(--borda-radius);">
+            <div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--azul-profundo);">${s.qtdQuestoes}</div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Questões</div>
+          </div>
+          <div style="text-align:center;padding:var(--espacamento-md);background:var(--cinza-azulado);border-radius:var(--borda-radius);">
+            <div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--azul-profundo);">${tempo}</div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Tempo</div>
+          </div>
+          <div style="text-align:center;padding:var(--espacamento-md);background:var(--cinza-azulado);border-radius:var(--borda-radius);">
+            <div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--azul-profundo);">${composicao.habilidades}</div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Habilidades</div>
+          </div>
+        </div>
+        <h4 style="font-size:var(--fonte-tamanho-sm);margin-bottom:var(--espacamento-sm);color:var(--azul-profundo);">Dificuldade</h4>
+        <div style="display:flex;gap:var(--espacamento-sm);margin-bottom:var(--espacamento-lg);">
+          <div style="flex:1;text-align:center;padding:8px;background:#C6F6D5;border-radius:var(--borda-radius);">
+            <div style="font-weight:700;color:#22543D;">${composicao.facil}</div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:#22543D;">Fácil (${pctF}%)</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:8px;background:#FEFCBF;border-radius:var(--borda-radius);">
+            <div style="font-weight:700;color:#744210;">${composicao.medio}</div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:#744210;">Médio (${pctM}%)</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:8px;background:#FED7D7;border-radius:var(--borda-radius);">
+            <div style="font-weight:700;color:#742A2A;">${composicao.dificil}</div>
+            <div style="font-size:var(--fonte-tamanho-xs);color:#742A2A;">Difícil (${pctD}%)</div>
+          </div>
+        </div>
+        <h4 style="font-size:var(--fonte-tamanho-sm);margin-bottom:var(--espacamento-sm);color:var(--azul-profundo);">Por Área BNCC</h4>
+        <div style="margin-bottom:var(--espacamento-md);">${areasHtml}</div>
+      `;
+      document.getElementById('modal-detalhes').classList.add('visivel');
+    }
+
+    document.getElementById('modal-detalhes').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('visivel');
+    });
+
+    function confirmarPublicar() {
+      document.getElementById('modal-publicar').classList.remove('visivel');
+      alert('Simulado publicado com sucesso!');
+      location.reload();
+    }
+  </script>
+</body>
+</html>

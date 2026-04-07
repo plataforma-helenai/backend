@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Cadastro de Questão</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+  <style>
+    .form-card {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .alternativas-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .alternativa-row {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .alternativa-label {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      min-width: 28px;
+      font-size: var(--fonte-tamanho-base);
+    }
+
+    .alternativa-row .form-input { flex: 1; }
+
+    .resposta-correta {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+      padding: var(--espacamento-md);
+      background: #F0FFF4;
+      border-radius: var(--borda-radius);
+      border: 1px solid #C6F6D5;
+    }
+
+    .resposta-correta > label:first-child {
+      font-weight: 500;
+      color: var(--cor-sucesso);
+      font-size: var(--fonte-tamanho-sm);
+      white-space: nowrap;
+    }
+
+    .resposta-options {
+      display: flex;
+      gap: var(--espacamento-md);
+    }
+
+    .resposta-options label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .resposta-options input[type="radio"] { accent-color: var(--cor-sucesso); }
+
+    .bncc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .form-acoes {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .aviso-travada {
+      display: none;
+      padding: var(--espacamento-md);
+      background: #FFFFF0;
+      border: 1px solid #FEFCBF;
+      border-radius: var(--borda-radius);
+      color: #744210;
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: var(--espacamento-lg);
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .secao-titulo {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 600;
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      padding-bottom: var(--espacamento-sm);
+      border-bottom: 2px solid var(--azul-claro);
+    }
+
+    /* Quill editor */
+    .ql-toolbar.ql-snow {
+      border: 2px solid var(--borda-cor) !important;
+      border-bottom: none !important;
+      border-radius: var(--borda-radius) var(--borda-radius) 0 0 !important;
+      background: #F7FAFC;
+    }
+
+    .ql-container.ql-snow {
+      border: 2px solid var(--borda-cor) !important;
+      border-radius: 0 0 var(--borda-radius) var(--borda-radius) !important;
+      font-family: var(--fonte-principal) !important;
+      font-size: var(--fonte-tamanho-base) !important;
+      min-height: 150px;
+    }
+
+    .ql-editor {
+      min-height: 150px;
+    }
+
+    .ql-container.ql-snow:focus-within {
+      border-color: var(--azul-medio) !important;
+      box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15);
+    }
+
+    @media (max-width: 768px) {
+      .bncc-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item ativo">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Nova Questão</h1>
+          <p class="conteudo-subtitulo">Cadastro manual de questão</p>
+        </div>
+      </div>
+
+      <div class="form-card card">
+
+        <!-- Aviso de questão travada (aparece se editando questão usada em simulado realizado) -->
+        <div class="aviso-travada" id="aviso-travada">
+          <span>⚠</span>
+          <span>Esta questão está sendo usada em simulados já realizados por alunos. Não é possível editar o enunciado e as alternativas.</span>
+        </div>
+
+        <!-- Enunciado -->
+        <h4 class="secao-titulo">Enunciado e Alternativas</h4>
+
+        <div class="form-grupo">
+          <label class="form-label" for="codigo">Código da questão</label>
+          <input type="text" class="form-input" id="codigo" placeholder="Ex: MANUAL-001 (auto-gerado se vazio)">
+          <span class="form-helper">Deixe vazio para gerar automaticamente</span>
+        </div>
+
+        <div class="form-grupo">
+          <label class="form-label">Enunciado</label>
+          <div id="enunciado-editor"></div>
+        </div>
+
+        <label class="form-label">Alternativas</label>
+        <div class="alternativas-grid">
+          <div class="alternativa-row">
+            <span class="alternativa-label">A)</span>
+            <input type="text" class="form-input" placeholder="Alternativa A">
+          </div>
+          <div class="alternativa-row">
+            <span class="alternativa-label">B)</span>
+            <input type="text" class="form-input" placeholder="Alternativa B">
+          </div>
+          <div class="alternativa-row">
+            <span class="alternativa-label">C)</span>
+            <input type="text" class="form-input" placeholder="Alternativa C">
+          </div>
+          <div class="alternativa-row">
+            <span class="alternativa-label">D)</span>
+            <input type="text" class="form-input" placeholder="Alternativa D">
+          </div>
+          <div class="alternativa-row">
+            <span class="alternativa-label">E)</span>
+            <input type="text" class="form-input" placeholder="Alternativa E">
+          </div>
+        </div>
+
+        <div class="resposta-correta">
+          <label>✓ Resposta correta:</label>
+          <div class="resposta-options">
+            <label><input type="radio" name="resposta" value="A"> A</label>
+            <label><input type="radio" name="resposta" value="B"> B</label>
+            <label><input type="radio" name="resposta" value="C"> C</label>
+            <label><input type="radio" name="resposta" value="D"> D</label>
+            <label><input type="radio" name="resposta" value="E"> E</label>
+          </div>
+        </div>
+
+        <!-- BNCC -->
+        <h4 class="secao-titulo">Classificação BNCC</h4>
+
+        <div class="bncc-grid">
+          <div class="form-grupo">
+            <label class="form-label">Área do Conhecimento</label>
+            <select class="form-select">
+              <option value="">Selecione...</option>
+              <option>Matemática e suas Tecnologias</option>
+              <option>Linguagens, Códigos e suas Tecnologias</option>
+              <option>Ciências da Natureza e suas Tecnologias</option>
+              <option>Ciências Humanas e suas Tecnologias</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">Competência Geral</label>
+            <select class="form-select">
+              <option value="">Selecione...</option>
+              <option>CG01 — Conhecimento</option>
+              <option>CG02 — Pensamento científico, crítico e criativo</option>
+              <option>CG03 — Repertório cultural</option>
+              <option>CG04 — Comunicação</option>
+              <option>CG05 — Cultura digital</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">Habilidade BNCC</label>
+            <select class="form-select">
+              <option value="">Selecione...</option>
+              <option>EM13MAT101 — Interpretar situações econômicas...</option>
+              <option>EM13MAT301 — Resolver e elaborar problemas...</option>
+              <option>EM13LGG101 — Compreender e analisar processos...</option>
+              <option>EM13CNT101 — Analisar e representar...</option>
+              <option>EM13CHS101 — Identificar e analisar relações...</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label class="form-label">Nível de Dificuldade</label>
+            <select class="form-select">
+              <option value="">Selecione...</option>
+              <option>Fácil</option>
+              <option>Médio</option>
+              <option>Difícil</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="form-acoes">
+          <a href="/conteudista/banco-questoes.html" class="btn btn-secundario">Cancelar</a>
+          <button class="btn btn-primario" id="btn-salvar">Salvar</button>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Inicializar Quill
+    const quill = new Quill('#enunciado-editor', {
+      theme: 'snow',
+      placeholder: 'Digite o enunciado da questão...',
+      modules: {
+        toolbar: [
+          [{ 'header': [3, 4, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+          [{ 'script': 'sub' }, { 'script': 'super' }],
+          ['blockquote'],
+          ['link', 'image'],
+          [{ 'color': [] }],
+          ['clean']
+        ]
+      }
+    });
+
+    document.getElementById('btn-salvar').addEventListener('click', function () {
+      const enunciado = quill.getText().trim();
+      if (!enunciado) {
+        alert('Preencha o enunciado da questão.');
+        return;
+      }
+
+      this.textContent = 'Salvo ✓';
+      this.classList.remove('btn-primario');
+      this.classList.add('btn-sucesso');
+
+      setTimeout(() => {
+        window.location.href = '/conteudista/banco-questoes.html';
+      }, 1000);
+    });
+  </script>
+
+</body>
+</html>

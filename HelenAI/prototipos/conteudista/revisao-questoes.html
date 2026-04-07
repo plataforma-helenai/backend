@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Revisão de Questões</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .questao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-md);
+      overflow: hidden;
+      transition: var(--transicao);
+    }
+
+    .questao-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      cursor: pointer;
+      background: #F7FAFC;
+      border-bottom: 1px solid var(--borda-cor);
+      transition: var(--transicao);
+    }
+
+    .questao-header:hover {
+      background: #EBF8FF;
+    }
+
+    .questao-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+    }
+
+    .questao-numero {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-lg);
+    }
+
+    .questao-codigo {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      font-family: monospace;
+    }
+
+    .questao-tags {
+      display: flex;
+      gap: var(--espacamento-xs);
+    }
+
+    .questao-header .chevron {
+      font-size: 1.2rem;
+      color: var(--texto-terciario);
+      transition: transform 0.2s ease;
+    }
+
+    .questao-card.aberta .chevron {
+      transform: rotate(180deg);
+    }
+
+    .questao-corpo {
+      display: none;
+      padding: var(--espacamento-lg);
+    }
+
+    .questao-card.aberta .questao-corpo {
+      display: block;
+    }
+
+    .ia-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 500;
+    }
+
+    .alternativas-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .alternativa-row {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .alternativa-label {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      min-width: 24px;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .alternativa-row .form-input {
+      flex: 1;
+    }
+
+    .resposta-correta {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+      padding: var(--espacamento-md);
+      background: #F0FFF4;
+      border-radius: var(--borda-radius);
+      border: 1px solid #C6F6D5;
+    }
+
+    .resposta-correta label {
+      font-weight: 500;
+      color: var(--cor-sucesso);
+      font-size: var(--fonte-tamanho-sm);
+      white-space: nowrap;
+    }
+
+    .resposta-options {
+      display: flex;
+      gap: var(--espacamento-md);
+    }
+
+    .resposta-options label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+      font-weight: 400;
+    }
+
+    .resposta-options input[type="radio"] {
+      accent-color: var(--cor-sucesso);
+    }
+
+    .bncc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .questao-acoes {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .acoes-globais {
+      display: flex;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    /* Modal criar simulado */
+    .modal-simulado .form-grupo {
+      margin-bottom: var(--espacamento-md);
+    }
+
+    @media (max-width: 768px) {
+      .bncc-grid { grid-template-columns: 1fr; }
+      .acoes-globais { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Modal Criar Simulado -->
+  <div class="modal-overlay" id="modal-simulado">
+    <div class="modal modal-simulado">
+      <h3 class="modal-titulo">Criar Simulado com Estas Questões</h3>
+      <div class="form-grupo">
+        <label class="form-label">Nome do simulado</label>
+        <input type="text" class="form-input" id="simulado-nome" placeholder="Ex: ENEM 2025 — Caderno Azul">
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Código</label>
+        <input type="text" class="form-input" id="simulado-codigo" placeholder="Ex: ENEM-2025-AZ">
+      </div>
+      <div class="form-grupo">
+        <label class="form-label">Tempo limite (minutos)</label>
+        <input type="number" class="form-input" id="simulado-tempo" placeholder="Deixe vazio para sem limite">
+        <span class="form-helper">Opcional — o aluno poderá escolher usar ou não</span>
+      </div>
+      <div class="alerta alerta-info">
+        <span>ℹ</span>
+        <span>O simulado será criado como <strong>rascunho</strong>. Você poderá editar antes de publicar.</span>
+      </div>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-sucesso" onclick="criarSimulado()">Criar Simulado</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item ativo">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Revisão — <span id="titulo-importacao">ENEM 2025 Caderno Azul</span></h1>
+          <p class="conteudo-subtitulo"><span id="total-questoes">3</span> questões extraídas</p>
+        </div>
+      </div>
+
+      <!-- Ações globais -->
+      <div class="acoes-globais">
+        <button class="btn btn-secundario" id="btn-salvar-todas">Salvar Todas</button>
+        <button class="btn btn-sucesso" onclick="document.getElementById('modal-simulado').classList.add('visivel')">
+          Criar Simulado com Estas Questões
+        </button>
+      </div>
+
+      <!-- Questões -->
+      <div id="lista-questoes"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Carregar dados da importação
+    const importacao = JSON.parse(localStorage.getItem('helenai_importacao') || '{}');
+    const nomeImportacao = importacao.nome || 'ENEM 2025 — Caderno Azul';
+    const codigoImportacao = importacao.codigo || 'ENEM-2025-AZ';
+
+    document.getElementById('titulo-importacao').textContent = nomeImportacao;
+    document.getElementById('simulado-nome').value = nomeImportacao;
+    document.getElementById('simulado-codigo').value = codigoImportacao;
+
+    const questoes = HELEN_DATA.questoes;
+    document.getElementById('total-questoes').textContent = questoes.length;
+
+    const areas = HELEN_DATA.areasBNCC;
+    const competencias = HELEN_DATA.competenciasGerais;
+    const habilidades = HELEN_DATA.habilidades;
+
+    // Renderizar questões
+    const lista = document.getElementById('lista-questoes');
+
+    questoes.forEach((q, idx) => {
+      const aberta = idx === 0 ? 'aberta' : '';
+      const optionsArea = areas.map(a => `<option ${q.area === a ? 'selected' : ''}>${a}</option>`).join('');
+      const optionsComp = competencias.map(c => `<option ${q.competenciaGeral === c.codigo ? 'selected' : ''}>${c.codigo} — ${c.nome}</option>`).join('');
+      const optionsHab = habilidades.map(h => `<option ${q.habilidade === h.codigo ? 'selected' : ''}>${h.codigo} — ${h.descricao.substring(0, 50)}...</option>`).join('');
+      const niveis = ['Fácil', 'Médio', 'Difícil'];
+      const optionsNivel = niveis.map(n => `<option ${q.nivel === n ? 'selected' : ''}>${n}</option>`).join('');
+      const badgeNivel = q.nivel === 'Fácil' ? 'badge-facil' : q.nivel === 'Médio' ? 'badge-medio' : 'badge-dificil';
+
+      const radioLetras = ['A', 'B', 'C', 'D', 'E'].map(l =>
+        `<label><input type="radio" name="resposta-${q.id}" value="${l}" ${q.respostaCorreta === l ? 'checked' : ''}> ${l}</label>`
+      ).join('');
+
+      const altsHtml = ['A', 'B', 'C', 'D', 'E'].map(l =>
+        `<div class="alternativa-row">
+          <span class="alternativa-label">${l})</span>
+          <input type="text" class="form-input" value="${q.alternativas[l]}">
+        </div>`
+      ).join('');
+
+      lista.innerHTML += `
+        <div class="questao-card ${aberta}" data-id="${q.id}">
+          <div class="questao-header" onclick="this.parentElement.classList.toggle('aberta')">
+            <div class="questao-header-left">
+              <span class="questao-numero">Questão ${String(idx + 1).padStart(2, '0')}</span>
+              <span class="questao-codigo">${q.codigo}</span>
+              <div class="questao-tags">
+                <span class="badge ${badgeNivel}">${q.nivel}</span>
+                <span class="ia-tag">🤖 Classificado por IA</span>
+              </div>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="questao-corpo">
+            <div class="form-grupo">
+              <label class="form-label">Enunciado</label>
+              <textarea class="form-textarea" rows="3">${q.enunciado}</textarea>
+            </div>
+
+            <label class="form-label">Alternativas</label>
+            <div class="alternativas-grid">
+              ${altsHtml}
+            </div>
+
+            <div class="resposta-correta">
+              <label>✓ Resposta correta:</label>
+              <div class="resposta-options">
+                ${radioLetras}
+              </div>
+            </div>
+
+            <label class="form-label mb-sm">Classificação BNCC</label>
+            <div class="bncc-grid">
+              <div class="form-grupo">
+                <label class="form-label text-small">Área do Conhecimento</label>
+                <select class="form-select">${optionsArea}</select>
+              </div>
+              <div class="form-grupo">
+                <label class="form-label text-small">Competência Geral</label>
+                <select class="form-select">${optionsComp}</select>
+              </div>
+              <div class="form-grupo">
+                <label class="form-label text-small">Habilidade BNCC</label>
+                <select class="form-select">${optionsHab}</select>
+              </div>
+              <div class="form-grupo">
+                <label class="form-label text-small">Nível de Dificuldade</label>
+                <select class="form-select">${optionsNivel}</select>
+              </div>
+            </div>
+
+            <div class="questao-acoes">
+              <button class="btn btn-perigo btn-sm" onclick="excluirQuestao(this)">Excluir questão</button>
+              <button class="btn btn-primario btn-sm" onclick="salvarQuestao(this)">Salvar alterações</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    function excluirQuestao(btn) {
+      if (confirm('Tem certeza que deseja excluir esta questão?')) {
+        const card = btn.closest('.questao-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        setTimeout(() => card.remove(), 300);
+      }
+    }
+
+    function salvarQuestao(btn) {
+      const textoOriginal = btn.textContent;
+      btn.textContent = 'Salvo ✓';
+      btn.classList.remove('btn-primario');
+      btn.classList.add('btn-sucesso');
+      setTimeout(() => {
+        btn.textContent = textoOriginal;
+        btn.classList.remove('btn-sucesso');
+        btn.classList.add('btn-primario');
+      }, 2000);
+    }
+
+    // Salvar todas
+    document.getElementById('btn-salvar-todas').addEventListener('click', function () {
+      this.textContent = 'Todas salvas ✓';
+      this.classList.remove('btn-secundario');
+      this.classList.add('btn-sucesso');
+      setTimeout(() => {
+        this.textContent = 'Salvar Todas';
+        this.classList.remove('btn-sucesso');
+        this.classList.add('btn-secundario');
+      }, 2000);
+    });
+
+    // Modal
+    function fecharModal() {
+      document.getElementById('modal-simulado').classList.remove('visivel');
+    }
+
+    function criarSimulado() {
+      fecharModal();
+      alert('Simulado criado como rascunho! Redirecionando para a lista de simulados...');
+      window.location.href = '/conteudista/simulados.html';
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Editar Simulado</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .simulado-config-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: var(--espacamento-md);
+      align-items: flex-start;
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .simulado-config-card .form-grupo {
+      margin-bottom: 0;
+    }
+
+    .simulado-config-desc {
+      grid-column: 1 / 3;
+    }
+
+    .simulado-body {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: var(--espacamento-lg);
+    }
+
+    .simulado-composicao {
+      position: sticky;
+      top: 92px;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+    }
+
+    /* Estatísticas do simulado */
+    .stats-section { margin-top: var(--espacamento-md); }
+    .stats-section h5 { font-size: var(--fonte-tamanho-sm); margin-bottom: var(--espacamento-sm); color: var(--azul-profundo); }
+
+    .stat-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-xs);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-label { color: var(--texto-secundario); flex: 1; }
+    .stat-value { font-weight: 700; color: var(--azul-profundo); min-width: 30px; text-align: right; }
+    .stat-bar { width: 60px; height: 6px; background: var(--cinza-azulado); border-radius: 3px; margin-left: 8px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 3px; }
+
+    .stat-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs); font-weight: 600; margin: 2px;
+    }
+
+    .stat-chip.facil { background: #C6F6D5; color: #22543D; }
+    .stat-chip.medio { background: #FEFCBF; color: #744210; }
+    .stat-chip.dificil { background: #FED7D7; color: #742A2A; }
+
+    .stats-chart-mini { max-height: 180px; margin-top: var(--espacamento-sm); }
+
+    .stats-resumo {
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+    .stats-resumo-item {
+      text-align: center; padding: var(--espacamento-sm);
+      background: var(--cinza-azulado); border-radius: var(--borda-radius);
+    }
+    .stats-resumo-item .valor { font-size: var(--fonte-tamanho-xl); font-weight: 700; color: var(--azul-profundo); }
+    .stats-resumo-item .label { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+
+    /* Questões do simulado */
+    .questao-sim-item {
+      background: var(--branco); border-radius: var(--borda-radius);
+      padding: var(--espacamento-md); margin-bottom: var(--espacamento-sm);
+      box-shadow: var(--sombra-card); display: flex; align-items: center;
+      gap: var(--espacamento-sm); cursor: grab; transition: var(--transicao);
+      border-left: 3px solid var(--azul-claro);
+      overflow: hidden;
+    }
+    .questao-sim-item:hover { box-shadow: var(--sombra-card-hover); border-left-color: var(--azul-medio); }
+    .questao-sim-item.dragging { opacity: 0.5; border-left-color: var(--ciano); }
+
+    .drag-handle { color: var(--texto-terciario); font-size: 1rem; cursor: grab; flex-shrink: 0; }
+    .questao-sim-num {
+      width: 28px; height: 28px; background: var(--cinza-azulado);
+      border-radius: var(--borda-radius); display: flex; align-items: center;
+      justify-content: center; font-weight: 700; font-size: var(--fonte-tamanho-xs);
+      color: var(--azul-profundo); flex-shrink: 0;
+    }
+    .questao-sim-info { flex: 1; min-width: 0; overflow: hidden; }
+    .questao-sim-enunciado {
+      font-size: var(--fonte-tamanho-sm); color: var(--texto-primario);
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      overflow: hidden; line-height: 1.4; margin-bottom: 4px;
+    }
+    .questao-sim-meta { display: flex; gap: var(--espacamento-xs); flex-wrap: wrap; }
+    .questao-sim-remover {
+      background: none; border: none; color: var(--cor-erro);
+      cursor: pointer; font-size: 1rem; padding: 4px; opacity: 0.5;
+      transition: var(--transicao); flex-shrink: 0;
+    }
+    .questao-sim-remover:hover { opacity: 1; }
+
+    .secao-titulo-sim {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: var(--espacamento-md);
+      position: sticky; top: 60px; z-index: 10;
+      background: var(--cinza-azulado); padding: var(--espacamento-md) 0;
+    }
+    .secao-titulo-sim h3 { font-size: var(--fonte-tamanho-lg); }
+
+    .btn-group-add { display: flex; gap: var(--espacamento-sm); }
+
+    .acoes-bottom {
+      display: flex; gap: var(--espacamento-md); justify-content: space-between;
+      margin-top: var(--espacamento-lg); padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .questoes-vazio {
+      text-align: center; padding: var(--espacamento-2xl);
+      color: var(--texto-terciario); background: var(--branco);
+      border-radius: var(--borda-radius-lg); box-shadow: var(--sombra-card);
+    }
+    .questoes-vazio .icone { font-size: 3rem; margin-bottom: var(--espacamento-md); }
+
+    /* Modal grande de seleção */
+    .modal-selecao-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6); display: none; z-index: 2000;
+    }
+    .modal-selecao-overlay.visivel { display: block; }
+
+    .modal-selecao {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 1000px; max-height: calc(100vh - 40px);
+      background: var(--branco); border-radius: var(--borda-radius-xl);
+      box-shadow: var(--sombra-modal); display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-selecao-header {
+      padding: var(--espacamento-lg); border-bottom: 1px solid var(--borda-cor);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-selecao-header h3 { margin: 0; }
+    .modal-selecao-fechar {
+      background: none; border: none; font-size: 1.5rem; cursor: pointer;
+      color: var(--texto-terciario); padding: 4px;
+    }
+    .modal-selecao-fechar:hover { color: var(--cor-erro); }
+
+    .modal-selecao-filtros {
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      background: var(--cinza-azulado); border-bottom: 1px solid var(--borda-cor);
+      display: flex; gap: var(--espacamento-md); flex-wrap: wrap; align-items: flex-end;
+    }
+
+    .modal-selecao-corpo {
+      flex: 1; overflow-y: auto; padding: var(--espacamento-lg);
+    }
+
+    .modal-selecao-footer {
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor); display: flex;
+      align-items: center; justify-content: space-between;
+      background: var(--cinza-azulado);
+    }
+
+    .selecao-counter { font-size: var(--fonte-tamanho-sm); color: var(--texto-secundario); font-weight: 600; }
+
+    .questao-selecao-item {
+      display: flex; align-items: flex-start; gap: var(--espacamento-md);
+      padding: var(--espacamento-md); border-bottom: 1px solid var(--borda-cor);
+      transition: var(--transicao);
+    }
+    .questao-selecao-item:hover { background: #F7FAFC; }
+    .questao-selecao-item:last-child { border-bottom: none; }
+    .questao-selecao-item input[type="checkbox"] {
+      margin-top: 4px; accent-color: var(--azul-medio); flex-shrink: 0;
+      width: 18px; height: 18px;
+    }
+    .questao-selecao-info { flex: 1; }
+    .questao-selecao-codigo { font-family: monospace; font-size: var(--fonte-tamanho-xs); color: var(--azul-medio); font-weight: 600; }
+    .questao-selecao-enunciado { font-size: var(--fonte-tamanho-sm); color: var(--texto-primario); margin: 4px 0; line-height: 1.5; }
+    .questao-selecao-tags { display: flex; gap: var(--espacamento-xs); flex-wrap: wrap; }
+
+    /* Modal criar questão rápida */
+    .modal-criar { max-width: 650px; }
+    .modal-criar .alternativas-grid { display: flex; flex-direction: column; gap: var(--espacamento-sm); }
+    .modal-criar .alt-row { display: flex; align-items: center; gap: var(--espacamento-sm); }
+    .modal-criar .alt-label { font-weight: 700; color: var(--azul-profundo); min-width: 24px; }
+    .modal-criar .alt-row .form-input { flex: 1; }
+    .modal-criar .resp-options { display: flex; gap: var(--espacamento-md); }
+    .modal-criar .resp-options label { display: flex; align-items: center; gap: 4px; font-size: var(--fonte-tamanho-sm); cursor: pointer; }
+    .modal-criar .resp-options input[type="radio"] { accent-color: var(--cor-sucesso); }
+    .bncc-grid-mini { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacamento-sm); }
+
+    @media (max-width: 900px) {
+      .simulado-config-card { grid-template-columns: 1fr; }
+      .simulado-config-desc { grid-column: auto; }
+      .simulado-body { grid-template-columns: 1fr; }
+      .simulado-composicao { position: static; max-height: none; }
+      .modal-selecao { width: 98%; top: 10px; max-height: calc(100vh - 20px); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles"><button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button><button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button></div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+  <div class="ledor-player"><button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button><div class="acessibilidade-separador"></div><button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button></div>
+  <div class="libras-janela"><div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div><div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div></div>
+
+  <!-- MODAL GRANDE: Selecionar Questões do Banco -->
+  <div class="modal-selecao-overlay" id="modal-selecao">
+    <div class="modal-selecao">
+      <div class="modal-selecao-header">
+        <h3>Selecionar Questões do Banco</h3>
+        <button class="modal-selecao-fechar" onclick="fecharModalSelecao()">✕</button>
+      </div>
+      <div class="modal-selecao-filtros">
+        <div class="filtro-grupo" style="min-width:160px;">
+          <label class="filtro-label">Buscar</label>
+          <input type="text" class="form-input" placeholder="No enunciado...">
+        </div>
+        <div class="filtro-grupo" style="min-width:180px;">
+          <label class="filtro-label">Área</label>
+          <select class="form-select" id="sel-area">
+            <option value="">Todas</option>
+            <option>Matemática e suas Tecnologias</option>
+            <option>Linguagens, Códigos e suas Tecnologias</option>
+            <option>Ciências da Natureza e suas Tecnologias</option>
+            <option>Ciências Humanas e suas Tecnologias</option>
+          </select>
+        </div>
+        <div class="filtro-grupo" style="min-width:180px;">
+          <label class="filtro-label">Habilidade</label>
+          <select class="form-select" id="sel-habilidade">
+            <option value="">Todas</option>
+            <option>EM13MAT101</option><option>EM13MAT301</option><option>EM13MAT501</option>
+            <option>EM13LGG101</option><option>EM13LGG301</option>
+            <option>EM13CNT101</option><option>EM13CNT301</option>
+            <option>EM13CHS101</option><option>EM13CHS301</option>
+          </select>
+        </div>
+        <div class="filtro-grupo" style="min-width:120px;">
+          <label class="filtro-label">Nível</label>
+          <select class="form-select" id="sel-nivel">
+            <option value="">Todos</option>
+            <option>Fácil</option><option>Médio</option><option>Difícil</option>
+          </select>
+        </div>
+        <div class="filtro-grupo" style="min-width:140px;">
+          <label class="filtro-label">Origem</label>
+          <select class="form-select" id="sel-origem">
+            <option value="">Todas</option>
+            <option>ENEM-2025-AZ</option><option>TRF5-2025</option><option>Manual</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-selecao-corpo" id="modal-selecao-corpo"></div>
+      <div class="modal-selecao-footer">
+        <span class="selecao-counter"><span id="selecao-count">0</span> questões selecionadas</span>
+        <div class="flex gap-sm">
+          <button class="btn btn-secundario" onclick="fecharModalSelecao()">Cancelar</button>
+          <button class="btn btn-sucesso" onclick="adicionarSelecionadas()">Adicionar ao Simulado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Criar Questão Rápida -->
+  <div class="modal-overlay" id="modal-criar">
+    <div class="modal modal-criar" style="max-height:90vh;overflow-y:auto;">
+      <h3 class="modal-titulo">Criar Nova Questão</h3>
+
+      <div class="form-grupo">
+        <label class="form-label">Enunciado</label>
+        <textarea class="form-textarea" id="nova-enunciado" rows="3" placeholder="Digite o enunciado..."></textarea>
+      </div>
+
+      <label class="form-label">Alternativas</label>
+      <div class="alternativas-grid" style="margin-bottom:var(--espacamento-md);">
+        <div class="alt-row"><span class="alt-label">A)</span><input type="text" class="form-input" placeholder="Alternativa A"></div>
+        <div class="alt-row"><span class="alt-label">B)</span><input type="text" class="form-input" placeholder="Alternativa B"></div>
+        <div class="alt-row"><span class="alt-label">C)</span><input type="text" class="form-input" placeholder="Alternativa C"></div>
+        <div class="alt-row"><span class="alt-label">D)</span><input type="text" class="form-input" placeholder="Alternativa D"></div>
+        <div class="alt-row"><span class="alt-label">E)</span><input type="text" class="form-input" placeholder="Alternativa E"></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:var(--espacamento-md);margin-bottom:var(--espacamento-md);padding:var(--espacamento-sm);background:#F0FFF4;border-radius:var(--borda-radius);border:1px solid #C6F6D5;">
+        <label style="font-weight:500;color:var(--cor-sucesso);font-size:var(--fonte-tamanho-sm);white-space:nowrap;">✓ Correta:</label>
+        <div class="resp-options">
+          <label><input type="radio" name="nova-resp" value="A"> A</label>
+          <label><input type="radio" name="nova-resp" value="B"> B</label>
+          <label><input type="radio" name="nova-resp" value="C" checked> C</label>
+          <label><input type="radio" name="nova-resp" value="D"> D</label>
+          <label><input type="radio" name="nova-resp" value="E"> E</label>
+        </div>
+      </div>
+
+      <div class="bncc-grid-mini">
+        <div class="form-grupo">
+          <label class="form-label text-small">Área</label>
+          <select class="form-select" id="nova-area">
+            <option value="">Selecione</option>
+            <option>Matemática e suas Tecnologias</option>
+            <option>Linguagens, Códigos e suas Tecnologias</option>
+            <option>Ciências da Natureza e suas Tecnologias</option>
+            <option>Ciências Humanas e suas Tecnologias</option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label class="form-label text-small">Habilidade</label>
+          <select class="form-select" id="nova-habilidade">
+            <option value="">Selecione</option>
+            <option>EM13MAT101</option><option>EM13MAT301</option>
+            <option>EM13LGG101</option><option>EM13CNT101</option><option>EM13CHS101</option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label class="form-label text-small">Nível</label>
+          <select class="form-select" id="nova-nivel">
+            <option value="">Selecione</option>
+            <option>Fácil</option><option>Médio</option><option>Difícil</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="document.getElementById('modal-criar').classList.remove('visivel')">Cancelar</button>
+        <button class="btn btn-sucesso" onclick="salvarNovaQuestao()">Criar e Adicionar ao Simulado</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span></div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item ativo">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Editar Simulado</h1>
+          <p class="conteudo-subtitulo">ENEM 2025 — Caderno Azul</p>
+        </div>
+      </div>
+
+      <!-- Configurações (topo, horizontal) -->
+      <div class="card simulado-config-card">
+        <div class="form-grupo">
+          <label class="form-label">Nome do simulado</label>
+          <input type="text" class="form-input" value="ENEM 2025 — Caderno Azul">
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Código</label>
+          <input type="text" class="form-input" value="ENEM-2025-AZ">
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Tempo limite (min)</label>
+          <input type="number" class="form-input" value="45" placeholder="Sem limite">
+        </div>
+        <div class="form-grupo">
+          <label class="form-label">Status</label>
+          <div style="padding-top:6px;"><span class="badge badge-rascunho">Rascunho</span></div>
+        </div>
+        <div class="form-grupo simulado-config-desc">
+          <label class="form-label">Descrição</label>
+          <input type="text" class="form-input" value="Simulado completo do ENEM 2025." placeholder="Descrição opcional...">
+        </div>
+      </div>
+
+      <!-- Corpo: Questões + Composição -->
+      <div class="simulado-body">
+        <!-- Questões (esquerda, maior) -->
+        <div class="simulado-questoes">
+          <div class="secao-titulo-sim">
+            <h3>Questões (<span id="qtd-questoes">3</span>)</h3>
+            <div class="btn-group-add">
+              <button class="btn btn-secundario btn-sm" onclick="document.getElementById('modal-criar').classList.add('visivel')">+ Criar Nova</button>
+              <button class="btn btn-primario btn-sm" onclick="abrirModalSelecao()">+ Selecionar do Banco</button>
+            </div>
+          </div>
+
+          <div id="lista-questoes-sim"></div>
+
+          <div class="acoes-bottom">
+            <a href="/conteudista/simulados.html" class="btn btn-secundario">Cancelar</a>
+            <div class="flex gap-sm">
+              <button class="btn btn-secundario" id="btn-rascunho">Salvar Rascunho</button>
+              <button class="btn btn-sucesso" id="btn-publicar">Publicar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Composição (direita, sidebar) -->
+        <div class="card simulado-composicao" id="stats-card">
+          <h4 style="margin-bottom:var(--espacamento-md);">Composição</h4>
+
+          <div class="stats-resumo" id="stats-resumo">
+            <div class="stats-resumo-item">
+              <div class="valor" id="stat-total">3</div>
+              <div class="label">Questões</div>
+            </div>
+            <div class="stats-resumo-item">
+              <div class="valor" id="stat-tempo-est">~6 min</div>
+              <div class="label">Tempo est.</div>
+            </div>
+          </div>
+
+          <div class="stats-section">
+            <h5>Por Dificuldade</h5>
+            <div id="stats-dificuldade"></div>
+          </div>
+
+          <div class="stats-section">
+            <h5>Por Área BNCC</h5>
+            <div id="stats-areas"></div>
+          </div>
+
+          <div class="stats-section">
+            <h5>Por Habilidade</h5>
+            <div id="stats-habilidades"></div>
+          </div>
+
+          <div class="stats-section">
+            <h5>Dificuldade</h5>
+            <canvas id="chart-dificuldade" class="stats-chart-mini"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Questões no simulado
+    let questoesSimulado = JSON.parse(JSON.stringify(HELEN_DATA.questoes));
+
+    // Banco completo (para seleção)
+    const bancoCompleto = [
+      ...JSON.parse(JSON.stringify(HELEN_DATA.questoes)),
+      { id: 4, codigo: 'ENEM-2025-AZ-Q04', enunciado: 'Considere a função f(x) = 2x² - 3x + 1. O valor mínimo dessa função é atingido quando x é igual a:', area: 'Matemática e suas Tecnologias', habilidade: 'EM13MAT301', nivel: 'Médio', origem: 'ENEM-2025-AZ' },
+      { id: 5, codigo: 'ENEM-2025-AZ-Q05', enunciado: 'No contexto da inclusão escolar de estudantes com deficiência, a adaptação curricular refere-se a modificações nos objetivos, conteúdos e avaliações.', area: 'Ciências Humanas e suas Tecnologias', habilidade: 'EM13CHS301', nivel: 'Fácil', origem: 'ENEM-2025-AZ' },
+      { id: 6, codigo: 'TRF5-2025-Q01', enunciado: 'De acordo com a Constituição Federal de 1988, artigo 37, a administração pública deve obedecer aos princípios de legalidade, impessoalidade, moralidade, publicidade e eficiência.', area: 'Ciências Humanas e suas Tecnologias', habilidade: 'EM13CHS101', nivel: 'Difícil', origem: 'TRF5-2025' },
+      { id: 7, codigo: 'MANUAL-001', enunciado: 'A fotossíntese é um processo fundamental para a manutenção da vida na Terra. Analise as afirmações sobre este processo.', area: 'Ciências da Natureza e suas Tecnologias', habilidade: 'EM13CNT101', nivel: 'Médio', origem: 'Manual' },
+      { id: 8, codigo: 'MANUAL-002', enunciado: 'Analise o trecho a seguir e identifique a figura de linguagem predominante no texto.', area: 'Linguagens, Códigos e suas Tecnologias', habilidade: 'EM13LGG101', nivel: 'Fácil', origem: 'Manual' },
+      { id: 9, codigo: 'MANUAL-003', enunciado: 'Um tanque de água tem formato cilíndrico com raio de 2m e altura de 3m. Calcule o volume de água necessário para enchê-lo.', area: 'Matemática e suas Tecnologias', habilidade: 'EM13MAT501', nivel: 'Médio', origem: 'Manual' },
+      { id: 10, codigo: 'MANUAL-004', enunciado: 'A Revolução Industrial transformou profundamente as relações de trabalho na Europa do século XVIII. Sobre esse período, é correto afirmar:', area: 'Ciências Humanas e suas Tecnologias', habilidade: 'EM13CHS301', nivel: 'Difícil', origem: 'Manual' },
+    ];
+
+    let chartDificuldade = null;
+
+    // === RENDER QUESTÕES DO SIMULADO ===
+    function renderQuestoes() {
+      const lista = document.getElementById('lista-questoes-sim');
+      lista.innerHTML = '';
+
+      if (questoesSimulado.length === 0) {
+        lista.innerHTML = `
+          <div class="questoes-vazio">
+            <div class="icone">📝</div>
+            <h4>Nenhuma questão adicionada</h4>
+            <p>Use os botões acima para criar ou selecionar questões.</p>
+          </div>`;
+      } else {
+        questoesSimulado.forEach((q, i) => {
+          const badgeNivel = q.nivel === 'Fácil' ? 'badge-facil' : q.nivel === 'Médio' ? 'badge-medio' : 'badge-dificil';
+          const areaShort = (q.area || '').split(' ')[0];
+          lista.innerHTML += `
+            <div class="questao-sim-item" draggable="true" data-idx="${i}">
+              <span class="drag-handle">⠿</span>
+              <span class="questao-sim-num">${i + 1}</span>
+              <div class="questao-sim-info">
+                <div class="questao-sim-enunciado">${q.enunciado}</div>
+                <div class="questao-sim-meta">
+                  <span class="badge badge-compartilhado">${areaShort}</span>
+                  <span class="badge badge-rascunho">${q.habilidade || '—'}</span>
+                  <span class="badge ${badgeNivel}">${q.nivel}</span>
+                </div>
+              </div>
+              <button class="questao-sim-remover" onclick="removerQuestao(${i})" title="Remover">✕</button>
+            </div>`;
+        });
+      }
+      document.getElementById('qtd-questoes').textContent = questoesSimulado.length;
+      initDragDrop();
+      atualizarStats();
+    }
+
+    function removerQuestao(idx) {
+      questoesSimulado.splice(idx, 1);
+      renderQuestoes();
+    }
+
+    // === DRAG & DROP ===
+    function initDragDrop() {
+      const items = document.querySelectorAll('.questao-sim-item');
+      let dragIdx = null;
+      items.forEach(item => {
+        item.addEventListener('dragstart', () => { dragIdx = parseInt(item.dataset.idx); item.classList.add('dragging'); });
+        item.addEventListener('dragend', () => item.classList.remove('dragging'));
+        item.addEventListener('dragover', (e) => e.preventDefault());
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const dropIdx = parseInt(item.dataset.idx);
+          if (dragIdx !== null && dragIdx !== dropIdx) {
+            const moved = questoesSimulado.splice(dragIdx, 1)[0];
+            questoesSimulado.splice(dropIdx, 0, moved);
+            renderQuestoes();
+          }
+        });
+      });
+    }
+
+    // === ESTATÍSTICAS ===
+    function atualizarStats() {
+      const total = questoesSimulado.length;
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-tempo-est').textContent = total > 0 ? '~' + (total * 2) + ' min' : '—';
+
+      // Dificuldade
+      const dif = { 'Fácil': 0, 'Médio': 0, 'Difícil': 0 };
+      const areas = {};
+      const habs = {};
+
+      questoesSimulado.forEach(q => {
+        dif[q.nivel] = (dif[q.nivel] || 0) + 1;
+        const areaShort = (q.area || '').split(' ')[0];
+        areas[areaShort] = (areas[areaShort] || 0) + 1;
+        if (q.habilidade) habs[q.habilidade] = (habs[q.habilidade] || 0) + 1;
+      });
+
+      // Render dificuldade
+      const statsDif = document.getElementById('stats-dificuldade');
+      statsDif.innerHTML = ['Fácil', 'Médio', 'Difícil'].map(d => {
+        const v = dif[d] || 0;
+        const pct = total > 0 ? Math.round(v / total * 100) : 0;
+        const cls = d === 'Fácil' ? 'facil' : d === 'Médio' ? 'medio' : 'dificil';
+        const cor = d === 'Fácil' ? '#38A169' : d === 'Médio' ? '#ECC94B' : '#E53E3E';
+        return `<div class="stat-row">
+          <span class="stat-label"><span class="stat-chip ${cls}">${d}</span></span>
+          <span class="stat-value">${v}</span>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%;background:${cor}"></div></div>
+        </div>`;
+      }).join('');
+
+      // Render áreas
+      const statsAreas = document.getElementById('stats-areas');
+      const coresArea = { 'Matemática': '#2B6CB0', 'Linguagens': '#3CC8D0', 'Ciências': '#38A169', 'Ciências': '#ECC94B' };
+      statsAreas.innerHTML = Object.entries(areas).map(([a, v]) => {
+        const pct = Math.round(v / total * 100);
+        return `<div class="stat-row">
+          <span class="stat-label">${a}</span>
+          <span class="stat-value">${v}</span>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%;background:var(--azul-medio)"></div></div>
+        </div>`;
+      }).join('') || '<p class="text-muted text-small">Nenhuma questão</p>';
+
+      // Render habilidades
+      const statsHabs = document.getElementById('stats-habilidades');
+      statsHabs.innerHTML = Object.entries(habs).map(([h, v]) => {
+        const pct = Math.round(v / total * 100);
+        return `<div class="stat-row">
+          <span class="stat-label" style="font-family:monospace;">${h}</span>
+          <span class="stat-value">${v}</span>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:${pct}%;background:var(--ciano)"></div></div>
+        </div>`;
+      }).join('') || '<p class="text-muted text-small">Nenhuma questão</p>';
+
+      // Chart dificuldade
+      if (chartDificuldade) chartDificuldade.destroy();
+      chartDificuldade = new Chart(document.getElementById('chart-dificuldade'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Fácil', 'Médio', 'Difícil'],
+          datasets: [{ data: [dif['Fácil'], dif['Médio'], dif['Difícil']], backgroundColor: ['#38A169', '#ECC94B', '#E53E3E'], borderWidth: 0 }]
+        },
+        options: {
+          responsive: true, cutout: '65%',
+          plugins: {
+            legend: { position: 'bottom', labels: { padding: 8, usePointStyle: true, font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // === MODAL SELECIONAR DO BANCO ===
+    function abrirModalSelecao() {
+      renderBancoModal();
+      document.getElementById('modal-selecao').classList.add('visivel');
+    }
+
+    function fecharModalSelecao() {
+      document.getElementById('modal-selecao').classList.remove('visivel');
+    }
+
+    function renderBancoModal() {
+      const corpo = document.getElementById('modal-selecao-corpo');
+      const idsNoSimulado = questoesSimulado.map(q => q.codigo);
+
+      corpo.innerHTML = bancoCompleto.map((q, i) => {
+        const jaAdicionada = idsNoSimulado.includes(q.codigo);
+        const badgeNivel = q.nivel === 'Fácil' ? 'badge-facil' : q.nivel === 'Médio' ? 'badge-medio' : 'badge-dificil';
+        const areaShort = (q.area || '').split(' ')[0];
+        const disabled = jaAdicionada ? 'disabled checked' : '';
+        const opacity = jaAdicionada ? 'opacity:0.5;' : '';
+
+        return `<div class="questao-selecao-item" style="${opacity}">
+          <input type="checkbox" value="${i}" ${disabled} onchange="atualizarContador()">
+          <div class="questao-selecao-info">
+            <span class="questao-selecao-codigo">${q.codigo}</span>
+            ${jaAdicionada ? '<span class="badge badge-publicado" style="margin-left:8px;">Já adicionada</span>' : ''}
+            <p class="questao-selecao-enunciado">${q.enunciado}</p>
+            <div class="questao-selecao-tags">
+              <span class="badge badge-compartilhado">${areaShort}</span>
+              <span class="badge badge-rascunho">${q.habilidade || '—'}</span>
+              <span class="badge ${badgeNivel}">${q.nivel}</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+
+      atualizarContador();
+    }
+
+    function atualizarContador() {
+      const checks = document.querySelectorAll('#modal-selecao-corpo input[type="checkbox"]:checked:not([disabled])');
+      document.getElementById('selecao-count').textContent = checks.length;
+    }
+
+    function adicionarSelecionadas() {
+      const checks = document.querySelectorAll('#modal-selecao-corpo input[type="checkbox"]:checked:not([disabled])');
+      checks.forEach(c => {
+        const q = bancoCompleto[parseInt(c.value)];
+        questoesSimulado.push(JSON.parse(JSON.stringify(q)));
+      });
+      fecharModalSelecao();
+      renderQuestoes();
+    }
+
+    // Fechar com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        fecharModalSelecao();
+        document.getElementById('modal-criar').classList.remove('visivel');
+      }
+    });
+
+    // === CRIAR QUESTÃO RÁPIDA ===
+    let novaQuestaoId = 100;
+
+    function salvarNovaQuestao() {
+      const enunciado = document.getElementById('nova-enunciado').value.trim();
+      if (!enunciado) { alert('Preencha o enunciado.'); return; }
+
+      const area = document.getElementById('nova-area').value;
+      const habilidade = document.getElementById('nova-habilidade').value;
+      const nivel = document.getElementById('nova-nivel').value || 'Médio';
+
+      questoesSimulado.push({
+        id: novaQuestaoId++,
+        codigo: 'NOVA-' + String(novaQuestaoId).padStart(3, '0'),
+        enunciado: enunciado,
+        area: area || 'Não classificada',
+        habilidade: habilidade || '—',
+        nivel: nivel
+      });
+
+      // Limpar modal
+      document.getElementById('nova-enunciado').value = '';
+      document.getElementById('nova-area').value = '';
+      document.getElementById('nova-habilidade').value = '';
+      document.getElementById('nova-nivel').value = '';
+      document.getElementById('modal-criar').classList.remove('visivel');
+
+      renderQuestoes();
+    }
+
+    // === SALVAR / PUBLICAR ===
+    document.getElementById('btn-rascunho').addEventListener('click', function() {
+      this.textContent = 'Salvo ✓';
+      this.classList.add('btn-sucesso'); this.classList.remove('btn-secundario');
+      setTimeout(() => { this.textContent = 'Salvar Rascunho'; this.classList.remove('btn-sucesso'); this.classList.add('btn-secundario'); }, 2000);
+    });
+
+    document.getElementById('btn-publicar').addEventListener('click', function() {
+      if (questoesSimulado.length === 0) { alert('Adicione pelo menos uma questão.'); return; }
+      if (confirm('Publicar simulado? Após alunos realizarem, as questões não poderão ser editadas.')) {
+        alert('Simulado publicado!');
+        window.location.href = '/conteudista/simulados.html';
+      }
+    });
+
+    // Init
+    renderQuestoes();
+  </script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+/* ============================================
+   HelenAI — Acessibilidade
+   Alto contraste, dislexia, color blind,
+   tamanhos de fonte, barra de acessibilidade
+   ============================================ */
+
+/* === Barra de Acessibilidade === */
+.acessibilidade-bar {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(26, 58, 107, 0.95);
+  backdrop-filter: blur(8px);
+  border-top-left-radius: var(--borda-radius-lg);
+}
+
+.acessibilidade-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--borda-radius);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: var(--transicao);
+  font-size: 14px;
+  padding: 0;
+}
+
+.acessibilidade-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--branco);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.acessibilidade-btn.ativo {
+  background: var(--ciano);
+  color: var(--azul-profundo);
+  border-color: var(--ciano);
+}
+
+/* Tooltip via title — usa o nativo do navegador, sem ::after */
+
+.acessibilidade-separador {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 4px;
+}
+
+/* Botões de tamanho de fonte */
+.fonte-controles {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fonte-controles .acessibilidade-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* === Alto Contraste === */
+body.alto-contraste {
+  background-color: #000000 !important;
+  color: #FFFFFF !important;
+}
+
+body.alto-contraste * {
+  border-color: #FFFFFF !important;
+}
+
+body.alto-contraste .card,
+body.alto-contraste .modal,
+body.alto-contraste .filtros-bar {
+  background: #1A1A1A !important;
+  color: #FFFFFF !important;
+}
+
+body.alto-contraste .sidebar {
+  background: #000000 !important;
+  border-right: 2px solid #FFFFFF;
+}
+
+body.alto-contraste .sidebar-item {
+  color: #FFFFFF !important;
+}
+
+body.alto-contraste .sidebar-item.ativo {
+  background: #FFFF00 !important;
+  color: #000000 !important;
+}
+
+body.alto-contraste h1,
+body.alto-contraste h2,
+body.alto-contraste h3,
+body.alto-contraste h4,
+body.alto-contraste h5,
+body.alto-contraste .card-titulo,
+body.alto-contraste .conteudo-titulo {
+  color: #FFFF00 !important;
+}
+
+body.alto-contraste a {
+  color: #00FFFF !important;
+}
+
+body.alto-contraste .btn-primario {
+  background: #FFFF00 !important;
+  color: #000000 !important;
+  border-color: #FFFF00 !important;
+}
+
+body.alto-contraste .form-input,
+body.alto-contraste .form-select,
+body.alto-contraste .form-textarea {
+  background: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border-color: #FFFFFF !important;
+}
+
+body.alto-contraste .badge {
+  border: 1px solid #FFFFFF;
+}
+
+body.alto-contraste .tabela td,
+body.alto-contraste .tabela th {
+  background: #1A1A1A !important;
+  color: #FFFFFF !important;
+  border-color: #444444 !important;
+}
+
+body.alto-contraste .text-muted,
+body.alto-contraste .texto-secundario,
+body.alto-contraste .form-helper {
+  color: #CCCCCC !important;
+}
+
+/* === Fonte para Dislexia === */
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
+
+body.fonte-dislexia,
+body.fonte-dislexia * {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', cursive, sans-serif !important;
+  letter-spacing: 0.05em;
+  word-spacing: 0.15em;
+}
+
+body.fonte-dislexia p,
+body.fonte-dislexia li,
+body.fonte-dislexia td,
+body.fonte-dislexia .form-input {
+  line-height: 1.8;
+}
+
+/* === Tamanhos de Fonte === */
+body.fonte-grande {
+  font-size: 18px;
+}
+
+body.fonte-maior {
+  font-size: 20px;
+}
+
+/* === Modo Color Blind === */
+body.color-blind .badge-ativo,
+body.color-blind .badge-publicado,
+body.color-blind .badge-facil {
+  background: #BEE3F8;
+  color: #2A4365;
+  border: 2px solid #2A4365;
+}
+
+body.color-blind .badge-bloqueado,
+body.color-blind .badge-rejeitado,
+body.color-blind .badge-dificil {
+  background: #FFF;
+  color: #1A1A1A;
+  border: 2px dashed #1A1A1A;
+}
+
+body.color-blind .badge-pendente,
+body.color-blind .badge-medio {
+  background: #E2E8F0;
+  color: #4A5568;
+  border: 2px dotted #4A5568;
+}
+
+body.color-blind .btn-sucesso {
+  background: var(--azul-medio);
+  border-color: var(--azul-medio);
+}
+
+body.color-blind .btn-perigo {
+  border-style: dashed;
+}
+
+body.color-blind .alerta-erro {
+  border-style: dashed;
+  border-width: 2px;
+}
+
+body.color-blind .alerta-sucesso {
+  border-style: solid;
+  border-width: 2px;
+}
+
+/* === Ledor — Destaque de leitura === */
+.ledor-destaque {
+  background: rgba(60, 200, 208, 0.3) !important;
+  outline: 2px solid var(--ciano);
+  border-radius: 2px;
+}
+
+/* Mini player do ledor */
+.ledor-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--azul-profundo);
+  color: var(--branco);
+  padding: 8px 20px;
+  display: none;
+  align-items: center;
+  gap: var(--espacamento-md);
+  z-index: 9998;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.ledor-player.visivel {
+  display: flex;
+}
+
+.ledor-player button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--branco);
+  padding: 4px 10px;
+  border-radius: var(--borda-radius);
+  cursor: pointer;
+  font-family: var(--fonte-principal);
+  font-size: var(--fonte-tamanho-sm);
+}
+
+.ledor-player button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ledor-player .velocidade-atual {
+  font-weight: 600;
+  color: var(--ciano);
+  min-width: 40px;
+  text-align: center;
+}
+
+/* === LIBRAS — Janela do intérprete === */
+.libras-janela {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 200px;
+  height: 250px;
+  background: var(--branco);
+  border-radius: var(--borda-radius-lg);
+  box-shadow: var(--sombra-modal);
+  display: none;
+  flex-direction: column;
+  z-index: 9997;
+  overflow: hidden;
+  resize: both;
+}
+
+.libras-janela.visivel {
+  display: flex;
+}
+
+.libras-janela-header {
+  background: var(--azul-profundo);
+  color: var(--branco);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--fonte-tamanho-sm);
+  font-weight: 600;
+  cursor: move;
+}
+
+.libras-janela-header button {
+  background: transparent;
+  border: none;
+  color: var(--branco);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px;
+}
+
+.libras-janela-corpo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F0F4F8;
+  color: var(--texto-terciario);
+  font-size: var(--fonte-tamanho-sm);
+  text-align: center;
+  padding: var(--espacamento-md);
+}

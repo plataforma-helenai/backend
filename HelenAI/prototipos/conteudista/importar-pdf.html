@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Importações</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* Listagem de importações */
+    .importacao-item {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-md);
+      transition: var(--transicao);
+      border-left: 4px solid var(--azul-medio);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacamento-lg);
+    }
+
+    .importacao-item:hover {
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .importacao-info {
+      flex: 1;
+    }
+
+    .importacao-nome {
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .importacao-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      flex-wrap: wrap;
+    }
+
+    .importacao-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .importacao-codigo {
+      font-family: monospace;
+      background: var(--cinza-azulado);
+      padding: 2px 8px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--azul-medio);
+      font-weight: 600;
+    }
+
+    .importacao-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+      flex-shrink: 0;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: var(--espacamento-2xl);
+      color: var(--texto-terciario);
+    }
+
+    .empty-state .icone {
+      font-size: 4rem;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .empty-state h3 {
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    /* Modal upload */
+    .modal-upload {
+      max-width: 560px;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--azul-claro);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-2xl);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transicao);
+      background: #F7FAFC;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--azul-medio);
+      background: #EBF8FF;
+    }
+
+    .dropzone .icone { font-size: 3rem; margin-bottom: var(--espacamento-md); display: block; }
+    .dropzone .texto-principal { font-size: var(--fonte-tamanho-lg); font-weight: 500; color: var(--azul-profundo); margin-bottom: var(--espacamento-xs); }
+    .dropzone .texto-secundario { font-size: var(--fonte-tamanho-sm); color: var(--texto-terciario); }
+    .dropzone input[type="file"] { display: none; }
+
+    .arquivo-selecionado {
+      display: none;
+      align-items: center;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-md);
+      background: #EBF8FF;
+      border: 1px solid var(--azul-claro);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .arquivo-selecionado.visivel { display: flex; }
+    .arquivo-selecionado .arquivo-icone { font-size: 1.5rem; }
+    .arquivo-selecionado .arquivo-info { flex: 1; }
+    .arquivo-selecionado .arquivo-nome { font-weight: 600; font-size: var(--fonte-tamanho-sm); color: var(--azul-profundo); }
+    .arquivo-selecionado .arquivo-tamanho { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .arquivo-selecionado .arquivo-remover { background: none; border: none; color: var(--cor-erro); cursor: pointer; font-size: 1.2rem; padding: 4px; }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-overlay.visivel { display: flex; }
+
+    .loading-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      padding: var(--espacamento-2xl);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: var(--sombra-modal);
+    }
+
+    .loading-card .spinner {
+      width: 60px; height: 60px;
+      border: 4px solid var(--azul-claro);
+      border-top-color: var(--azul-medio);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto var(--espacamento-lg);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-card h3 { margin-bottom: var(--espacamento-sm); }
+    .loading-card .loading-status { color: var(--texto-secundario); font-size: var(--fonte-tamanho-sm); margin-bottom: var(--espacamento-lg); }
+
+    .progress-bar { width: 100%; height: 8px; background: var(--cinza-azulado); border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--gradiente-header); border-radius: 4px; width: 0%; transition: width 0.3s ease; }
+    .progress-percent { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); margin-top: var(--espacamento-sm); }
+
+    @media (max-width: 768px) {
+      .importacao-item { flex-direction: column; align-items: flex-start; }
+      .importacao-acoes { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <h3>Processando PDF</h3>
+      <p class="loading-status" id="loading-status">Extraindo questões do PDF...</p>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-percent" id="progress-percent">0%</p>
+    </div>
+  </div>
+
+  <!-- Modal Nova Importação -->
+  <div class="modal-overlay" id="modal-importar">
+    <div class="modal modal-upload">
+      <h3 class="modal-titulo">Nova Importação</h3>
+
+      <div class="form-grupo">
+        <label class="form-label" for="nome-importacao">Nome da importação</label>
+        <input type="text" class="form-input" id="nome-importacao" placeholder="Ex: ENEM 2026 - Caderno Azul">
+        <span class="form-erro" id="erro-nome">Informe o nome da importação</span>
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label" for="codigo-importacao">Código da importação</label>
+        <input type="text" class="form-input" id="codigo-importacao" placeholder="Ex: ENEM-2026-AZ">
+        <span class="form-helper">Este código será usado como referência nas questões (ex: ENEM-2026-AZ-Q01)</span>
+        <span class="form-erro" id="erro-codigo">Informe o código da importação</span>
+      </div>
+
+      <label class="form-label">Arquivo PDF</label>
+      <div class="dropzone" id="dropzone">
+        <span class="icone">📎</span>
+        <p class="texto-principal">Arraste o PDF aqui ou clique para selecionar</p>
+        <p class="texto-secundario">Formato aceito: .pdf</p>
+        <input type="file" id="file-input" accept=".pdf">
+      </div>
+
+      <div class="arquivo-selecionado" id="arquivo-selecionado">
+        <span class="arquivo-icone">📄</span>
+        <div class="arquivo-info">
+          <div class="arquivo-nome" id="arquivo-nome">documento.pdf</div>
+          <div class="arquivo-tamanho" id="arquivo-tamanho">2.4 MB</div>
+        </div>
+        <button class="arquivo-remover" id="arquivo-remover" title="Remover">✕</button>
+      </div>
+
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-primario" id="btn-importar" disabled>Importar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item ativo">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Importações</h1>
+          <p class="conteudo-subtitulo">PDFs importados e questões extraídas</p>
+        </div>
+        <button class="btn btn-sucesso" onclick="abrirModal()">+ Nova Importação</button>
+      </div>
+
+      <!-- Lista de importações -->
+      <div id="lista-importacoes"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Renderizar importações
+    const lista = document.getElementById('lista-importacoes');
+    const importacoes = HELEN_DATA.importacoes;
+
+    function renderImportacoes() {
+      lista.innerHTML = '';
+
+      if (importacoes.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-state card">
+            <div class="icone">📄</div>
+            <h3>Nenhuma importação ainda</h3>
+            <p>Importe seu primeiro PDF para extrair questões automaticamente.</p>
+            <button class="btn btn-primario mt-lg" onclick="abrirModal()">+ Nova Importação</button>
+          </div>
+        `;
+        return;
+      }
+
+      importacoes.forEach(imp => {
+        lista.innerHTML += `
+          <div class="importacao-item">
+            <div class="importacao-info">
+              <div class="importacao-nome">${imp.nome}</div>
+              <div class="importacao-meta">
+                <span class="importacao-codigo">${imp.codigo}</span>
+                <span>📄 ${imp.totalQuestoes} questões</span>
+                <span>📅 ${formatarData(imp.data)}</span>
+                <span>👤 ${imp.criador}</span>
+              </div>
+            </div>
+            <div class="importacao-acoes">
+              <a href="/conteudista/revisao-questoes.html" class="btn btn-secundario btn-sm" onclick="selecionarImportacao('${imp.nome}', '${imp.codigo}')">Ver Questões</a>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function formatarData(data) {
+      const partes = data.split('-');
+      return partes[2] + '/' + partes[1] + '/' + partes[0];
+    }
+
+    function selecionarImportacao(nome, codigo) {
+      localStorage.setItem('helenai_importacao', JSON.stringify({ nome, codigo }));
+    }
+
+    renderImportacoes();
+
+    // Modal
+    function abrirModal() {
+      document.getElementById('modal-importar').classList.add('visivel');
+      resetModal();
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-importar').classList.remove('visivel');
+    }
+
+    function resetModal() {
+      document.getElementById('nome-importacao').value = '';
+      document.getElementById('codigo-importacao').value = '';
+      document.getElementById('codigo-importacao').dataset.editado = '';
+      document.getElementById('file-input').value = '';
+      document.getElementById('arquivo-selecionado').classList.remove('visivel');
+      document.getElementById('dropzone').style.display = 'block';
+      document.getElementById('btn-importar').disabled = true;
+      document.querySelectorAll('.form-erro').forEach(e => e.classList.remove('visivel'));
+      document.querySelectorAll('.form-input').forEach(e => e.classList.remove('erro'));
+      temArquivo = false;
+    }
+
+    // Fechar modal com ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') fecharModal();
+    });
+
+    // Fechar modal clicando fora
+    document.getElementById('modal-importar').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal-importar')) fecharModal();
+    });
+
+    // Upload
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const arquivoSelecionado = document.getElementById('arquivo-selecionado');
+    const btnImportar = document.getElementById('btn-importar');
+    let temArquivo = false;
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) selecionarArquivo(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) selecionarArquivo(fileInput.files[0]);
+    });
+
+    function selecionarArquivo(file) {
+      document.getElementById('arquivo-nome').textContent = file.name;
+      document.getElementById('arquivo-tamanho').textContent = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+      arquivoSelecionado.classList.add('visivel');
+      dropzone.style.display = 'none';
+      temArquivo = true;
+      verificarForm();
+    }
+
+    document.getElementById('arquivo-remover').addEventListener('click', () => {
+      arquivoSelecionado.classList.remove('visivel');
+      dropzone.style.display = 'block';
+      fileInput.value = '';
+      temArquivo = false;
+      verificarForm();
+    });
+
+    function verificarForm() {
+      const nome = document.getElementById('nome-importacao').value.trim();
+      const codigo = document.getElementById('codigo-importacao').value.trim();
+      btnImportar.disabled = !(nome && codigo && temArquivo);
+    }
+
+    document.getElementById('nome-importacao').addEventListener('input', function () {
+      const codigo = this.value.trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9\s\-]/g, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 20);
+      if (!document.getElementById('codigo-importacao').dataset.editado) {
+        document.getElementById('codigo-importacao').value = codigo;
+      }
+      verificarForm();
+    });
+
+    document.getElementById('codigo-importacao').addEventListener('input', function () {
+      this.dataset.editado = 'true';
+      verificarForm();
+    });
+
+    // Importar
+    btnImportar.addEventListener('click', () => {
+      const nome = document.getElementById('nome-importacao').value.trim();
+      const codigo = document.getElementById('codigo-importacao').value.trim();
+
+      let valido = true;
+      document.querySelectorAll('.form-erro').forEach(e => e.classList.remove('visivel'));
+      document.querySelectorAll('.modal .form-input').forEach(e => e.classList.remove('erro'));
+
+      if (!nome) {
+        document.getElementById('nome-importacao').classList.add('erro');
+        document.getElementById('erro-nome').classList.add('visivel');
+        valido = false;
+      }
+      if (!codigo) {
+        document.getElementById('codigo-importacao').classList.add('erro');
+        document.getElementById('erro-codigo').classList.add('visivel');
+        valido = false;
+      }
+      if (!valido) return;
+
+      // Salvar dados para próxima tela
+      localStorage.setItem('helenai_importacao', JSON.stringify({ nome, codigo }));
+
+      // Fechar modal e mostrar loading
+      fecharModal();
+      const loading = document.getElementById('loading');
+      const fill = document.getElementById('progress-fill');
+      const percent = document.getElementById('progress-percent');
+      const status = document.getElementById('loading-status');
+      loading.classList.add('visivel');
+
+      const etapas = [
+        { p: 20, t: 'Lendo o PDF...' },
+        { p: 40, t: 'Identificando questões...' },
+        { p: 60, t: 'Extraindo alternativas...' },
+        { p: 80, t: 'Classificando pela BNCC com IA...' },
+        { p: 95, t: 'Finalizando...' },
+        { p: 100, t: 'Concluído!' }
+      ];
+
+      let i = 0;
+      const intervalo = setInterval(() => {
+        if (i < etapas.length) {
+          fill.style.width = etapas[i].p + '%';
+          percent.textContent = etapas[i].p + '%';
+          status.textContent = etapas[i].t;
+          i++;
+        } else {
+          clearInterval(intervalo);
+          setTimeout(() => {
+            window.location.href = '/conteudista/revisao-questoes.html';
+          }, 500);
+        }
+      }, 800);
+    });
+  </script>
+
+</body>
+</html>

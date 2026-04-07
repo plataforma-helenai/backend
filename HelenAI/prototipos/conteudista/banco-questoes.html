@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Banco de Questões</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+  <style>
+    .questao-item {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-md);
+      transition: var(--transicao);
+      border-left: 4px solid transparent;
+    }
+
+    .questao-item:hover {
+      box-shadow: var(--sombra-card-hover);
+      border-left-color: var(--azul-medio);
+    }
+
+    .questao-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .questao-item-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .questao-item-codigo {
+      font-weight: 700;
+      font-family: monospace;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .questao-item-enunciado {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.5;
+      margin-bottom: var(--espacamento-sm);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .questao-item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .questao-item-tags {
+      display: flex;
+      gap: var(--espacamento-xs);
+      flex-wrap: wrap;
+    }
+
+    .questao-item-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+    }
+
+    .total-count {
+      color: var(--texto-terciario);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 400;
+    }
+
+    .questao-item-criador {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      font-weight: 500;
+    }
+
+    .questao-item-info-row {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-sm);
+      flex-wrap: wrap;
+    }
+
+    .info-detalhe {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .info-detalhe strong {
+      color: var(--azul-profundo);
+    }
+
+    .info-nenhum {
+      color: var(--texto-terciario);
+      font-style: italic;
+    }
+
+    .info-simulados-link {
+      cursor: pointer;
+      user-select: none;
+      text-decoration: underline dotted;
+      text-underline-offset: 3px;
+    }
+
+    .info-simulados-link:hover {
+      color: var(--azul-medio);
+    }
+
+    .modal-simulados-lista {
+      list-style: none;
+      padding: 0;
+    }
+
+    .modal-simulados-lista li {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      padding: var(--espacamento-md);
+      border-bottom: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .modal-simulados-lista li:last-child {
+      border-bottom: none;
+    }
+
+    .modal-simulados-lista .simulado-icone {
+      width: 36px;
+      height: 36px;
+      background: #EBF8FF;
+      border-radius: var(--borda-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .modal-simulados-lista .simulado-nome {
+      font-weight: 600;
+      color: var(--azul-profundo);
+    }
+
+    .filtros-bar {
+      flex-direction: column !important;
+      gap: var(--espacamento-md) !important;
+    }
+
+    .filtros-row {
+      display: flex;
+      gap: var(--espacamento-md);
+      width: 100%;
+      align-items: flex-end;
+    }
+
+    .filtro-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .filtro-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filtros-acoes {
+      display: flex;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    .btn-limpar {
+      background: none;
+      border: none;
+      color: var(--cor-erro);
+      font-size: var(--fonte-tamanho-sm);
+      cursor: pointer;
+      padding: 10px 14px;
+      font-family: var(--fonte-principal);
+      font-weight: 500;
+      white-space: nowrap;
+      transition: var(--transicao);
+      border-radius: var(--borda-radius);
+      display: none;
+    }
+
+    .btn-limpar.visivel {
+      display: inline-flex;
+    }
+
+    .btn-limpar:hover {
+      background: #FFF5F5;
+    }
+
+    /* Select2 overrides */
+    .select2-container--default .select2-selection--single {
+      height: 42px !important;
+      border: 2px solid var(--borda-cor) !important;
+      border-radius: var(--borda-radius) !important;
+      padding: 6px 10px !important;
+      font-family: var(--fonte-principal) !important;
+      font-size: var(--fonte-tamanho-sm) !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+      line-height: 26px !important;
+      color: var(--texto-primario) !important;
+      padding-left: 0 !important;
+      padding-right: 24px !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+      height: 40px !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+      color: var(--texto-terciario) !important;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+      border-color: var(--azul-medio) !important;
+      box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15) !important;
+    }
+
+    /* Dropdown aberto: mostra texto completo */
+    .select2-dropdown {
+      border: 2px solid var(--azul-medio) !important;
+      border-radius: var(--borda-radius) !important;
+      box-shadow: var(--sombra-card-hover) !important;
+      min-width: 300px !important;
+    }
+
+    .select2-results__option {
+      white-space: normal !important;
+      word-wrap: break-word !important;
+      padding: 8px 12px !important;
+      font-size: var(--fonte-tamanho-sm) !important;
+    }
+
+    .select2-results__option--highlighted[aria-selected] {
+      background-color: var(--azul-medio) !important;
+    }
+
+    .select2-search--dropdown .select2-search__field {
+      border: 2px solid var(--borda-cor) !important;
+      border-radius: var(--borda-radius) !important;
+      padding: 6px 10px !important;
+      font-family: var(--fonte-principal) !important;
+    }
+
+    .select2-search--dropdown .select2-search__field:focus {
+      border-color: var(--azul-medio) !important;
+    }
+
+    .filtros-bar .select2-container {
+      width: 100% !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Modal Simulados da Questão -->
+  <div class="modal-overlay" id="modal-simulados">
+    <div class="modal">
+      <h3 class="modal-titulo" id="modal-simulados-titulo">Simulados — ENEM-2025-AZ-Q01</h3>
+      <ul class="modal-simulados-lista" id="modal-simulados-lista"></ul>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="document.getElementById('modal-simulados').classList.remove('visivel')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item ativo">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Banco de Questões <span class="total-count">(342 questões)</span></h1>
+          <p class="conteudo-subtitulo">Gerencie todas as questões da plataforma</p>
+        </div>
+        <a href="/conteudista/questao-form.html" class="btn btn-sucesso">+ Nova Questão</a>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-bar">
+        <div class="filtros-row">
+          <div class="filtro-grupo" style="flex:3;">
+            <label class="filtro-label">Buscar</label>
+            <input type="text" class="form-input" id="filtro-busca" placeholder="Pesquisar no enunciado..." oninput="verificarFiltros()">
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Área do Conhecimento</label>
+            <select class="form-select filtro-select" id="filtro-area">
+              <option value="">Todas</option>
+              <option>Matemática e suas Tecnologias</option>
+              <option>Linguagens, Códigos e suas Tecnologias</option>
+              <option>Ciências da Natureza e suas Tecnologias</option>
+              <option>Ciências Humanas e suas Tecnologias</option>
+            </select>
+          </div>
+        </div>
+        <div class="filtros-row">
+          <div class="filtro-grupo">
+            <label class="filtro-label">Habilidade BNCC</label>
+            <select class="form-select filtro-select" id="filtro-habilidade">
+              <option value="">Todas</option>
+              <option>EM13MAT101 — Interpretar situações econômicas</option>
+              <option>EM13MAT301 — Resolver e elaborar problemas</option>
+              <option>EM13MAT501 — Investigar relações entre números</option>
+              <option>EM13LGG101 — Compreender e analisar processos</option>
+              <option>EM13LGG301 — Participar de processos de produção</option>
+              <option>EM13CNT101 — Analisar e representar transformações</option>
+              <option>EM13CNT301 — Construir questões e problemas</option>
+              <option>EM13CHS101 — Identificar e analisar relações</option>
+              <option>EM13CHS301 — Problematizar hábitos e práticas</option>
+            </select>
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Nível</label>
+            <select class="form-select filtro-select" id="filtro-nivel">
+              <option value="">Todos</option>
+              <option>Fácil</option>
+              <option>Médio</option>
+              <option>Difícil</option>
+            </select>
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Origem</label>
+            <select class="form-select filtro-select" id="filtro-origem">
+              <option value="">Todas</option>
+              <option>ENEM-2025-AZ</option>
+              <option>TRF5-2025</option>
+              <option>Manual</option>
+            </select>
+          </div>
+          <div class="filtros-acoes">
+            <button class="btn-limpar" id="btn-limpar" onclick="limparFiltros()">✕ Limpar filtros</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de questões -->
+      <div id="lista-questoes"></div>
+
+      <!-- Paginação -->
+      <div class="paginacao">
+        <button class="paginacao-item">←</button>
+        <button class="paginacao-item ativo">1</button>
+        <button class="paginacao-item">2</button>
+        <button class="paginacao-item">3</button>
+        <button class="paginacao-item">...</button>
+        <button class="paginacao-item">12</button>
+        <button class="paginacao-item">→</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Inicializar Select2 nos filtros
+    $(document).ready(function() {
+      $('.filtro-select').select2({
+        allowClear: true,
+        placeholder: function() { return $(this).find('option:first').text(); },
+        width: '100%'
+      });
+    });
+
+    function verificarFiltros() {
+      const busca = document.getElementById('filtro-busca').value.trim();
+      const selects = document.querySelectorAll('.filtro-select');
+      let temFiltro = busca.length > 0;
+      selects.forEach(s => { if (s.value) temFiltro = true; });
+      document.getElementById('btn-limpar').classList.toggle('visivel', temFiltro);
+    }
+
+    function limparFiltros() {
+      document.getElementById('filtro-busca').value = '';
+      $('.filtro-select').val('').trigger('change');
+      verificarFiltros();
+    }
+
+    // Ouvir mudanças nos Select2
+    $(document).ready(function() {
+      $('.filtro-select').on('change', verificarFiltros);
+    });
+  </script>
+  <script>
+    const lista = document.getElementById('lista-questoes');
+    const questoes = HELEN_DATA.questoes;
+
+    // Questões extras para preencher a lista
+    const questoesExtras = [
+      { codigo: 'ENEM-2025-AZ-Q04', enunciado: 'Considere a função f(x) = 2x² - 3x + 1. O valor mínimo dessa função é atingido quando x é igual a:', area: 'Matemática e suas Tecnologias', habilidade: 'EM13MAT301', nivel: 'Médio', origem: 'ENEM-2025-AZ', criador: 'Prof. Carlos Mendes', simulados: ['ENEM 2025 — Caderno Azul'] },
+      { codigo: 'ENEM-2025-AZ-Q05', enunciado: 'No contexto da inclusão escolar de estudantes com deficiência, a adaptação curricular refere-se a modificações realizadas nos objetivos, conteúdos e avaliações. Qual normativa brasileira estabelece diretrizes para a educação especial?', area: 'Ciências Humanas e suas Tecnologias', habilidade: 'EM13CHS301', nivel: 'Fácil', origem: 'ENEM-2025-AZ', criador: 'Prof. Carlos Mendes', simulados: ['ENEM 2025 — Caderno Azul'] },
+      { codigo: 'TRF5-2025-Q01', enunciado: 'De acordo com a Constituição Federal de 1988, artigo 37, a administração pública direta e indireta deve obedecer aos princípios de legalidade, impessoalidade, moralidade, publicidade e eficiência. Sobre esses princípios, é CORRETO afirmar:', area: 'Ciências Humanas e suas Tecnologias', habilidade: 'EM13CHS101', nivel: 'Difícil', origem: 'TRF5-2025', criador: 'Prof. Carlos Mendes', simulados: [] },
+      { codigo: 'MANUAL-001', enunciado: 'A fotossíntese é um processo fundamental para a manutenção da vida na Terra. Analise as afirmações sobre este processo e identifique a alternativa correta.', area: 'Ciências da Natureza e suas Tecnologias', habilidade: 'EM13CNT101', nivel: 'Médio', origem: null, criador: 'Prof. Ana Costa', simulados: ['Simulado Ciências'] },
+    ];
+
+    // Adicionar campos extras nas questões do HELEN_DATA
+    questoes.forEach((q, i) => {
+      q.criador = 'Prof. Carlos Mendes';
+      q.simulados = i < 2 ? ['ENEM 2025 — Caderno Azul', 'Simulado Matemática Básica'] : [];
+    });
+
+    const todasQuestoes = [...questoes, ...questoesExtras];
+
+    todasQuestoes.forEach(q => {
+      const badgeNivel = q.nivel === 'Fácil' ? 'badge-facil' : q.nivel === 'Médio' ? 'badge-medio' : 'badge-dificil';
+      const areaShort = q.area.split(' ')[0];
+
+      // Info de origem
+      const origemHtml = q.origem
+        ? `<span class="info-detalhe">📄 Importação: <strong>${q.origem}</strong></span>`
+        : `<span class="info-detalhe">✏️ Cadastro manual</span>`;
+
+      // Info de simulados
+      let simuladosHtml;
+      if (!q.simulados || q.simulados.length === 0) {
+        simuladosHtml = `<span class="info-detalhe info-nenhum">📝 Não usada em simulados</span>`;
+      } else {
+        const qtd = q.simulados.length;
+        const label = qtd === 1 ? '1 simulado' : qtd + ' simulados';
+        simuladosHtml = `<span class="info-detalhe info-simulados-link" onclick="abrirModalSimulados('${q.codigo}', ${JSON.stringify(q.simulados).replace(/'/g, "\\'")})">📝 Usada em <strong>${label}</strong></span>`;
+      }
+
+      lista.innerHTML += `
+        <div class="questao-item">
+          <div class="questao-item-header">
+            <div class="questao-item-header-left">
+              <span class="questao-item-codigo">${q.codigo}</span>
+              <span class="badge ${badgeNivel}">${q.nivel}</span>
+            </div>
+            <span class="questao-item-criador">👤 ${q.criador}</span>
+          </div>
+          <p class="questao-item-enunciado">${q.enunciado}</p>
+          <div class="questao-item-info-row">
+            ${origemHtml}
+            ${simuladosHtml}
+          </div>
+          <div class="questao-item-footer">
+            <div class="questao-item-tags">
+              <span class="badge badge-compartilhado">${areaShort}</span>
+              <span class="badge badge-rascunho">${q.habilidade}</span>
+            </div>
+            <div class="questao-item-acoes">
+              <a href="/conteudista/questao-form.html" class="btn btn-secundario btn-sm">Ver/Editar</a>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    // Modal de simulados
+    function abrirModalSimulados(codigo, simulados) {
+      document.getElementById('modal-simulados-titulo').textContent = 'Simulados — ' + codigo;
+      const lista = document.getElementById('modal-simulados-lista');
+      lista.innerHTML = simulados.map(s => `
+        <li>
+          <span class="simulado-icone">📝</span>
+          <span class="simulado-nome">${s}</span>
+        </li>
+      `).join('');
+      document.getElementById('modal-simulados').classList.add('visivel');
+    }
+
+    // Fechar modal com ESC ou clicando fora
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('modal-simulados').classList.remove('visivel');
+    });
+    document.getElementById('modal-simulados').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('visivel');
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Resultados do Simulado</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .graficos-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--espacamento-lg); margin-bottom: var(--espacamento-lg); }
+    .grafico-card { background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg); box-shadow: var(--sombra-card); }
+    .grafico-card h4 { font-size: var(--fonte-tamanho-base); margin-bottom: var(--espacamento-md); }
+    .grafico-card canvas { max-height: 280px; }
+
+    .questao-resultado { display: flex; align-items: center; gap: var(--espacamento-md); padding: var(--espacamento-md); border-bottom: 1px solid var(--borda-cor); }
+    .questao-resultado:last-child { border-bottom: none; }
+    .questao-resultado-codigo { font-family: monospace; font-size: var(--fonte-tamanho-xs); color: var(--azul-medio); min-width: 140px; font-weight: 600; }
+    .acerto-bar { flex: 1; height: 24px; background: var(--cinza-azulado); border-radius: 12px; overflow: hidden; position: relative; }
+    .acerto-bar-fill { height: 100%; border-radius: 12px; transition: width 0.5s ease; }
+    .acerto-bar-fill.alto { background: var(--cor-sucesso); }
+    .acerto-bar-fill.medio { background: var(--cor-aviso); }
+    .acerto-bar-fill.baixo { background: var(--cor-erro); }
+    .acerto-percent { font-size: var(--fonte-tamanho-sm); font-weight: 600; min-width: 45px; text-align: right; }
+    .alt-mais-escolhida { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); min-width: 100px; }
+
+    @media (max-width: 768px) { .graficos-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles"><button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button><button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button></div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+  <div class="ledor-player"><button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button><div class="acessibilidade-separador"></div><button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button></div>
+  <div class="libras-janela"><div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div><div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div></div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span></div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item ativo">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item">✅ Curadoria <span class="notificacao">3</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Resultados — ENEM 2025 Caderno Azul</h1>
+          <p class="conteudo-subtitulo">Publicado em 15/03/2026</p>
+        </div>
+        <div class="flex gap-sm">
+          <a href="/conteudista/simulados.html" class="btn btn-secundario">← Voltar</a>
+          <a href="/conteudista/simulado-form.html" class="btn btn-primario">Editar Simulado</a>
+        </div>
+      </div>
+
+      <!-- Métricas -->
+      <div class="metricas-grid">
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background:#EBF8FF;color:var(--azul-medio);">👥</div>
+          <div class="metrica-valor">89</div>
+          <div class="metrica-label">Alunos que Realizaram</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background:#C6F6D5;color:var(--cor-sucesso);">📊</div>
+          <div class="metrica-valor">72%</div>
+          <div class="metrica-label">Média de Acertos</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background:#FEFCBF;color:#B7791F;">⏱</div>
+          <div class="metrica-valor">38 min</div>
+          <div class="metrica-label">Tempo Médio</div>
+        </div>
+      </div>
+
+      <!-- Gráficos -->
+      <div class="graficos-row">
+        <div class="grafico-card">
+          <h4>Distribuição de Notas</h4>
+          <canvas id="grafico-notas"></canvas>
+        </div>
+        <div class="grafico-card">
+          <h4>Desempenho por Área BNCC</h4>
+          <canvas id="grafico-areas"></canvas>
+        </div>
+      </div>
+
+      <!-- Desempenho por questão -->
+      <div class="card mb-lg">
+        <h4 class="card-titulo" style="margin-bottom:var(--espacamento-md);">Desempenho por Questão</h4>
+        <div id="lista-questao-resultado"></div>
+      </div>
+
+      <!-- Lista de alunos -->
+      <div class="card">
+        <h4 class="card-titulo" style="margin-bottom:var(--espacamento-md);">Alunos</h4>
+        <div class="tabela-wrapper" style="box-shadow:none;">
+          <table class="tabela">
+            <thead>
+              <tr><th>Nome</th><th>Nota</th><th>Acertos</th><th>Tempo</th><th>Data</th></tr>
+            </thead>
+            <tbody id="tabela-alunos"></tbody>
+          </table>
+        </div>
+        <div class="paginacao">
+          <button class="paginacao-item">←</button>
+          <button class="paginacao-item ativo">1</button>
+          <button class="paginacao-item">2</button>
+          <button class="paginacao-item">→</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Gráfico notas
+    new Chart(document.getElementById('grafico-notas'), {
+      type: 'bar',
+      data: {
+        labels: ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'],
+        datasets: [{ label: 'Alunos', data: [3, 8, 22, 38, 18], backgroundColor: ['#FED7D7','#FEFCBF','#BEE3F8','#C6F6D5','#38A169'], borderRadius: 6 }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Alunos' } } } }
+    });
+
+    // Gráfico áreas
+    new Chart(document.getElementById('grafico-areas'), {
+      type: 'bar',
+      data: {
+        labels: ['Matemática', 'Linguagens', 'Ciên. Natureza', 'Ciên. Humanas'],
+        datasets: [{ label: '% Acerto', data: [68, 78, 65, 75], backgroundColor: '#3CC8D0', borderRadius: 6 }]
+      },
+      options: { responsive: true, indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { max: 100, title: { display: true, text: '% Acerto' } } } }
+    });
+
+    // Questões resultado
+    const questoesResultado = [
+      { codigo: 'ENEM-2025-AZ-Q01', acerto: 85, altMais: 'C (correta)' },
+      { codigo: 'ENEM-2025-AZ-Q02', acerto: 72, altMais: 'B (correta)' },
+      { codigo: 'ENEM-2025-AZ-Q03', acerto: 45, altMais: 'D (incorreta)' },
+      { codigo: 'ENEM-2025-AZ-Q04', acerto: 62, altMais: 'A (correta)' },
+      { codigo: 'ENEM-2025-AZ-Q05', acerto: 91, altMais: 'B (correta)' },
+    ];
+
+    const listaQR = document.getElementById('lista-questao-resultado');
+    questoesResultado.forEach(q => {
+      const nivel = q.acerto >= 70 ? 'alto' : q.acerto >= 50 ? 'medio' : 'baixo';
+      listaQR.innerHTML += `
+        <div class="questao-resultado">
+          <span class="questao-resultado-codigo">${q.codigo}</span>
+          <div class="acerto-bar"><div class="acerto-bar-fill ${nivel}" style="width:${q.acerto}%"></div></div>
+          <span class="acerto-percent">${q.acerto}%</span>
+          <span class="alt-mais-escolhida">Mais escolhida: ${q.altMais}</span>
+        </div>
+      `;
+    });
+
+    // Tabela alunos
+    const alunosResult = [
+      { nome: 'Ana Beatriz', nota: '41/45', acertos: '91%', tempo: '35 min', data: '16/03/2026' },
+      { nome: 'Maria Oliveira', nota: '34/45', acertos: '76%', tempo: '42 min', data: '16/03/2026' },
+      { nome: 'Pedro Santos', nota: '31/45', acertos: '69%', tempo: '40 min', data: '17/03/2026' },
+      { nome: 'Juliana Ferreira', nota: '28/45', acertos: '62%', tempo: '44 min', data: '17/03/2026' },
+      { nome: 'Lucas Almeida', nota: '22/45', acertos: '49%', tempo: '45 min', data: '18/03/2026' },
+    ];
+
+    const tabelaAlunos = document.getElementById('tabela-alunos');
+    alunosResult.forEach(a => {
+      tabelaAlunos.innerHTML += `<tr><td><strong>${a.nome}</strong></td><td>${a.nota}</td><td>${a.acertos}</td><td>${a.tempo}</td><td>${a.data}</td></tr>`;
+    });
+  </script>
+</body>
+</html>

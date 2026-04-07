@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Curadoria</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* Cards de importação na listagem */
+    .imp-card {
+      background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card); margin-bottom: var(--espacamento-md); cursor: pointer;
+      transition: var(--transicao); border-left: 4px solid var(--azul-medio);
+      display: flex; align-items: center; justify-content: space-between; gap: var(--espacamento-lg); flex-wrap: wrap;
+    }
+    .imp-card:hover { box-shadow: var(--sombra-card-hover); transform: translateY(-1px); }
+    .imp-card-left { display: flex; align-items: center; gap: var(--espacamento-md); flex: 1; }
+    .imp-card-icone { width: 44px; height: 44px; border-radius: var(--borda-radius); background: #EBF8FF; color: var(--azul-medio); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .imp-card-titulo { font-weight: 700; color: var(--azul-profundo); }
+    .imp-card-meta { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); display: flex; gap: var(--espacamento-md); margin-top: 2px; flex-wrap: wrap; }
+    .imp-card-right { display: flex; align-items: center; gap: var(--espacamento-lg); flex-shrink: 0; }
+    .imp-progresso { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .imp-progresso-label { font-size: var(--fonte-tamanho-xs); font-weight: 600; color: var(--texto-terciario); }
+    .progresso-bar { width: 100px; height: 6px; background: var(--cinza-azulado); border-radius: 3px; overflow: hidden; }
+    .progresso-bar-fill { height: 100%; border-radius: 3px; }
+    .progresso-bar-fill.parcial { background: var(--cor-aviso); }
+    .progresso-bar-fill.completo { background: var(--cor-sucesso); }
+    .progresso-nums { display: flex; gap: var(--espacamento-sm); font-size: var(--fonte-tamanho-xs); }
+
+    /* Detalhe da importação */
+    .detalhe-header-card {
+      background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card); margin-bottom: var(--espacamento-lg);
+    }
+    .detalhe-header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--espacamento-md); margin-bottom: var(--espacamento-md); }
+    .detalhe-stats { display: flex; gap: var(--espacamento-xl); }
+    .detalhe-stat { text-align: center; }
+    .detalhe-stat .valor { font-size: var(--fonte-tamanho-xl); font-weight: 700; }
+    .detalhe-stat .label { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+
+    .secao-titulo { font-size: var(--fonte-tamanho-lg); font-weight: 700; color: var(--azul-profundo); margin-bottom: var(--espacamento-md); display: flex; align-items: center; gap: var(--espacamento-sm); }
+
+    /* Questão card para auditar */
+    .q-audit-card {
+      background: var(--branco); border-radius: var(--borda-radius-lg); padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card); margin-bottom: var(--espacamento-md); border-left: 4px solid var(--cor-aviso);
+      transition: var(--transicao);
+    }
+    .q-audit-card.aprovada { border-left-color: var(--cor-sucesso); background: #FAFFF9; }
+    .q-audit-card.rejeitada { border-left-color: var(--cor-erro); background: #FFFAFA; }
+    .q-audit-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--espacamento-sm); }
+    .q-audit-header-left { display: flex; align-items: center; gap: var(--espacamento-sm); }
+    .q-audit-num { width: 28px; height: 28px; background: var(--cinza-azulado); border-radius: var(--borda-radius); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: var(--fonte-tamanho-xs); color: var(--azul-profundo); }
+    .q-audit-codigo { font-family: monospace; font-size: var(--fonte-tamanho-xs); color: var(--azul-medio); font-weight: 600; }
+    .q-audit-enunciado { font-size: var(--fonte-tamanho-sm); color: var(--texto-primario); line-height: 1.6; margin-bottom: var(--espacamento-sm); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .q-audit-tags { display: flex; gap: var(--espacamento-xs); flex-wrap: wrap; margin-bottom: var(--espacamento-md); }
+    .q-audit-acoes { display: flex; align-items: center; justify-content: space-between; gap: var(--espacamento-sm); }
+    .q-audit-resultado { padding: var(--espacamento-sm) var(--espacamento-md); border-radius: var(--borda-radius); font-size: var(--fonte-tamanho-xs); font-weight: 600; }
+    .motivo-inline { display: none; margin-top: var(--espacamento-sm); }
+    .motivo-inline.visivel { display: flex; gap: var(--espacamento-sm); align-items: flex-start; }
+    .motivo-inline .form-input { flex: 1; }
+
+    /* Questões do restante (outros curadores) */
+    .q-rest-row {
+      display: flex; align-items: center; gap: var(--espacamento-sm); padding: 10px var(--espacamento-md);
+      border-bottom: 1px solid var(--borda-cor); font-size: var(--fonte-tamanho-sm); cursor: pointer; transition: var(--transicao);
+      background: var(--branco);
+    }
+    .q-rest-row:hover { background: #F7FAFC; }
+    .q-rest-row:first-child { border-radius: var(--borda-radius-lg) var(--borda-radius-lg) 0 0; }
+    .q-rest-row:last-child { border-bottom: none; border-radius: 0 0 var(--borda-radius-lg) var(--borda-radius-lg); }
+    .q-rest-num { min-width: 24px; text-align: center; font-weight: 700; color: var(--azul-profundo); font-size: var(--fonte-tamanho-xs); }
+    .q-rest-codigo { font-family: monospace; font-size: var(--fonte-tamanho-xs); color: var(--azul-medio); min-width: 140px; }
+    .q-rest-fill { flex: 1; }
+    .q-rest-curador { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .q-rest-status { font-weight: 600; font-size: var(--fonte-tamanho-xs); min-width: 85px; text-align: right; }
+
+    .area-header { padding: 10px var(--espacamento-md); background: #F0F4F8; font-weight: 600; font-size: var(--fonte-tamanho-sm); color: var(--azul-profundo); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--borda-cor); }
+    .area-header-left { display: flex; align-items: center; gap: var(--espacamento-sm); }
+    .area-bar { width: 4px; height: 18px; border-radius: 2px; }
+
+    /* Modal questão detalhe */
+    .modal-qd { max-width: 650px; max-height: 85vh; overflow-y: auto; }
+    .mqd-enunciado { font-size: var(--fonte-tamanho-base); line-height: 1.7; margin-bottom: var(--espacamento-md); }
+    .mqd-alt { padding: 10px var(--espacamento-md); border-bottom: 1px solid var(--borda-cor); font-size: var(--fonte-tamanho-sm); display: flex; gap: var(--espacamento-sm); }
+    .mqd-alt:last-child { border-bottom: none; }
+    .mqd-alt.correta { background: #F0FFF4; color: var(--cor-sucesso); font-weight: 600; }
+    .mqd-alt-letra { font-weight: 700; min-width: 24px; color: var(--azul-profundo); }
+    .mqd-info { display: flex; gap: var(--espacamento-md); flex-wrap: wrap; margin-top: var(--espacamento-md); padding-top: var(--espacamento-md); border-top: 1px solid var(--borda-cor); }
+    .mqd-info-item { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .mqd-info-item strong { color: var(--texto-primario); }
+
+    /* Filtros */
+    .filtros-bar { flex-direction: column !important; gap: var(--espacamento-md) !important; }
+    .filtros-row { display: flex; gap: var(--espacamento-md); width: 100%; align-items: flex-end; }
+    .filtro-grupo { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+    .filtro-label { font-size: var(--fonte-tamanho-xs); font-weight: 600; color: var(--texto-secundario); text-transform: uppercase; letter-spacing: 0.5px; }
+    .filtros-acoes { display: flex; align-items: flex-end; flex-shrink: 0; }
+    .btn-limpar { background: none; border: none; color: var(--cor-erro); font-size: var(--fonte-tamanho-sm); cursor: pointer; padding: 10px 14px; font-family: var(--fonte-principal); font-weight: 500; white-space: nowrap; border-radius: var(--borda-radius); display: none; }
+    .btn-limpar.visivel { display: inline-flex; }
+    .btn-limpar:hover { background: #FFF5F5; }
+
+    .aluno-link { color: var(--azul-medio); cursor: pointer; font-weight: 600; }
+    .aluno-link:hover { text-decoration: underline; }
+
+    .lista-rest-wrapper { box-shadow: var(--sombra-card); border-radius: var(--borda-radius-lg); overflow: hidden; }
+  </style>
+</head>
+<body>
+
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles"><button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button><button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button></div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+  <div class="ledor-player"><button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button><div class="acessibilidade-separador"></div><button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button></div>
+  <div class="libras-janela"><div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div><div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div></div>
+
+  <!-- Modal: Detalhe questão -->
+  <div class="modal-overlay" id="modal-questao">
+    <div class="modal modal-qd">
+      <h3 class="modal-titulo" id="mqd-titulo">Questão</h3>
+      <div id="mqd-corpo"></div>
+      <div class="modal-acoes"><button class="btn btn-secundario" onclick="document.getElementById('modal-questao').classList.remove('visivel')">Fechar</button></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo"><img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span></div>
+      <nav class="sidebar-nav">
+        <a href="/conteudista/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/conteudista/importar-pdf.html" class="sidebar-item">📄 Importações</a>
+        <a href="/conteudista/banco-questoes.html" class="sidebar-item">📚 Banco de Questões</a>
+        <a href="/conteudista/simulados.html" class="sidebar-item">📝 Simulados</a>
+        <a href="/conteudista/meus-alunos.html" class="sidebar-item">👥 Meus Alunos</a>
+        <a href="/conteudista/curadoria.html" class="sidebar-item ativo">✅ Curadoria <span class="notificacao">9</span></a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <!-- VISTA: Listagem -->
+      <div id="vista-lista">
+        <div class="conteudo-header">
+          <div><h1 class="conteudo-titulo">Curadoria de Questões</h1><p class="conteudo-subtitulo">Aprove questões de importações dos alunos</p></div>
+        </div>
+
+        <!-- Stats gerais -->
+        <div class="card" style="margin-bottom:var(--espacamento-lg);display:flex;gap:var(--espacamento-xl);flex-wrap:wrap;padding:var(--espacamento-lg);">
+          <div style="text-align:center;"><div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--azul-medio);" id="s-para-voce">9</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Para você avaliar</div></div>
+          <div style="text-align:center;"><div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--cor-sucesso);" id="s-aprovadas">1</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Você aprovou</div></div>
+          <div style="text-align:center;"><div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--cor-erro);" id="s-rejeitadas">0</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Você rejeitou</div></div>
+          <div style="text-align:center;"><div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--cor-aviso);" id="s-pendentes">8</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Pendentes</div></div>
+          <div style="width:1px;background:var(--borda-cor);"></div>
+          <div style="text-align:center;"><div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--texto-terciario);">75</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Total plataforma</div></div>
+          <div style="text-align:center;"><div style="font-size:var(--fonte-tamanho-2xl);font-weight:700;color:var(--texto-terciario);">62</div><div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Revisadas (geral)</div></div>
+        </div>
+
+        <div id="lista-importacoes"></div>
+      </div>
+
+      <!-- VISTA: Detalhe de importação -->
+      <div id="vista-detalhe" style="display:none;">
+        <div class="conteudo-header">
+          <div>
+            <a href="#" onclick="return voltarLista()" style="font-size:var(--fonte-tamanho-sm);color:var(--azul-medio);">← Voltar para curadoria</a>
+            <h1 class="conteudo-titulo" id="det-titulo"></h1>
+          </div>
+        </div>
+
+        <div class="detalhe-header-card">
+          <div class="detalhe-header-top">
+            <div>
+              <div style="font-size:var(--fonte-tamanho-sm);color:var(--texto-terciario);margin-bottom:4px;">Importado por <span class="aluno-link" id="det-aluno"></span> em <span id="det-data"></span></div>
+              <div style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">Código: <strong id="det-codigo"></strong></div>
+            </div>
+            <div class="detalhe-stats">
+              <div class="detalhe-stat"><div class="valor" style="color:var(--azul-profundo);" id="det-total">30</div><div class="label">Total</div></div>
+              <div class="detalhe-stat"><div class="valor" style="color:var(--azul-medio);" id="det-suas">4</div><div class="label">Suas</div></div>
+              <div class="detalhe-stat"><div class="valor" style="color:var(--cor-sucesso);" id="det-aprov-geral">23</div><div class="label">Aprovadas</div></div>
+              <div class="detalhe-stat"><div class="valor" style="color:var(--cor-erro);" id="det-rej-geral">1</div><div class="label">Rejeitadas</div></div>
+              <div class="detalhe-stat"><div class="valor" style="color:var(--cor-aviso);" id="det-pend-geral">6</div><div class="label">Pendentes</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suas questões para auditar -->
+        <h3 class="secao-titulo"><span style="font-size:1.2rem;">📋</span> Suas questões para avaliar (<span id="det-suas-count">0</span>)</h3>
+        <div id="det-minhas-questoes"></div>
+
+        <!-- Todas as outras questões -->
+        <h3 class="secao-titulo" style="margin-top:var(--espacamento-xl);"><span style="font-size:1.2rem;">📄</span> Demais questões desta importação (<span id="det-outras-count">0</span>)</h3>
+        <div class="lista-rest-wrapper" id="det-outras-questoes"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const importacoes = [
+      {
+        id: 1, nome: 'ENEM 2024 — Caderno Rosa', codigo: 'ALN-ENEM-2024', aluno: 'Maria Oliveira', dataEnvio: '2026-04-04', totalQuestoes: 30,
+        minhasQuestoes: [
+          { id: 1, num: 3, codigo: 'ALN-ENEM-2024-Q03', enunciado: 'Uma pesquisa do IBGE mostrou que a taxa de escolarização de PcDs entre 6 e 14 anos é de 95,8%. Entre 18 e 24 anos, cai para 32,2%. Qual a diferença percentual?', alternativas: { A: '63,6 p.p.', B: '55,2 p.p.', C: '48,8 p.p.', D: '71,0 p.p.', E: '60,0 p.p.' }, correta: 'A', area: 'Matemática', habilidade: 'EM13MAT101', nivel: 'Fácil', status: 'pendente' },
+          { id: 2, num: 7, codigo: 'ALN-ENEM-2024-Q07', enunciado: 'Um cilindro tem raio 5cm e altura 10cm. Calcule o volume aproximado.', alternativas: { A: '785 cm³', B: '628 cm³', C: '314 cm³', D: '1570 cm³', E: '500 cm³' }, correta: 'A', area: 'Matemática', habilidade: 'EM13MAT301', nivel: 'Médio', status: 'pendente' },
+          { id: 3, num: 12, codigo: 'ALN-ENEM-2024-Q12', enunciado: 'A clorofila é o pigmento responsável pela absorção da luz solar durante a fotossíntese. Sobre esse processo:', alternativas: { A: 'Ocorre apenas em plantas', B: 'A fase clara ocorre no estroma', C: 'O oxigênio liberado vem da água', D: 'Não depende de luz solar', E: 'Produz apenas glicose' }, correta: 'C', area: 'Ciências da Natureza', habilidade: 'EM13CNT101', nivel: 'Médio', status: 'aprovada', aprovadoPor: 'voce' },
+          { id: 4, num: 18, codigo: 'ALN-ENEM-2024-Q18', enunciado: 'Uma reação exotérmica é aquela que libera energia. Qual exemplifica corretamente?', alternativas: { A: 'Fotossíntese', B: 'Combustão do etanol', C: 'Decomposição da água', D: 'Fusão do gelo', E: 'Evaporação' }, correta: 'B', area: 'Ciências da Natureza', habilidade: 'EM13CNT301', nivel: 'Fácil', status: 'pendente' },
+        ],
+        questoesOutros: [
+          { num: 1, codigo: 'ALN-ENEM-2024-Q01', area: 'Linguagens', habilidade: 'EM13LGG101', status: 'aprovada', curador: 'Profa. Ana Costa', enunciado: 'Leia o poema e identifique o recurso estilístico predominante.', alternativas: { A: 'Aliteração', B: 'Metáfora', C: 'Ironia', D: 'Antítese', E: 'Hipérbole' }, correta: 'C' },
+          { num: 2, codigo: 'ALN-ENEM-2024-Q02', area: 'Linguagens', habilidade: 'EM13LGG301', status: 'aprovada', curador: 'Profa. Ana Costa', enunciado: 'A repetição do verso configura qual figura?', alternativas: { A: 'Anáfora', B: 'Pleonasmo', C: 'Gradação', D: 'Elipse', E: 'Catacrese' }, correta: 'A' },
+          { num: 4, codigo: 'ALN-ENEM-2024-Q04', area: 'Ciências Humanas', habilidade: 'EM13CHS101', status: 'aprovada', curador: 'Prof. João Lima', enunciado: 'O Tratado de Versalhes impôs sanções à Alemanha. Sobre suas consequências:', alternativas: { A: 'Estabilizou a Europa', B: 'Contribuiu para o nazismo', C: 'Fortaleceu a Liga', D: 'Eliminou o militarismo', E: 'Promoveu democracia' }, correta: 'B' },
+          { num: 5, codigo: 'ALN-ENEM-2024-Q05', area: 'Ciências Humanas', habilidade: 'EM13CHS301', status: 'rejeitada', curador: 'Prof. João Lima', motivo: 'Enunciado ambíguo', enunciado: 'Questão sobre Revolução Francesa...', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'C' },
+          { num: 6, codigo: 'ALN-ENEM-2024-Q06', area: 'Linguagens', habilidade: 'EM13LGG101', status: 'pendente', curador: null, enunciado: 'Identifique a função da linguagem predominante no texto.', alternativas: { A: 'Referencial', B: 'Emotiva', C: 'Conativa', D: 'Fática', E: 'Metalinguística' }, correta: 'A' },
+          { num: 8, codigo: 'ALN-ENEM-2024-Q08', area: 'Ciências Humanas', habilidade: 'EM13CHS101', status: 'aprovada', curador: 'Prof. João Lima', enunciado: 'Sobre o período colonial brasileiro:', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'B' },
+          { num: 9, codigo: 'ALN-ENEM-2024-Q09', area: 'Linguagens', habilidade: 'EM13LGG301', status: 'pendente', curador: null, enunciado: 'Analise a crônica e identifique o tema central.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'C' },
+          { num: 10, codigo: 'ALN-ENEM-2024-Q10', area: 'Ciências Humanas', habilidade: 'EM13CHS301', status: 'aprovada', curador: 'Prof. João Lima', enunciado: 'Sobre a globalização:', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'D' },
+        ]
+      },
+      {
+        id: 2, nome: 'Vestibular UFPE 2025', codigo: 'ALN-UFPE-2025', aluno: 'Pedro Santos', dataEnvio: '2026-04-05', totalQuestoes: 20,
+        minhasQuestoes: [
+          { id: 5, num: 2, codigo: 'ALN-UFPE-2025-Q02', enunciado: 'Resolva: 3x² - 12x + 9 = 0.', alternativas: { A: 'x=1 e x=3', B: 'x=2 e x=3', C: 'x=1 e x=2', D: 'x=3 e x=4', E: 'x=0 e x=3' }, correta: 'A', area: 'Matemática', habilidade: 'EM13MAT301', nivel: 'Médio', status: 'pendente' },
+          { id: 6, num: 8, codigo: 'ALN-UFPE-2025-Q08', enunciado: 'O pH de HCl 0,01 mol/L é:', alternativas: { A: 'pH=1', B: 'pH=2', C: 'pH=3', D: 'pH=7', E: 'pH=12' }, correta: 'B', area: 'Ciências da Natureza', habilidade: 'EM13CNT301', nivel: 'Médio', status: 'pendente' },
+          { id: 7, num: 14, codigo: 'ALN-UFPE-2025-Q14', enunciado: 'Área de triângulo base 8cm altura 5cm:', alternativas: { A: '20cm²', B: '40cm²', C: '13cm²', D: '25cm²', E: '30cm²' }, correta: 'A', area: 'Matemática', habilidade: 'EM13MAT101', nivel: 'Fácil', status: 'pendente' },
+        ],
+        questoesOutros: [
+          { num: 1, codigo: 'ALN-UFPE-2025-Q01', area: 'Linguagens', habilidade: 'EM13LGG101', status: 'aprovada', curador: 'Profa. Ana Costa', enunciado: 'Questão de interpretação.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'B' },
+          { num: 3, codigo: 'ALN-UFPE-2025-Q03', area: 'Ciências Humanas', habilidade: 'EM13CHS101', status: 'pendente', curador: null, enunciado: 'Sobre direitos humanos.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'C' },
+          { num: 4, codigo: 'ALN-UFPE-2025-Q04', area: 'Linguagens', habilidade: 'EM13LGG301', status: 'aprovada', curador: 'Profa. Ana Costa', enunciado: 'Questão sobre gêneros textuais.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'A' },
+          { num: 5, codigo: 'ALN-UFPE-2025-Q05', area: 'Ciências Humanas', habilidade: 'EM13CHS301', status: 'aprovada', curador: 'Prof. João Lima', enunciado: 'Sobre a urbanização brasileira.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'D' },
+        ]
+      },
+      {
+        id: 3, nome: 'Concurso TRT 2024', codigo: 'ALN-TRT-2024', aluno: 'Ana Beatriz', dataEnvio: '2026-04-06', totalQuestoes: 25,
+        minhasQuestoes: [
+          { id: 8, num: 5, codigo: 'ALN-TRT-2024-Q05', enunciado: 'Determine x na proporção: 4/x = 8/12', alternativas: { A: 'x=4', B: 'x=6', C: 'x=8', D: 'x=3', E: 'x=10' }, correta: 'B', area: 'Matemática', habilidade: 'EM13MAT101', nivel: 'Fácil', status: 'pendente' },
+          { id: 9, num: 11, codigo: 'ALN-TRT-2024-Q11', enunciado: 'A Lei de Lavoisier se refere a:', alternativas: { A: 'Conservação de energia', B: 'Conservação de massa', C: 'Conservação de movimento', D: 'Equilíbrio térmico', E: 'Entropia' }, correta: 'B', area: 'Ciências da Natureza', habilidade: 'EM13CNT101', nivel: 'Fácil', status: 'pendente' },
+        ],
+        questoesOutros: [
+          { num: 1, codigo: 'ALN-TRT-2024-Q01', area: 'Linguagens', habilidade: 'EM13LGG101', status: 'pendente', curador: null, enunciado: 'Questão sobre norma culta.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'A' },
+          { num: 2, codigo: 'ALN-TRT-2024-Q02', area: 'Ciências Humanas', habilidade: 'EM13CHS101', status: 'pendente', curador: null, enunciado: 'Questão sobre cidadania.', alternativas: { A: 'a', B: 'b', C: 'c', D: 'd', E: 'e' }, correta: 'B' },
+        ]
+      }
+    ];
+
+    // === LISTAGEM ===
+    function renderLista() {
+      const lista = document.getElementById('lista-importacoes');
+      lista.innerHTML = '';
+
+      let totalParaVoce = 0, totalAprov = 0, totalRej = 0, totalPend = 0;
+
+      importacoes.forEach(imp => {
+        const minhasPend = imp.minhasQuestoes.filter(q => q.status === 'pendente').length;
+        const minhasAprov = imp.minhasQuestoes.filter(q => q.status === 'aprovada').length;
+        const minhasRej = imp.minhasQuestoes.filter(q => q.status === 'rejeitada').length;
+        const minhasRevisadas = minhasAprov + minhasRej;
+        const totalQ = imp.minhasQuestoes.length;
+
+        totalParaVoce += totalQ;
+        totalAprov += minhasAprov;
+        totalRej += minhasRej;
+        totalPend += minhasPend;
+
+        const todasQ = [...imp.minhasQuestoes, ...imp.questoesOutros];
+        const geralAprov = todasQ.filter(q => q.status === 'aprovada').length;
+        const geralRej = todasQ.filter(q => q.status === 'rejeitada').length;
+        const geralPend = imp.totalQuestoes - geralAprov - geralRej;
+        const pctGeral = Math.round((geralAprov + geralRej) / imp.totalQuestoes * 100);
+        const pctVoce = totalQ > 0 ? Math.round(minhasRevisadas / totalQ * 100) : 0;
+
+        lista.innerHTML += `
+          <div class="imp-card" onclick="abrirDetalhe(${imp.id})">
+            <div class="imp-card-left">
+              <div class="imp-card-icone">📄</div>
+              <div>
+                <div class="imp-card-titulo">${imp.nome}</div>
+                <div class="imp-card-meta">
+                  <span>👤 ${imp.aluno}</span>
+                  <span>📅 ${imp.dataEnvio.split('-').reverse().join('/')}</span>
+                  <span>📄 ${imp.totalQuestoes} questões</span>
+                </div>
+              </div>
+            </div>
+            <div class="imp-card-right">
+              <div class="imp-progresso">
+                <div class="imp-progresso-label">GERAL ${geralAprov + geralRej}/${imp.totalQuestoes}</div>
+                <div class="progresso-bar"><div class="progresso-bar-fill ${pctGeral === 100 ? 'completo' : 'parcial'}" style="width:${pctGeral}%"></div></div>
+              </div>
+              <div class="imp-progresso">
+                <div class="imp-progresso-label" style="color:var(--azul-medio);">VOCÊ ${minhasRevisadas}/${totalQ}</div>
+                <div class="progresso-bar"><div class="progresso-bar-fill ${pctVoce === 100 ? 'completo' : 'parcial'}" style="width:${pctVoce}%"></div></div>
+              </div>
+              <div class="progresso-nums">
+                <span style="color:var(--cor-aviso);font-weight:600;">${minhasPend} pendente${minhasPend !== 1 ? 's' : ''}</span>
+              </div>
+              <span style="color:var(--azul-medio);font-size:1.2rem;">→</span>
+            </div>
+          </div>`;
+      });
+
+      document.getElementById('s-para-voce').textContent = totalParaVoce;
+      document.getElementById('s-aprovadas').textContent = totalAprov;
+      document.getElementById('s-rejeitadas').textContent = totalRej;
+      document.getElementById('s-pendentes').textContent = totalPend;
+    }
+
+    // === DETALHE ===
+    function abrirDetalhe(impId) {
+      const imp = importacoes.find(i => i.id === impId);
+      if (!imp) return;
+      window._impAtual = imp;
+
+      document.getElementById('vista-lista').style.display = 'none';
+      document.getElementById('vista-detalhe').style.display = 'block';
+
+      document.getElementById('det-titulo').textContent = imp.nome;
+      document.getElementById('det-aluno').textContent = imp.aluno;
+      document.getElementById('det-data').textContent = imp.dataEnvio.split('-').reverse().join('/');
+      document.getElementById('det-codigo').textContent = imp.codigo;
+
+      renderDetalhe(imp);
+    }
+
+    function renderDetalhe(imp) {
+      const todasQ = [...imp.minhasQuestoes, ...imp.questoesOutros];
+      const gAprov = todasQ.filter(q => q.status === 'aprovada').length;
+      const gRej = todasQ.filter(q => q.status === 'rejeitada').length;
+
+      document.getElementById('det-total').textContent = imp.totalQuestoes;
+      document.getElementById('det-suas').textContent = imp.minhasQuestoes.length;
+      document.getElementById('det-aprov-geral').textContent = gAprov;
+      document.getElementById('det-rej-geral').textContent = gRej;
+      document.getElementById('det-pend-geral').textContent = imp.totalQuestoes - gAprov - gRej;
+
+      // Minhas questões
+      const minhasDiv = document.getElementById('det-minhas-questoes');
+      const minhasPend = imp.minhasQuestoes.filter(q => q.status === 'pendente').length;
+      document.getElementById('det-suas-count').textContent = `${imp.minhasQuestoes.length} — ${minhasPend} pendente${minhasPend !== 1 ? 's' : ''}`;
+      minhasDiv.innerHTML = '';
+
+      imp.minhasQuestoes.forEach((q, i) => {
+        const badgeNivel = q.nivel === 'Fácil' ? 'badge-facil' : q.nivel === 'Médio' ? 'badge-medio' : 'badge-dificil';
+        let statusHtml = '', cardClass = '', resultHtml = '';
+
+        if (q.status === 'aprovada') {
+          cardClass = 'aprovada';
+          statusHtml = '<span class="badge badge-publicado">✓ Aprovada</span>';
+          resultHtml = `<div class="q-audit-resultado" style="background:#F0FFF4;color:var(--cor-sucesso);">✅ Aprovada por Você</div>`;
+        } else if (q.status === 'rejeitada') {
+          cardClass = 'rejeitada';
+          statusHtml = '<span class="badge badge-bloqueado">✕ Rejeitada</span>';
+          resultHtml = `<div class="q-audit-resultado" style="background:#FFF5F5;color:var(--cor-erro);">❌ Rejeitada por Você — "${q.motivoRejeicao || ''}"</div>`;
+        } else {
+          statusHtml = '<span class="badge badge-pendente">Pendente</span>';
+        }
+
+        const acoesHtml = q.status === 'pendente' ? `
+          <div class="q-audit-acoes">
+            <button class="btn btn-secundario btn-sm" onclick="verQuestao(${imp.id}, ${q.id}, 'minha')">Ver questão</button>
+            <div style="display:flex;gap:var(--espacamento-xs);">
+              <button class="btn btn-perigo btn-sm" onclick="iniciarRejeicao(${q.id})">Rejeitar</button>
+              <button class="btn btn-sucesso btn-sm" onclick="aprovar(${imp.id}, ${q.id})">Aprovar</button>
+            </div>
+          </div>
+          <div class="motivo-inline" id="motivo-${q.id}">
+            <input type="text" class="form-input" placeholder="Motivo da rejeição..." id="motivo-input-${q.id}">
+            <button class="btn btn-perigo btn-sm" onclick="rejeitar(${imp.id}, ${q.id})">Confirmar</button>
+            <button class="btn btn-secundario btn-sm" onclick="document.getElementById('motivo-${q.id}').classList.remove('visivel')">Cancelar</button>
+          </div>` : `
+          <div class="q-audit-acoes">
+            <button class="btn btn-secundario btn-sm" onclick="verQuestao(${imp.id}, ${q.id}, 'minha')">Ver questão</button>
+            ${resultHtml}
+          </div>`;
+
+        minhasDiv.innerHTML += `
+          <div class="q-audit-card ${cardClass}">
+            <div class="q-audit-header">
+              <div class="q-audit-header-left"><span class="q-audit-num">${q.num}</span><span class="q-audit-codigo">${q.codigo}</span></div>
+              ${statusHtml}
+            </div>
+            <p class="q-audit-enunciado">${q.enunciado}</p>
+            <div class="q-audit-tags">
+              <span class="badge badge-compartilhado">${q.area}</span>
+              <span class="badge badge-rascunho">${q.habilidade}</span>
+              <span class="badge ${badgeNivel}">${q.nivel}</span>
+            </div>
+            ${acoesHtml}
+          </div>`;
+      });
+
+      // Outras questões agrupadas por área
+      const outrasDiv = document.getElementById('det-outras-questoes');
+      document.getElementById('det-outras-count').textContent = imp.questoesOutros.length;
+
+      const porArea = {};
+      imp.questoesOutros.forEach(q => { if (!porArea[q.area]) porArea[q.area] = []; porArea[q.area].push(q); });
+      const areaCores = { 'Matemática': '#2B6CB0', 'Linguagens': '#3CC8D0', 'Ciências da Natureza': '#38A169', 'Ciências Humanas': '#ECC94B' };
+
+      let outrasHtml = '';
+      Object.entries(porArea).forEach(([area, questoes]) => {
+        const aA = questoes.filter(q => q.status === 'aprovada').length;
+        const aR = questoes.filter(q => q.status === 'rejeitada').length;
+        const aP = questoes.filter(q => q.status === 'pendente').length;
+
+        outrasHtml += `<div class="area-header"><div class="area-header-left"><div class="area-bar" style="background:${areaCores[area] || '#999'};"></div><strong>${area}</strong><span style="font-size:var(--fonte-tamanho-xs);color:var(--texto-terciario);">(${questoes.length})</span></div><div style="display:flex;gap:var(--espacamento-sm);font-size:var(--fonte-tamanho-xs);"><span style="color:var(--cor-sucesso);">✓${aA}</span><span style="color:var(--cor-erro);">✕${aR}</span><span style="color:var(--cor-aviso);">⏳${aP}</span></div></div>`;
+
+        questoes.forEach(q => {
+          const sIcon = q.status === 'aprovada' ? '✅' : q.status === 'rejeitada' ? '❌' : '⏳';
+          const sText = q.status === 'aprovada' ? 'Aprovada' : q.status === 'rejeitada' ? 'Rejeitada' : 'Pendente';
+          const sColor = q.status === 'aprovada' ? 'var(--cor-sucesso)' : q.status === 'rejeitada' ? 'var(--cor-erro)' : 'var(--cor-aviso)';
+          const curadorHtml = q.curador ? `<span class="q-rest-curador">${q.curador}</span>` : '<span class="q-rest-curador" style="font-style:italic;">Aguardando curador</span>';
+          const motivoHtml = q.motivo ? `<div style="font-size:var(--fonte-tamanho-xs);color:var(--cor-erro);font-style:italic;padding:0 var(--espacamento-md) 6px 36px;">"${q.motivo}"</div>` : '';
+
+          outrasHtml += `<div class="q-rest-row" onclick="verQuestaoOutra(${imp.id}, '${q.codigo}')">
+            <span class="q-rest-num">${q.num}</span>
+            <span class="q-rest-codigo">${q.codigo}</span>
+            <span class="badge badge-rascunho" style="font-size:0.6rem;">${q.habilidade}</span>
+            <span class="q-rest-fill"></span>
+            ${curadorHtml}
+            <span class="q-rest-status" style="color:${sColor};">${sIcon} ${sText}</span>
+          </div>${motivoHtml}`;
+        });
+      });
+
+      outrasDiv.innerHTML = outrasHtml || '<p style="padding:var(--espacamento-lg);color:var(--texto-terciario);text-align:center;">Nenhuma outra questão</p>';
+    }
+
+    function voltarLista() {
+      document.getElementById('vista-detalhe').style.display = 'none';
+      document.getElementById('vista-lista').style.display = 'block';
+      renderLista();
+      return false;
+    }
+
+    // === AÇÕES ===
+    function aprovar(impId, qId) {
+      const imp = importacoes.find(i => i.id === impId);
+      const q = imp.minhasQuestoes.find(q => q.id === qId);
+      q.status = 'aprovada'; q.aprovadoPor = 'voce';
+      renderDetalhe(imp);
+    }
+
+    function iniciarRejeicao(qId) {
+      document.getElementById('motivo-' + qId).classList.add('visivel');
+      document.getElementById('motivo-input-' + qId).focus();
+    }
+
+    function rejeitar(impId, qId) {
+      const motivo = document.getElementById('motivo-input-' + qId).value.trim();
+      if (!motivo) { alert('Informe o motivo.'); return; }
+      const imp = importacoes.find(i => i.id === impId);
+      const q = imp.minhasQuestoes.find(q => q.id === qId);
+      q.status = 'rejeitada'; q.rejeitadoPor = 'voce'; q.motivoRejeicao = motivo;
+      renderDetalhe(imp);
+    }
+
+    // === VER QUESTÃO (modal) ===
+    function verQuestao(impId, qId, tipo) {
+      const imp = importacoes.find(i => i.id === impId);
+      const q = imp.minhasQuestoes.find(q => q.id === qId);
+      if (!q) return;
+      mostrarModalQuestao(q, true);
+    }
+
+    function verQuestaoOutra(impId, codigo) {
+      const imp = importacoes.find(i => i.id === impId);
+      const q = imp.questoesOutros.find(q => q.codigo === codigo);
+      if (!q) return;
+      mostrarModalQuestao(q, false);
+    }
+
+    function mostrarModalQuestao(q, isMinha) {
+      document.getElementById('mqd-titulo').textContent = 'Questão ' + q.codigo;
+
+      const altsHtml = q.alternativas ? Object.entries(q.alternativas).map(([l, t]) => {
+        const cor = l === q.correta;
+        return `<div class="mqd-alt ${cor ? 'correta' : ''}"><span class="mqd-alt-letra">${l})</span> ${t} ${cor ? '✓ Correta' : ''}</div>`;
+      }).join('') : '<p class="text-muted">Alternativas não disponíveis</p>';
+
+      const sText = q.status === 'aprovada' ? '✅ Aprovada' : q.status === 'rejeitada' ? '❌ Rejeitada' : '⏳ Pendente';
+      let curadorHtml = '';
+      if (q.status === 'aprovada' || q.status === 'rejeitada') {
+        const quem = (q.aprovadoPor === 'voce' || q.rejeitadoPor === 'voce') ? 'Você' : (q.curador || '—');
+        curadorHtml = `<div class="mqd-info-item">Curador: <strong>${quem}</strong></div>`;
+      }
+      const motivoHtml = (q.motivo || q.motivoRejeicao) ? `<div class="mqd-info-item" style="color:var(--cor-erro);">Motivo: <strong>"${q.motivo || q.motivoRejeicao}"</strong></div>` : '';
+
+      document.getElementById('mqd-corpo').innerHTML = `
+        <p class="mqd-enunciado">${q.enunciado || 'Enunciado não disponível'}</p>
+        <div style="border:1px solid var(--borda-cor);border-radius:var(--borda-radius);overflow:hidden;margin-bottom:var(--espacamento-md);">${altsHtml}</div>
+        <div class="mqd-info">
+          <div class="mqd-info-item">Área: <strong>${q.area || '—'}</strong></div>
+          <div class="mqd-info-item">Habilidade: <strong>${q.habilidade || '—'}</strong></div>
+          ${q.nivel ? '<div class="mqd-info-item">Nível: <strong>' + q.nivel + '</strong></div>' : ''}
+          <div class="mqd-info-item">Status: <strong>${sText}</strong></div>
+          ${curadorHtml}${motivoHtml}
+        </div>`;
+
+      document.getElementById('modal-questao').classList.add('visivel');
+    }
+
+    // Fechar modal
+    document.getElementById('modal-questao').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('visivel'); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modal-questao').classList.remove('visivel'); });
+
+    renderLista();
+  </script>
+</body>
+</html>

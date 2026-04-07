@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Login</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Layout da página de login === */
+    .login-page {
+      display: flex;
+      min-height: 100vh;
+      background: var(--cinza-azulado);
+    }
+
+    /* Lado esquerdo — gradiente + branding */
+    .login-branding {
+      flex: 1;
+      background: var(--gradiente-principal);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--espacamento-2xl);
+      color: var(--branco);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-branding::before {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.15);
+      top: -100px;
+      right: -150px;
+    }
+
+    .login-branding::after {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      bottom: -50px;
+      left: -100px;
+    }
+
+    .login-branding .logo-grande {
+      width: 120px;
+      height: 120px;
+      margin-bottom: var(--espacamento-lg);
+      filter: brightness(0) invert(1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-branding h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--branco);
+      text-align: center;
+      margin-bottom: var(--espacamento-sm);
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-branding .slogan {
+      font-size: var(--fonte-tamanho-lg);
+      opacity: 0.9;
+      text-align: center;
+      max-width: 400px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-branding .tagline {
+      margin-top: var(--espacamento-xl);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--borda-radius-lg);
+      font-size: var(--fonte-tamanho-sm);
+      opacity: 0.8;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-branding .beneficios {
+      margin-top: var(--espacamento-xl);
+      list-style: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .login-branding .beneficios li {
+      padding: 8px 0;
+      font-size: var(--fonte-tamanho-sm);
+      opacity: 0.9;
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .login-branding .beneficios li .check {
+      width: 24px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: var(--borda-radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Lado direito — formulário */
+    .login-form-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--espacamento-2xl);
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-card .logo-mobile {
+      display: none;
+      width: 60px;
+      margin: 0 auto var(--espacamento-md);
+    }
+
+    .login-card h2 {
+      font-size: var(--fonte-tamanho-2xl);
+      margin-bottom: var(--espacamento-xs);
+    }
+
+    .login-card .subtitulo {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    /* Senha — mostrar/ocultar */
+    .senha-wrapper {
+      position: relative;
+    }
+
+    .senha-wrapper .form-input {
+      padding-right: 44px;
+    }
+
+    .senha-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--texto-terciario);
+      font-size: 18px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .senha-toggle:hover {
+      color: var(--azul-medio);
+    }
+
+    /* Links auxiliares */
+    .login-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--espacamento-lg);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .login-links label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--texto-secundario);
+    }
+
+    .login-links label input[type="checkbox"] {
+      accent-color: var(--azul-medio);
+    }
+
+    /* Erro de login */
+    .login-erro {
+      display: none;
+      padding: var(--espacamento-md);
+      background: #FFF5F5;
+      border: 1px solid #FED7D7;
+      border-radius: var(--borda-radius);
+      color: var(--cor-erro);
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: var(--espacamento-md);
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .login-erro.visivel {
+      display: flex;
+    }
+
+    /* Credenciais de teste */
+    .credenciais-teste {
+      margin-top: var(--espacamento-xl);
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      border: 1px dashed var(--azul-claro);
+    }
+
+    .credenciais-teste h4 {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--azul-medio);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .credenciais-teste .cred-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      border-bottom: 1px solid var(--borda-cor);
+      cursor: pointer;
+      transition: var(--transicao);
+    }
+
+    .credenciais-teste .cred-item:last-child {
+      border-bottom: none;
+    }
+
+    .credenciais-teste .cred-item:hover {
+      color: var(--azul-medio);
+    }
+
+    .credenciais-teste .cred-item .perfil-badge {
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: var(--borda-radius-full);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    .cred-admin .perfil-badge { background: #E9D8FD; color: #553C9A; }
+    .cred-conteudista .perfil-badge { background: #BEE3F8; color: #2A4365; }
+    .cred-aluno .perfil-badge { background: #C6F6D5; color: #22543D; }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      margin-top: var(--espacamento-xl);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 768px) {
+      .login-page {
+        flex-direction: column;
+      }
+
+      .login-branding {
+        display: none;
+      }
+
+      .login-card .logo-mobile {
+        display: block;
+      }
+
+      .login-form-area {
+        padding: var(--espacamento-lg);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <!-- Ledor Player -->
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <!-- LIBRAS Janela -->
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Página de Login -->
+  <div class="login-page">
+
+    <!-- Lado esquerdo — Branding -->
+    <div class="login-branding">
+      <img src="/assets/img/logo-helen.png" alt="HelenAI Logo" class="logo-grande">
+      <h1>helen.ai</h1>
+      <p class="slogan">Aprendizado sem barreiras</p>
+      <div class="tagline">A tecnologia a favor da inclusão</div>
+
+      <ul class="beneficios">
+        <li><span class="check">✓</span> Simulados personalizados para você</li>
+        <li><span class="check">✓</span> Questões classificadas pela BNCC</li>
+        <li><span class="check">✓</span> Acessibilidade total: LIBRAS, ledor, alto contraste</li>
+        <li><span class="check">✓</span> Gamificação: XP, badges e ranking</li>
+        <li><span class="check">✓</span> 100% gratuito</li>
+      </ul>
+    </div>
+
+    <!-- Lado direito — Formulário -->
+    <div class="login-form-area">
+      <div class="login-card">
+
+        <!-- Logo mobile -->
+        <img src="/assets/img/logo-helen.png" alt="HelenAI" class="logo-mobile">
+
+        <h2>Bem-vindo!</h2>
+        <p class="subtitulo">Faça login para acessar a plataforma</p>
+
+        <!-- Alerta de erro -->
+        <div class="login-erro" id="login-erro">
+          <span>⚠</span>
+          <span>Email ou senha inválidos. Tente novamente.</span>
+        </div>
+
+        <!-- Formulário -->
+        <form id="form-login" onsubmit="return false;">
+
+          <div class="form-grupo">
+            <label class="form-label" for="email">Email</label>
+            <input type="email" class="form-input" id="email" placeholder="seu@email.com" required>
+            <span class="form-erro" id="erro-email">Informe um email válido</span>
+          </div>
+
+          <div class="form-grupo">
+            <label class="form-label" for="senha">Senha</label>
+            <div class="senha-wrapper">
+              <input type="password" class="form-input" id="senha" placeholder="Sua senha" required>
+              <button type="button" class="senha-toggle" id="toggle-senha" title="Mostrar senha">👁</button>
+            </div>
+            <span class="form-erro" id="erro-senha">A senha deve ter no mínimo 6 caracteres</span>
+          </div>
+
+          <div class="login-links">
+            <label>
+              <input type="checkbox"> Lembrar de mim
+            </label>
+            <a href="/compartilhado/recuperar-senha.html">Esqueci minha senha</a>
+          </div>
+
+          <button type="submit" class="btn btn-primario btn-full btn-lg" id="btn-entrar">
+            Entrar
+          </button>
+        </form>
+
+        <div class="divider">ou</div>
+
+        <!-- Botão Google — vai direto para aluno -->
+        <button class="btn btn-google btn-full" id="btn-google">
+          <svg viewBox="0 0 24 24" width="20" height="20">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Entrar com Google
+        </button>
+
+        <!-- Link para cadastro -->
+        <p class="text-center mt-lg text-small">
+          Não tem conta? <a href="/compartilhado/cadastro.html"><strong>Criar conta</strong></a>
+        </p>
+
+        <!-- Credenciais de teste -->
+        <div class="credenciais-teste">
+          <h4>🔑 Credenciais de teste</h4>
+          <div class="cred-item cred-admin" onclick="preencherLogin('admin@helen.ai', 'admin')">
+            <span>admin@helen.ai / admin</span>
+            <span class="perfil-badge">Admin</span>
+          </div>
+          <div class="cred-item cred-conteudista" onclick="preencherLogin('conteudista@helen.ai', 'conteudista')">
+            <span>conteudista@helen.ai / conteudista</span>
+            <span class="perfil-badge">Conteudista</span>
+          </div>
+          <div class="cred-item cred-aluno" onclick="preencherLogin('aluno@helen.ai', 'aluno')">
+            <span>aluno@helen.ai / aluno</span>
+            <span class="perfil-badge">Aluno</span>
+          </div>
+        </div>
+
+        <div class="login-footer">
+          HelenAI — Educação inclusiva para todos
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script>
+    // Preencher credenciais ao clicar
+    function preencherLogin(email, senha) {
+      document.getElementById('email').value = email;
+      document.getElementById('senha').value = senha;
+      document.getElementById('login-erro').classList.remove('visivel');
+      // Remove erro visual dos inputs
+      document.getElementById('email').classList.remove('erro');
+      document.getElementById('senha').classList.remove('erro');
+    }
+
+    // Toggle mostrar/ocultar senha
+    document.getElementById('toggle-senha').addEventListener('click', function () {
+      const input = document.getElementById('senha');
+      if (input.type === 'password') {
+        input.type = 'text';
+        this.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        this.textContent = '👁';
+      }
+    });
+
+    // Login
+    document.getElementById('form-login').addEventListener('submit', function (e) {
+      e.preventDefault();
+      tentarLogin();
+    });
+
+    document.getElementById('btn-entrar').addEventListener('click', tentarLogin);
+
+    function tentarLogin() {
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value.trim();
+      const erroDiv = document.getElementById('login-erro');
+      const erroEmail = document.getElementById('erro-email');
+      const erroSenha = document.getElementById('erro-senha');
+
+      // Reset
+      erroDiv.classList.remove('visivel');
+      erroEmail.classList.remove('visivel');
+      erroSenha.classList.remove('visivel');
+      document.getElementById('email').classList.remove('erro');
+      document.getElementById('senha').classList.remove('erro');
+
+      // Validações
+      let valido = true;
+
+      if (!email || !email.includes('@')) {
+        document.getElementById('email').classList.add('erro');
+        erroEmail.classList.add('visivel');
+        valido = false;
+      }
+
+      if (!senha || senha.length < 4) {
+        document.getElementById('senha').classList.add('erro');
+        erroSenha.classList.add('visivel');
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      // Buscar usuário fake
+      const usuario = HELEN_DATA.usuarios.find(u => u.email === email && u.senha === senha);
+
+      if (usuario) {
+        // Salvar perfil logado
+        localStorage.setItem('helenai_usuario', JSON.stringify(usuario));
+        // Redirecionar
+        window.location.href = '/' + usuario.redirect.replace('../', '');
+      } else {
+        erroDiv.classList.add('visivel');
+      }
+    }
+
+    // Botão Google → direto para aluno
+    document.getElementById('btn-google').addEventListener('click', function () {
+      const alunoUser = HELEN_DATA.usuarios.find(u => u.perfil === 'aluno');
+      localStorage.setItem('helenai_usuario', JSON.stringify(alunoUser));
+      window.location.href = '/aluno/dashboard.html';
+    });
+
+    // Enter no campo senha
+    document.getElementById('senha').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') tentarLogin();
+    });
+  </script>
+
+</body>
+</html>
