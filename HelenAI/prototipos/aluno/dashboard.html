@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Dashboard Aluno</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* === Continue de onde parou === */
+    .continue-card {
+      background: linear-gradient(135deg, #FFFAF0 0%, #FFF5F0 100%);
+      border-left: 5px solid #ED8936;
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .continue-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(237, 137, 54, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .continue-icone {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #FEEBC8;
+      color: #C05621;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+      animation: pulse-laranja 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-laranja {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(237, 137, 54, 0.4); }
+      50%      { box-shadow: 0 0 0 10px rgba(237, 137, 54, 0); }
+    }
+
+    .continue-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .continue-tag {
+      display: inline-block;
+      background: #ED8936;
+      color: var(--branco);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--borda-radius-full);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .continue-titulo {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .continue-meta {
+      display: flex;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-sm);
+      flex-wrap: wrap;
+    }
+
+    .continue-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .continue-barra {
+      height: 8px;
+      background: rgba(237, 137, 54, 0.15);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+      max-width: 480px;
+    }
+
+    .continue-barra-preenchida {
+      height: 100%;
+      background: linear-gradient(90deg, #ED8936 0%, #DD6B20 100%);
+      border-radius: var(--borda-radius-full);
+      transition: width 0.4s ease;
+    }
+
+    .continue-barra-info {
+      font-size: var(--fonte-tamanho-xs);
+      color: #C05621;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .continue-acoes {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+      flex-shrink: 0;
+    }
+
+    .btn-continuar {
+      background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
+      color: var(--branco);
+      border: none;
+      padding: 12px 24px;
+      border-radius: var(--borda-radius);
+      font-weight: 600;
+      font-size: var(--fonte-tamanho-sm);
+      cursor: pointer;
+      transition: var(--transicao);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-family: var(--fonte-principal);
+      text-decoration: none;
+    }
+
+    .btn-continuar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(237, 137, 54, 0.35);
+      color: var(--branco);
+      text-decoration: none;
+    }
+
+    .btn-descartar {
+      background: transparent;
+      color: var(--texto-secundario);
+      border: none;
+      font-size: var(--fonte-tamanho-xs);
+      cursor: pointer;
+      padding: 4px;
+      font-family: var(--fonte-principal);
+      text-decoration: underline;
+    }
+
+    .btn-descartar:hover {
+      color: var(--texto-primario);
+    }
+
+    /* === Saudação e nível === */
+    .saudacao-card {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-xl);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacamento-lg);
+      flex-wrap: wrap;
+    }
+
+    .saudacao-texto h2 {
+      color: var(--branco);
+      font-size: var(--fonte-tamanho-2xl);
+      margin-bottom: var(--espacamento-xs);
+    }
+
+    .saudacao-texto p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .nivel-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      min-width: 240px;
+    }
+
+    .nivel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .nivel-numero {
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-base);
+    }
+
+    .nivel-barra {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .nivel-barra-preenchida {
+      height: 100%;
+      background: var(--branco);
+      border-radius: var(--borda-radius-full);
+    }
+
+    .nivel-xp {
+      font-size: var(--fonte-tamanho-xs);
+      margin-top: var(--espacamento-xs);
+      opacity: 0.9;
+    }
+
+    /* === Cards de seções === */
+    .secao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .secao-card h4 {
+      font-size: var(--fonte-tamanho-base);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .secao-card h4 .secao-icone {
+      font-size: 1.4em;
+    }
+
+    .secao-card-subtitulo {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-top: -8px;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    /* === Trilha personalizada (IA — Fase 8) === */
+    .trilha-ia {
+      background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+      border: 1px solid #BEE3F8;
+    }
+
+    .trilha-ia h4 {
+      color: var(--azul-profundo);
+    }
+
+    .trilha-ia-tag {
+      display: inline-block;
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: var(--fonte-tamanho-xs);
+      padding: 2px 10px;
+      border-radius: var(--borda-radius-full);
+      font-weight: 600;
+      margin-left: var(--espacamento-sm);
+    }
+
+    .trilha-passos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--espacamento-md);
+    }
+
+    .trilha-passo {
+      background: var(--branco);
+      border-radius: var(--borda-radius);
+      padding: var(--espacamento-md);
+      border-left: 4px solid var(--azul-medio);
+    }
+
+    .trilha-passo-numero {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      background: var(--azul-medio);
+      color: var(--branco);
+      border-radius: 50%;
+      text-align: center;
+      line-height: 24px;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .trilha-passo-titulo {
+      font-weight: 600;
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .trilha-passo-info {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    /* === Habilidades === */
+    .habilidades-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .habilidade-item {
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .habilidade-fraca {
+      background: #FFF5F5;
+      border-left: 3px solid var(--cor-erro);
+    }
+
+    .habilidade-forte {
+      background: #F0FFF4;
+      border-left: 3px solid var(--cor-sucesso);
+    }
+
+    .habilidade-codigo {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      letter-spacing: 0.5px;
+    }
+
+    .habilidade-nome {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+      margin: 4px 0 8px;
+    }
+
+    .habilidade-barra {
+      height: 6px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .habilidade-barra-preenchida {
+      height: 100%;
+      border-radius: var(--borda-radius-full);
+    }
+
+    .habilidade-fraca .habilidade-barra-preenchida {
+      background: var(--cor-erro);
+    }
+
+    .habilidade-forte .habilidade-barra-preenchida {
+      background: var(--cor-sucesso);
+    }
+
+    .habilidade-percentual {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* === Layout duas colunas === */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    /* === Resumo semanal IA === */
+    .resumo-semanal {
+      background: linear-gradient(135deg, #FAF5FF 0%, #FFF5F7 100%);
+      border: 1px solid #E9D8FD;
+    }
+
+    .resumo-semanal h4 {
+      color: #553C9A;
+    }
+
+    .resumo-semanal p {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .resumo-semanal strong {
+      color: #553C9A;
+    }
+
+    /* === Lista simulados === */
+    .lista-simulados {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+    }
+
+    .simulado-linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      transition: var(--transicao);
+      cursor: pointer;
+    }
+
+    .simulado-linha:hover {
+      background: #E2EBF5;
+      transform: translateX(2px);
+    }
+
+    .simulado-info {
+      flex: 1;
+    }
+
+    .simulado-nome {
+      font-weight: 600;
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--azul-profundo);
+      margin-bottom: 2px;
+    }
+
+    .simulado-meta {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .simulado-stats {
+      display: flex;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-xs);
+      margin-top: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-acerto {
+      color: var(--cor-sucesso);
+      font-weight: 600;
+    }
+
+    .stat-erro {
+      color: var(--cor-erro);
+      font-weight: 600;
+    }
+
+    .stat-status {
+      color: var(--texto-secundario);
+    }
+
+    .stat-restante {
+      color: #C05621;
+      font-weight: 600;
+    }
+
+    .stat-sep {
+      color: var(--texto-terciario);
+    }
+
+    .simulado-acoes-mini {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .simulado-nota {
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--cor-sucesso);
+      min-width: 60px;
+      text-align: right;
+      line-height: 1;
+    }
+
+    .simulado-nota.baixa {
+      color: var(--cor-erro);
+    }
+
+    .simulado-nota.media {
+      color: #B7791F;
+    }
+
+    .simulado-nota.andamento {
+      color: #C05621;
+    }
+
+    /* Linha em andamento */
+    .simulado-linha.em-andamento {
+      background: linear-gradient(90deg, #FFFAF0 0%, #FFF5F0 100%);
+      border-left: 3px solid #ED8936;
+      padding-left: calc(var(--espacamento-md) - 3px);
+    }
+
+    .simulado-linha.em-andamento:hover {
+      background: linear-gradient(90deg, #FEEBC8 0%, #FFFAF0 100%);
+    }
+
+    .btn-mini-continuar {
+      background: #ED8936;
+      color: var(--branco);
+      border: none;
+      padding: 5px 12px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      white-space: nowrap;
+      transition: var(--transicao);
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-mini-continuar:hover {
+      background: #DD6B20;
+      transform: translateY(-1px);
+      color: var(--branco);
+      text-decoration: none;
+    }
+
+    /* === Cards de simulados disponíveis === */
+    .simulados-disponiveis-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: var(--espacamento-md);
+    }
+
+    .simulado-card {
+      background: var(--branco);
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md);
+      transition: var(--transicao);
+      cursor: pointer;
+    }
+
+    .simulado-card:hover {
+      box-shadow: var(--sombra-card-hover);
+      transform: translateY(-2px);
+      border-color: var(--azul-medio);
+    }
+
+    .simulado-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .simulado-card-area {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--azul-medio);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .simulado-card-nome {
+      font-weight: 600;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-base);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .simulado-card-meta {
+      display: flex;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .simulado-card-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* === Gráfico === */
+    .grafico-container {
+      max-height: 300px;
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 1024px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .habilidades-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .saudacao-card { flex-direction: column; align-items: flex-start; }
+      .nivel-card { width: 100%; }
+      .continue-card { flex-direction: column; align-items: flex-start; }
+      .continue-acoes { width: 100%; }
+      .btn-continuar { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item ativo">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <!-- Saudação + Nível -->
+      <div class="saudacao-card">
+        <div class="saudacao-texto">
+          <h2>Olá, Maria! 👋</h2>
+          <p>Vamos continuar sua jornada de aprendizado?</p>
+        </div>
+        <div class="nivel-card">
+          <div class="nivel-header">
+            <span>Nível <span class="nivel-numero">5</span></span>
+            <span>🔥 12 dias seguidos</span>
+          </div>
+          <div class="nivel-barra">
+            <div class="nivel-barra-preenchida" style="width: 78%;"></div>
+          </div>
+          <div class="nivel-xp">2.350 / 3.000 XP — faltam 650 XP para o nível 6</div>
+        </div>
+      </div>
+
+      <!-- Continue de onde parou -->
+      <div class="continue-card">
+        <div class="continue-icone">⏸</div>
+        <div class="continue-info">
+          <span class="continue-tag">Simulado em andamento</span>
+          <div class="continue-titulo">ENEM 2025 — Caderno Azul</div>
+          <div class="continue-meta">
+            <span>📄 Questão 18 de 45</span>
+            <span>·</span>
+            <span>⏱ Iniciado há 2 horas</span>
+            <span>·</span>
+            <span>⏳ ~22 min restantes</span>
+          </div>
+          <div class="continue-barra">
+            <div class="continue-barra-preenchida" style="width: 40%;"></div>
+          </div>
+          <div class="continue-barra-info">40% concluído</div>
+        </div>
+        <div class="continue-acoes">
+          <a href="/aluno/simulado-questao.html" class="btn-continuar">
+            Continuar de onde parei →
+          </a>
+          <button class="btn-descartar">Descartar progresso</button>
+        </div>
+      </div>
+
+      <!-- Métricas resumo -->
+      <div class="metricas-grid">
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #BEE3F8; color: var(--azul-medio);">📝</div>
+          <div class="metrica-valor">23</div>
+          <div class="metrica-label">Simulados Realizados</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #C6F6D5; color: var(--cor-sucesso);">🎯</div>
+          <div class="metrica-valor">74%</div>
+          <div class="metrica-label">Média de Acertos</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #FED7E2; color: #97266D;">❓</div>
+          <div class="metrica-valor">690</div>
+          <div class="metrica-label">Questões Respondidas</div>
+        </div>
+        <div class="card-metrica">
+          <div class="metrica-icone" style="background: #FEFCBF; color: #B7791F;">⏰</div>
+          <div class="metrica-valor">Hoje</div>
+          <div class="metrica-label">Último Acesso</div>
+        </div>
+      </div>
+
+      <!-- Resumo Semanal da IA (Fase 8.7) -->
+      <div class="secao-card resumo-semanal">
+        <h4>
+          <span class="secao-icone">✨</span>
+          Resumo Semanal da IA
+          <span class="trilha-ia-tag">IA</span>
+        </h4>
+        <p>
+          Esta semana você melhorou <strong>12% em Matemática</strong> e completou
+          <strong>4 simulados</strong>. Continue focando em <strong>Ciências Humanas</strong>,
+          onde ainda há espaço para crescer. Seu ritmo está ótimo — mantenha o streak! 🔥
+        </p>
+      </div>
+
+      <!-- Trilha Personalizada IA (Fase 8.6) -->
+      <div class="secao-card trilha-ia">
+        <h4>
+          <span class="secao-icone">🛤️</span>
+          Trilha Recomendada para Você
+          <span class="trilha-ia-tag">IA</span>
+        </h4>
+        <p class="secao-card-subtitulo">
+          Montada com base no seu desempenho. Cada passo é um simulado curto focado nas habilidades que você precisa reforçar.
+        </p>
+        <div class="trilha-passos">
+          <div class="trilha-passo">
+            <div class="trilha-passo-numero">1</div>
+            <div class="trilha-passo-titulo">Interpretação de Gráficos</div>
+            <div class="trilha-passo-info">EM13MAT101 · 8 questões · ~12 min</div>
+          </div>
+          <div class="trilha-passo">
+            <div class="trilha-passo-numero">2</div>
+            <div class="trilha-passo-titulo">Problemas do Cotidiano</div>
+            <div class="trilha-passo-info">EM13MAT301 · 10 questões · ~15 min</div>
+          </div>
+          <div class="trilha-passo">
+            <div class="trilha-passo-numero">3</div>
+            <div class="trilha-passo-titulo">Sociedade e Cidadania</div>
+            <div class="trilha-passo-info">EM13CHS301 · 10 questões · ~15 min</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Habilidades — pontos fracos / fortes -->
+      <div class="habilidades-grid">
+        <div class="secao-card" style="margin: 0;">
+          <h4>
+            <span class="secao-icone">💪</span>
+            O que você precisa melhorar
+          </h4>
+          <p class="secao-card-subtitulo">Top 3 habilidades com menor desempenho</p>
+
+          <div class="habilidade-item habilidade-fraca">
+            <div class="habilidade-codigo">EM13CHS301</div>
+            <div class="habilidade-nome">Problematizar hábitos e práticas individuais e coletivos</div>
+            <div class="habilidade-barra">
+              <div class="habilidade-barra-preenchida" style="width: 42%;"></div>
+            </div>
+            <div class="habilidade-percentual">42% de acerto</div>
+          </div>
+
+          <div class="habilidade-item habilidade-fraca">
+            <div class="habilidade-codigo">EM13MAT301</div>
+            <div class="habilidade-nome">Resolver e elaborar problemas do cotidiano</div>
+            <div class="habilidade-barra">
+              <div class="habilidade-barra-preenchida" style="width: 48%;"></div>
+            </div>
+            <div class="habilidade-percentual">48% de acerto</div>
+          </div>
+
+          <div class="habilidade-item habilidade-fraca">
+            <div class="habilidade-codigo">EM13CNT301</div>
+            <div class="habilidade-nome">Construir questões e problemas de conhecimento</div>
+            <div class="habilidade-barra">
+              <div class="habilidade-barra-preenchida" style="width: 55%;"></div>
+            </div>
+            <div class="habilidade-percentual">55% de acerto</div>
+          </div>
+        </div>
+
+        <div class="secao-card" style="margin: 0;">
+          <h4>
+            <span class="secao-icone">⭐</span>
+            Seus pontos fortes
+          </h4>
+          <p class="secao-card-subtitulo">Top 3 habilidades onde você se destaca</p>
+
+          <div class="habilidade-item habilidade-forte">
+            <div class="habilidade-codigo">EM13LGG101</div>
+            <div class="habilidade-nome">Compreender processos de produção de discursos</div>
+            <div class="habilidade-barra">
+              <div class="habilidade-barra-preenchida" style="width: 92%;"></div>
+            </div>
+            <div class="habilidade-percentual">92% de acerto</div>
+          </div>
+
+          <div class="habilidade-item habilidade-forte">
+            <div class="habilidade-codigo">EM13CHS101</div>
+            <div class="habilidade-nome">Identificar relações entre sujeitos e grupos sociais</div>
+            <div class="habilidade-barra">
+              <div class="habilidade-barra-preenchida" style="width: 87%;"></div>
+            </div>
+            <div class="habilidade-percentual">87% de acerto</div>
+          </div>
+
+          <div class="habilidade-item habilidade-forte">
+            <div class="habilidade-codigo">EM13MAT101</div>
+            <div class="habilidade-nome">Interpretar situações econômicas e sociais</div>
+            <div class="habilidade-barra">
+              <div class="habilidade-barra-preenchida" style="width: 82%;"></div>
+            </div>
+            <div class="habilidade-percentual">82% de acerto</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layout duas colunas: gráfico + simulados recentes -->
+      <div class="dashboard-grid">
+        <div class="secao-card" style="margin: 0;">
+          <h4>
+            <span class="secao-icone">📊</span>
+            Seu desempenho por Área BNCC
+          </h4>
+          <div class="grafico-container">
+            <canvas id="grafico-radar"></canvas>
+          </div>
+        </div>
+
+        <div class="secao-card" style="margin: 0;">
+          <h4>
+            <span class="secao-icone">📝</span>
+            Simulados Recentes
+          </h4>
+          <div class="lista-simulados">
+
+            <!-- Em andamento — destaque -->
+            <div class="simulado-linha em-andamento">
+              <div class="simulado-info">
+                <div class="simulado-nome">Matemática Básica</div>
+                <div class="simulado-meta">Pausado há 4 dias · 20 questões</div>
+                <div class="simulado-stats">
+                  <span class="stat-acerto">✓ 12 acertos</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-erro">✗ 3 erros</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-restante">5 restantes</span>
+                </div>
+              </div>
+              <div class="simulado-acoes-mini">
+                <div class="simulado-nota andamento">80%</div>
+                <a href="/aluno/simulado-questao.html" class="btn-mini-continuar">Continuar →</a>
+              </div>
+            </div>
+
+            <!-- Finalizados -->
+            <div class="simulado-linha">
+              <div class="simulado-info">
+                <div class="simulado-nome">Linguagens — Interpretação</div>
+                <div class="simulado-meta">Há 1 semana · 15 questões</div>
+                <div class="simulado-stats">
+                  <span class="stat-acerto">✓ 14 acertos</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-erro">✗ 1 erro</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-status">Finalizado</span>
+                </div>
+              </div>
+              <div class="simulado-nota">93%</div>
+            </div>
+
+            <div class="simulado-linha">
+              <div class="simulado-info">
+                <div class="simulado-nome">Simulado de Química</div>
+                <div class="simulado-meta">Há 2 semanas · 18 questões</div>
+                <div class="simulado-stats">
+                  <span class="stat-acerto">✓ 14 acertos</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-erro">✗ 4 erros</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-status">Finalizado</span>
+                </div>
+              </div>
+              <div class="simulado-nota">78%</div>
+            </div>
+
+            <div class="simulado-linha">
+              <div class="simulado-info">
+                <div class="simulado-nome">Revisão Ciências Humanas</div>
+                <div class="simulado-meta">Há 2 semanas · 25 questões</div>
+                <div class="simulado-stats">
+                  <span class="stat-acerto">✓ 14 acertos</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-erro">✗ 11 erros</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-status">Finalizado</span>
+                </div>
+              </div>
+              <div class="simulado-nota baixa">56%</div>
+            </div>
+
+            <div class="simulado-linha">
+              <div class="simulado-info">
+                <div class="simulado-nome">Funções Trigonométricas</div>
+                <div class="simulado-meta">Há 3 semanas · 12 questões</div>
+                <div class="simulado-stats">
+                  <span class="stat-acerto">✓ 9 acertos</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-erro">✗ 3 erros</span>
+                  <span class="stat-sep">·</span>
+                  <span class="stat-status">Finalizado</span>
+                </div>
+              </div>
+              <div class="simulado-nota media">75%</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulados disponíveis -->
+      <div class="secao-card">
+        <h4>
+          <span class="secao-icone">🎓</span>
+          Simulados Disponíveis para Você
+        </h4>
+        <p class="secao-card-subtitulo">Simulados públicos que você ainda não fez</p>
+        <div class="simulados-disponiveis-grid">
+          <div class="simulado-card">
+            <div class="simulado-card-header">
+              <span class="simulado-card-area">Matemática</span>
+              <span class="badge badge-medio">Médio</span>
+            </div>
+            <div class="simulado-card-nome">Funções e Gráficos</div>
+            <div class="simulado-card-meta">
+              <span>📄 15 questões</span>
+              <span>⏱ 25 min</span>
+            </div>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm btn-full">Iniciar</a>
+          </div>
+
+          <div class="simulado-card">
+            <div class="simulado-card-header">
+              <span class="simulado-card-area">Linguagens</span>
+              <span class="badge badge-facil">Fácil</span>
+            </div>
+            <div class="simulado-card-nome">Variação Linguística</div>
+            <div class="simulado-card-meta">
+              <span>📄 10 questões</span>
+              <span>⏱ Sem limite</span>
+            </div>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm btn-full">Iniciar</a>
+          </div>
+
+          <div class="simulado-card">
+            <div class="simulado-card-header">
+              <span class="simulado-card-area">Ciências Humanas</span>
+              <span class="badge badge-dificil">Difícil</span>
+            </div>
+            <div class="simulado-card-nome">Brasil República</div>
+            <div class="simulado-card-meta">
+              <span>📄 20 questões</span>
+              <span>⏱ 30 min</span>
+            </div>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm btn-full">Iniciar</a>
+          </div>
+
+          <div class="simulado-card">
+            <div class="simulado-card-header">
+              <span class="simulado-card-area">Ciências da Natureza</span>
+              <span class="badge badge-medio">Médio</span>
+            </div>
+            <div class="simulado-card-nome">Ecologia e Meio Ambiente</div>
+            <div class="simulado-card-meta">
+              <span>📄 12 questões</span>
+              <span>⏱ 20 min</span>
+            </div>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm btn-full">Iniciar</a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Gráfico — Desempenho por área BNCC (radar)
+    new Chart(document.getElementById('grafico-radar'), {
+      type: 'radar',
+      data: {
+        labels: ['Matemática', 'Linguagens', 'Ciências da Natureza', 'Ciências Humanas'],
+        datasets: [{
+          label: 'Seu desempenho (%)',
+          data: [72, 88, 65, 70],
+          borderColor: '#2B6CB0',
+          backgroundColor: 'rgba(60, 200, 208, 0.25)',
+          pointBackgroundColor: '#2B6CB0',
+          pointBorderColor: '#fff',
+          pointRadius: 5,
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: { stepSize: 20, font: { size: 10 } },
+            pointLabels: { font: { size: 11, weight: '500' } }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Ranking</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Header com filtros === */
+    .ranking-header-card {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-xl);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--espacamento-md);
+    }
+
+    .ranking-header-info h2 {
+      color: var(--branco);
+      margin-bottom: 4px;
+      font-size: var(--fonte-tamanho-2xl);
+    }
+
+    .ranking-header-info p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .ranking-minha-pos {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      text-align: center;
+      min-width: 180px;
+    }
+
+    .ranking-minha-pos-label {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .ranking-minha-pos-numero {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .ranking-minha-pos-texto {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    /* === Filtros do ranking === */
+    .ranking-filtros {
+      display: flex;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+      align-items: center;
+    }
+
+    .ranking-filtro-select {
+      padding: 10px 14px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      background: var(--branco);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      cursor: pointer;
+    }
+
+    /* === Pódio Top 3 === */
+    .podio {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: var(--espacamento-md);
+      align-items: end;
+      margin-bottom: var(--espacamento-xl);
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .podio-item {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg) var(--espacamento-md);
+      text-align: center;
+      box-shadow: var(--sombra-card);
+      position: relative;
+      transition: var(--transicao);
+    }
+
+    .podio-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .podio-medalha {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      box-shadow: var(--sombra-card);
+      color: var(--branco);
+    }
+
+    .podio-1 .podio-medalha { background: linear-gradient(135deg, #F6E05E 0%, #D69E2E 100%); }
+    .podio-2 .podio-medalha { background: linear-gradient(135deg, #E2E8F0 0%, #A0AEC0 100%); }
+    .podio-3 .podio-medalha { background: linear-gradient(135deg, #F6AD55 0%, #C05621 100%); }
+
+    .podio-1 {
+      transform: scale(1.08);
+      border-top: 4px solid #F6E05E;
+    }
+    .podio-2 { border-top: 4px solid #A0AEC0; }
+    .podio-3 { border-top: 4px solid #C05621; }
+
+    .podio-1:hover { transform: scale(1.08) translateY(-4px); }
+
+    .podio-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 14px auto var(--espacamento-md);
+      border: 3px solid var(--branco);
+      box-shadow: var(--sombra-card);
+    }
+
+    .podio-nome {
+      font-size: var(--fonte-tamanho-base);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .podio-nivel {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .podio-xp {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-medio);
+      line-height: 1;
+    }
+
+    .podio-xp-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 2px;
+    }
+
+    .podio-stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--espacamento-md);
+      margin-top: var(--espacamento-md);
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .podio-stats strong {
+      color: var(--azul-profundo);
+    }
+
+    /* === Tabela de ranking === */
+    .ranking-tabela-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+    }
+
+    .ranking-tabela-header {
+      padding: var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ranking-tabela-header h3 {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .ranking-tabela {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ranking-tabela th {
+      text-align: left;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: var(--cinza-azulado);
+      border-bottom: 1px solid var(--borda-cor);
+    }
+
+    .ranking-tabela td {
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+    }
+
+    .ranking-tabela tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ranking-tabela tr:hover td {
+      background: var(--cinza-azulado);
+    }
+
+    .ranking-pos {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      width: 60px;
+    }
+
+    .ranking-pos.medalha-1 { color: #D69E2E; }
+    .ranking-pos.medalha-2 { color: #718096; }
+    .ranking-pos.medalha-3 { color: #C05621; }
+
+    .ranking-aluno {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .ranking-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .ranking-nome {
+      font-weight: 600;
+      color: var(--texto-primario);
+    }
+
+    .ranking-nivel-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #BEE3F8;
+      color: #2A4365;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+    }
+
+    .ranking-xp-valor {
+      font-weight: 700;
+      color: var(--azul-profundo);
+    }
+
+    /* === Linha do aluno logado === */
+    .ranking-tabela tr.eu-mesmo {
+      background: linear-gradient(90deg, #EBF8FF 0%, #E6FFFA 100%);
+      position: sticky;
+    }
+
+    .ranking-tabela tr.eu-mesmo td {
+      border-top: 2px solid var(--azul-medio);
+      border-bottom: 2px solid var(--azul-medio);
+    }
+
+    .ranking-tabela tr.eu-mesmo:hover td {
+      background: linear-gradient(90deg, #BEE3F8 0%, #B2F5EA 100%);
+    }
+
+    .ranking-tabela tr.eu-mesmo .ranking-aluno::after {
+      content: 'VOCÊ';
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: var(--borda-radius-full);
+      font-weight: 700;
+      margin-left: var(--espacamento-sm);
+      letter-spacing: 0.5px;
+    }
+
+    /* Linha separadora "..." */
+    .ranking-separador td {
+      text-align: center;
+      color: var(--texto-terciario);
+      font-weight: 700;
+      letter-spacing: 4px;
+      padding: 6px !important;
+      background: var(--cinza-azulado) !important;
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 768px) {
+      .podio { grid-template-columns: 1fr; max-width: 320px; }
+      .podio-1 { transform: none; }
+      .podio-1:hover { transform: translateY(-4px); }
+      .ranking-header-card { flex-direction: column; align-items: flex-start; }
+      .ranking-tabela th:nth-child(5),
+      .ranking-tabela td:nth-child(5) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/ranking.html" class="sidebar-item ativo">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Ranking</h1>
+          <p class="conteudo-subtitulo">Veja como você está em comparação com outros alunos</p>
+        </div>
+      </div>
+
+      <!-- Header com posição -->
+      <div class="ranking-header-card">
+        <div class="ranking-header-info">
+          <h2>🏆 Sua jornada de aprendizado</h2>
+          <p>Continue completando simulados para subir no ranking!</p>
+        </div>
+        <div class="ranking-minha-pos">
+          <div class="ranking-minha-pos-label">Sua posição</div>
+          <div class="ranking-minha-pos-numero">#5</div>
+          <div class="ranking-minha-pos-texto">de 1.247 alunos</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab ativo" onclick="trocarTab(this, 'geral')">🌍 Ranking Geral</button>
+        <button class="tab" onclick="trocarTab(this, 'simulado')">📝 Por Simulado</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="ranking-filtros">
+        <select class="ranking-filtro-select">
+          <option>Todos os tempos</option>
+          <option>Esta semana</option>
+          <option>Este mês</option>
+          <option>Últimos 3 meses</option>
+        </select>
+        <select class="ranking-filtro-select">
+          <option>Todas as áreas</option>
+          <option>Matemática</option>
+          <option>Linguagens</option>
+          <option>Ciências da Natureza</option>
+          <option>Ciências Humanas</option>
+        </select>
+      </div>
+
+      <!-- Pódio Top 3 -->
+      <div class="podio">
+        <!-- 2º lugar -->
+        <div class="podio-item podio-2">
+          <div class="podio-medalha">🥈</div>
+          <div class="podio-avatar">RS</div>
+          <div class="podio-nome">Roberto Silva</div>
+          <div class="podio-nivel">Nível 7</div>
+          <div class="podio-xp">3.800</div>
+          <div class="podio-xp-label">XP</div>
+          <div class="podio-stats">
+            <span><strong>28</strong> simulados</span>
+            <span><strong>82%</strong> acerto</span>
+          </div>
+        </div>
+
+        <!-- 1º lugar -->
+        <div class="podio-item podio-1">
+          <div class="podio-medalha">🥇</div>
+          <div class="podio-avatar">AB</div>
+          <div class="podio-nome">Ana Beatriz</div>
+          <div class="podio-nivel">Nível 8</div>
+          <div class="podio-xp">4.200</div>
+          <div class="podio-xp-label">XP</div>
+          <div class="podio-stats">
+            <span><strong>31</strong> simulados</span>
+            <span><strong>89%</strong> acerto</span>
+          </div>
+        </div>
+
+        <!-- 3º lugar -->
+        <div class="podio-item podio-3">
+          <div class="podio-medalha">🥉</div>
+          <div class="podio-avatar">CT</div>
+          <div class="podio-nome">Camila Torres</div>
+          <div class="podio-nivel">Nível 7</div>
+          <div class="podio-xp">3.650</div>
+          <div class="podio-xp-label">XP</div>
+          <div class="podio-stats">
+            <span><strong>26</strong> simulados</span>
+            <span><strong>80%</strong> acerto</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela do ranking completo -->
+      <div class="ranking-tabela-card">
+        <div class="ranking-tabela-header">
+          <h3>📋 Classificação Completa</h3>
+          <span class="text-muted text-small">1.247 alunos no total</span>
+        </div>
+
+        <table class="ranking-tabela">
+          <thead>
+            <tr>
+              <th>Posição</th>
+              <th>Aluno</th>
+              <th>Nível</th>
+              <th>XP Total</th>
+              <th>Simulados</th>
+              <th>Taxa de Acerto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ranking-pos medalha-1">🥇 1º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">AB</div>
+                  <span class="ranking-nome">Ana Beatriz</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 8</span></td>
+              <td><span class="ranking-xp-valor">4.200</span> XP</td>
+              <td>31</td>
+              <td>89%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos medalha-2">🥈 2º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">RS</div>
+                  <span class="ranking-nome">Roberto Silva</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 7</span></td>
+              <td><span class="ranking-xp-valor">3.800</span> XP</td>
+              <td>28</td>
+              <td>82%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos medalha-3">🥉 3º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">CT</div>
+                  <span class="ranking-nome">Camila Torres</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 7</span></td>
+              <td><span class="ranking-xp-valor">3.650</span> XP</td>
+              <td>26</td>
+              <td>80%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">4º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">DN</div>
+                  <span class="ranking-nome">Diego Nunes</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 6</span></td>
+              <td><span class="ranking-xp-valor">3.100</span> XP</td>
+              <td>22</td>
+              <td>78%</td>
+            </tr>
+            <tr class="eu-mesmo">
+              <td class="ranking-pos">5º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">MO</div>
+                  <span class="ranking-nome">Maria Oliveira</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 5</span></td>
+              <td><span class="ranking-xp-valor">2.350</span> XP</td>
+              <td>23</td>
+              <td>74%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">6º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">FC</div>
+                  <span class="ranking-nome">Fernando Costa</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 5</span></td>
+              <td><span class="ranking-xp-valor">2.200</span> XP</td>
+              <td>19</td>
+              <td>73%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">7º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">LS</div>
+                  <span class="ranking-nome">Letícia Souza</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 4</span></td>
+              <td><span class="ranking-xp-valor">1.800</span> XP</td>
+              <td>16</td>
+              <td>68%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">8º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">PS</div>
+                  <span class="ranking-nome">Pedro Santos</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 4</span></td>
+              <td><span class="ranking-xp-valor">1.650</span> XP</td>
+              <td>15</td>
+              <td>67%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">9º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">GL</div>
+                  <span class="ranking-nome">Gabriela Lima</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 3</span></td>
+              <td><span class="ranking-xp-valor">1.200</span> XP</td>
+              <td>11</td>
+              <td>62%</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">10º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">TR</div>
+                  <span class="ranking-nome">Thiago Rocha</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 3</span></td>
+              <td><span class="ranking-xp-valor">1.100</span> XP</td>
+              <td>9</td>
+              <td>59%</td>
+            </tr>
+            <tr class="ranking-separador">
+              <td colspan="6">• • •</td>
+            </tr>
+            <tr>
+              <td class="ranking-pos">47º</td>
+              <td>
+                <div class="ranking-aluno">
+                  <div class="ranking-avatar">JF</div>
+                  <span class="ranking-nome">Juliana Ferreira</span>
+                </div>
+              </td>
+              <td><span class="ranking-nivel-badge">Nível 2</span></td>
+              <td><span class="ranking-xp-valor">580</span> XP</td>
+              <td>5</td>
+              <td>54%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      <div class="paginacao">
+        <button class="paginacao-item">←</button>
+        <button class="paginacao-item ativo">1</button>
+        <button class="paginacao-item">2</button>
+        <button class="paginacao-item">3</button>
+        <button class="paginacao-item">...</button>
+        <button class="paginacao-item">125</button>
+        <button class="paginacao-item">→</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    function trocarTab(btn, id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+      btn.classList.add('ativo');
+    }
+  </script>
+
+</body>
+</html>

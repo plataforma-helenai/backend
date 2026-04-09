@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Explorar Simulados</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Filtros === */
+    .filtros-explorar {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    /* === Filtro por status (chips) === */
+    .filtros-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--espacamento-sm);
+      padding-bottom: var(--espacamento-md);
+      margin-bottom: var(--espacamento-md);
+      border-bottom: 1px solid var(--borda-cor);
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--branco);
+      color: var(--texto-secundario);
+      border: 1.5px solid var(--borda-cor);
+      padding: 7px 14px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      transition: var(--transicao);
+    }
+
+    .status-chip:hover {
+      border-color: var(--azul-medio);
+      color: var(--azul-medio);
+      transform: translateY(-1px);
+    }
+
+    .status-chip.ativo {
+      background: var(--azul-profundo);
+      color: var(--branco);
+      border-color: var(--azul-profundo);
+    }
+
+    .status-chip.ativo .chip-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: var(--branco);
+    }
+
+    /* Variantes coloridas pra cada estado */
+    .status-chip.chip-andamento.ativo {
+      background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
+      border-color: #DD6B20;
+    }
+
+    .status-chip.chip-finalizado.ativo {
+      background: linear-gradient(135deg, #38A169 0%, #2F855A 100%);
+      border-color: #2F855A;
+    }
+
+    .chip-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: var(--cinza-claro);
+      color: var(--texto-secundario);
+      border-radius: var(--borda-radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .filtros-linha {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr 1fr 1fr;
+      gap: var(--espacamento-md);
+      align-items: end;
+    }
+
+    .filtro-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filtro-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filtro-input,
+    .filtro-select {
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      background: var(--branco);
+      color: var(--texto-primario);
+      transition: var(--transicao);
+    }
+
+    .filtro-input:focus,
+    .filtro-select:focus {
+      outline: none;
+      border-color: var(--azul-medio);
+      box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15);
+    }
+
+    .filtro-busca {
+      position: relative;
+    }
+
+    .filtro-busca .filtro-input {
+      padding-left: 36px;
+      width: 100%;
+    }
+
+    .filtro-busca::before {
+      content: '🔍';
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .filtros-acoes {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: var(--espacamento-md);
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .filtros-resultado {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+    }
+
+    .filtros-resultado strong {
+      color: var(--azul-profundo);
+    }
+
+    .btn-limpar {
+      background: transparent;
+      color: var(--texto-secundario);
+      border: 1px solid var(--borda-cor);
+      padding: 6px 14px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 500;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      transition: var(--transicao);
+    }
+
+    .btn-limpar:hover {
+      border-color: var(--azul-medio);
+      color: var(--azul-medio);
+    }
+
+    /* === Grid de simulados === */
+    .grid-simulados {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--espacamento-lg);
+    }
+
+    .simulado-card-explorar {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      transition: var(--transicao);
+      display: flex;
+      flex-direction: column;
+      border: 2px solid transparent;
+    }
+
+    .simulado-card-explorar:hover {
+      box-shadow: var(--sombra-card-hover);
+      transform: translateY(-3px);
+      border-color: var(--azul-medio);
+    }
+
+    .simulado-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--espacamento-sm);
+      gap: var(--espacamento-sm);
+    }
+
+    .simulado-card-area {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--azul-medio);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .simulado-card-titulo {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-sm);
+      line-height: 1.3;
+    }
+
+    .simulado-card-desc {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .simulado-card-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--espacamento-sm);
+      padding: var(--espacamento-sm) 0;
+      border-top: 1px solid var(--borda-cor);
+      border-bottom: 1px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .meta-item-icone {
+      font-size: 1rem;
+    }
+
+    .meta-item strong {
+      color: var(--texto-primario);
+      font-weight: 600;
+    }
+
+    .simulado-card-criador {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .criador-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .criador-info {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .criador-nome {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-primario);
+      font-weight: 600;
+    }
+
+    .criador-tipo {
+      font-size: 0.7rem;
+      color: var(--texto-terciario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .simulado-card-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+    }
+
+    .simulado-card-acoes .btn {
+      flex: 1;
+    }
+
+    /* === Card de simulado já feito === */
+    .simulado-card-explorar.ja-feito {
+      background: linear-gradient(135deg, #F0FFF4 0%, #FFFFFF 100%);
+    }
+
+    .ja-feito-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #C6F6D5;
+      color: #22543D;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--borda-radius-full);
+    }
+
+    /* === Aluno como criador === */
+    .criador-avatar.aluno {
+      background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
+    }
+
+    /* === Card em andamento === */
+    .simulado-card-explorar.em-andamento {
+      background: linear-gradient(135deg, #FFFAF0 0%, #FFF5F0 100%);
+      border: 2px solid #ED8936;
+      position: relative;
+    }
+
+    .simulado-card-explorar.em-andamento::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 120px;
+      height: 120px;
+      background: radial-gradient(circle, rgba(237, 137, 54, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .em-andamento-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #ED8936;
+      color: var(--branco);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: var(--borda-radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Barra de progresso do card em andamento */
+    .card-progresso-wrap {
+      margin-top: -8px;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .card-progresso-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: #C05621;
+      margin-bottom: 4px;
+    }
+
+    .card-progresso-bar {
+      height: 8px;
+      background: rgba(237, 137, 54, 0.15);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .card-progresso-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ED8936 0%, #DD6B20 100%);
+      border-radius: var(--borda-radius-full);
+    }
+
+    /* Stats de acertos/erros/restantes no card em andamento */
+    .card-stats-andamento {
+      display: flex;
+      gap: var(--espacamento-sm);
+      align-items: center;
+      flex-wrap: wrap;
+      padding: var(--espacamento-sm) 0;
+      border-top: 1px dashed rgba(237, 137, 54, 0.3);
+      border-bottom: 1px dashed rgba(237, 137, 54, 0.3);
+      margin-bottom: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+    }
+
+    .card-stats-andamento .stat-acerto-mini {
+      color: var(--cor-sucesso);
+      font-weight: 700;
+    }
+
+    .card-stats-andamento .stat-erro-mini {
+      color: var(--cor-erro);
+      font-weight: 700;
+    }
+
+    .card-stats-andamento .stat-restante-mini {
+      color: #C05621;
+      font-weight: 700;
+    }
+
+    .card-stats-andamento .stat-sep-mini {
+      color: var(--texto-terciario);
+    }
+
+    /* Botão continuar dentro do card em andamento */
+    .btn-card-continuar {
+      flex: 1;
+      background: linear-gradient(135deg, #ED8936 0%, #DD6B20 100%);
+      color: var(--branco);
+      border: none;
+      padding: 8px 16px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: var(--transicao);
+    }
+
+    .btn-card-continuar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(237, 137, 54, 0.35);
+      color: var(--branco);
+      text-decoration: none;
+    }
+
+    /* === Tag de "popular" === */
+    .tag-popular {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #FED7E2;
+      color: #97266D;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: var(--borda-radius-full);
+    }
+
+    /* === Paginação === */
+    .paginacao-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-xl);
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 1200px) {
+      .filtros-linha { grid-template-columns: 2fr 1fr 1fr; }
+      .filtros-linha .filtro-grupo:nth-child(4),
+      .filtros-linha .filtro-grupo:nth-child(5) {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .filtros-linha { grid-template-columns: 1fr; }
+      .grid-simulados { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item ativo">🔍 Explorar Simulados</a>
+        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Explorar Simulados</h1>
+          <p class="conteudo-subtitulo">Descubra simulados públicos criados por professores e outros alunos</p>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab ativo" onclick="trocarTab(this, 'publicos')">🌐 Públicos</button>
+        <button class="tab" onclick="trocarTab(this, 'compartilhados')">🤝 Compartilhados comigo</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-explorar">
+
+        <!-- Filtro por status -->
+        <div class="filtros-status">
+          <button class="status-chip ativo" onclick="trocarStatus(this)">
+            Todos <span class="chip-badge">47</span>
+          </button>
+          <button class="status-chip" onclick="trocarStatus(this)">
+            ⚪ Não iniciados <span class="chip-badge">42</span>
+          </button>
+          <button class="status-chip chip-andamento" onclick="trocarStatus(this)">
+            🟠 Em andamento <span class="chip-badge">1</span>
+          </button>
+          <button class="status-chip chip-finalizado" onclick="trocarStatus(this)">
+            ✓ Finalizados <span class="chip-badge">4</span>
+          </button>
+        </div>
+
+        <div class="filtros-linha">
+          <div class="filtro-grupo filtro-busca">
+            <label class="filtro-label">Buscar por nome</label>
+            <input type="text" class="filtro-input" placeholder="ENEM, Matemática, Linguagens...">
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Área BNCC</label>
+            <select class="filtro-select">
+              <option>Todas as áreas</option>
+              <option>Matemática e suas Tecnologias</option>
+              <option>Linguagens, Códigos e suas Tecnologias</option>
+              <option>Ciências da Natureza e suas Tecnologias</option>
+              <option>Ciências Humanas e suas Tecnologias</option>
+            </select>
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Habilidade</label>
+            <select class="filtro-select">
+              <option>Todas</option>
+              <option>EM13MAT101</option>
+              <option>EM13MAT301</option>
+              <option>EM13LGG101</option>
+              <option>EM13CNT101</option>
+            </select>
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Dificuldade</label>
+            <select class="filtro-select">
+              <option>Todos os níveis</option>
+              <option>Fácil</option>
+              <option>Médio</option>
+              <option>Difícil</option>
+            </select>
+          </div>
+          <div class="filtro-grupo">
+            <label class="filtro-label">Tempo</label>
+            <select class="filtro-select">
+              <option>Todos</option>
+              <option>Com cronômetro</option>
+              <option>Sem limite</option>
+            </select>
+          </div>
+        </div>
+        <div class="filtros-acoes">
+          <div class="filtros-resultado">
+            Mostrando <strong>1-10</strong> de <strong>47</strong> simulados disponíveis
+          </div>
+          <button class="btn-limpar">✕ Limpar filtros</button>
+        </div>
+      </div>
+
+      <!-- Grid de simulados -->
+      <div class="grid-simulados">
+
+        <!-- Card 1 - Popular -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Geral · ENEM</span>
+            <span class="tag-popular">🔥 Popular</span>
+          </div>
+          <div class="simulado-card-titulo">ENEM 2025 — Caderno Amarelo</div>
+          <div class="simulado-card-desc">
+            Simulado completo do ENEM com 90 questões cobrindo todas as áreas do conhecimento. Ideal para treinar tempo e resistência.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>90</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>5h 30min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Médio</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>1.247</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">CM</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. Carlos Mendes</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 2 - Em andamento (pausado) -->
+        <div class="simulado-card-explorar em-andamento">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Matemática</span>
+            <span class="em-andamento-tag">⏸ Em andamento</span>
+          </div>
+          <div class="simulado-card-titulo">Análise Combinatória e Probabilidade</div>
+          <div class="simulado-card-desc">
+            Você pausou este simulado há 2 dias. Suas respostas foram salvas — pode continuar de onde parou a qualquer momento.
+          </div>
+
+          <!-- Barra de progresso -->
+          <div class="card-progresso-wrap">
+            <div class="card-progresso-info">
+              <span>Progresso</span>
+              <span>12 de 20 questões</span>
+            </div>
+            <div class="card-progresso-bar">
+              <div class="card-progresso-fill" style="width: 60%;"></div>
+            </div>
+          </div>
+
+          <!-- Stats parciais -->
+          <div class="card-stats-andamento">
+            <span class="stat-acerto-mini">✓ 9 acertos</span>
+            <span class="stat-sep-mini">·</span>
+            <span class="stat-erro-mini">✕ 3 erros</span>
+            <span class="stat-sep-mini">·</span>
+            <span class="stat-restante-mini">⏳ 8 restantes</span>
+          </div>
+
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>20</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>40 min</strong> total</div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Médio</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">🕓</span> Pausado há <strong>2 dias</strong></div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">CM</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. Carlos Mendes</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">↻ Reiniciar</a>
+            <a href="/aluno/simulado-questao.html" class="btn-card-continuar">▶ Continuar</a>
+          </div>
+        </div>
+
+        <!-- Card 3 - Já feito -->
+        <div class="simulado-card-explorar ja-feito">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Linguagens</span>
+            <span class="ja-feito-tag">✓ Já fiz</span>
+          </div>
+          <div class="simulado-card-titulo">Interpretação de Textos Literários</div>
+          <div class="simulado-card-desc">
+            Foco em análise de poemas, contos e crônicas brasileiras contemporâneas. Inclui questões de figuras de linguagem.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>15</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>Sem limite</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Médio</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">🎯</span> Sua nota: <strong>93%</strong></div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">AC</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. Ana Costa</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-resultado.html" class="btn btn-secundario btn-sm">Ver resultado</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">↻ Refazer</a>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Matemática</span>
+            <span class="badge badge-facil">Fácil</span>
+          </div>
+          <div class="simulado-card-titulo">Funções e Gráficos — Iniciante</div>
+          <div class="simulado-card-desc">
+            Conceitos básicos de função afim, quadrática e exponencial. Bom ponto de partida para revisão de Matemática do ensino médio.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>15</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>25 min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Fácil</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>342</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">CM</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. Carlos Mendes</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 4 - Aluno criador -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Ciências Humanas</span>
+            <span class="badge badge-medio">Médio</span>
+          </div>
+          <div class="simulado-card-titulo">Brasil República — 1889 a 1945</div>
+          <div class="simulado-card-desc">
+            Da Proclamação até a Era Vargas. Questões com fontes primárias e contexto histórico, ideais para quem quer aprofundar.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>20</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>30 min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Médio</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>89</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar aluno">AB</div>
+            <div class="criador-info">
+              <span class="criador-nome">Ana Beatriz</span>
+              <span class="criador-tipo">Aluna · aprovado pela curadoria</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Ciências da Natureza</span>
+            <span class="badge badge-dificil">Difícil</span>
+          </div>
+          <div class="simulado-card-titulo">Ecologia e Meio Ambiente</div>
+          <div class="simulado-card-desc">
+            Cadeias alimentares, ciclos biogeoquímicos e impactos ambientais. Para quem busca questões mais elaboradas de Biologia.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>12</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>20 min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Difícil</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>156</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">JL</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. João Lima</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Linguagens</span>
+            <span class="badge badge-facil">Fácil</span>
+          </div>
+          <div class="simulado-card-titulo">Variação Linguística</div>
+          <div class="simulado-card-desc">
+            Variedades regionais, sociais e situacionais. Inclui textos de diferentes registros para análise comparativa.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>10</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>Sem limite</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Fácil</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>278</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">AC</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. Ana Costa</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 7 -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Matemática</span>
+            <span class="badge badge-medio">Médio</span>
+          </div>
+          <div class="simulado-card-titulo">Geometria Plana — Áreas e Perímetros</div>
+          <div class="simulado-card-desc">
+            Cálculo de áreas e perímetros de figuras planas. Inclui questões aplicadas ao cotidiano com situações reais.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>18</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>30 min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Médio</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>423</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">CM</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. Carlos Mendes</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 8 -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Ciências Humanas</span>
+            <span class="badge badge-facil">Fácil</span>
+          </div>
+          <div class="simulado-card-titulo">Sociologia — Conceitos Iniciais</div>
+          <div class="simulado-card-desc">
+            Os pensadores clássicos da Sociologia: Durkheim, Weber e Marx. Conceitos fundamentais explicados com clareza.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>14</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>25 min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Fácil</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>98</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">JL</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. João Lima</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+        <!-- Card 9 -->
+        <div class="simulado-card-explorar">
+          <div class="simulado-card-header">
+            <span class="simulado-card-area">Ciências da Natureza</span>
+            <span class="badge badge-medio">Médio</span>
+          </div>
+          <div class="simulado-card-titulo">Termoquímica e Energia</div>
+          <div class="simulado-card-desc">
+            Reações endotérmicas e exotérmicas, entalpia e Lei de Hess. Inclui exercícios contextualizados.
+          </div>
+          <div class="simulado-card-meta">
+            <div class="meta-item"><span class="meta-item-icone">📄</span> <strong>16</strong> questões</div>
+            <div class="meta-item"><span class="meta-item-icone">⏱</span> <strong>35 min</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">📊</span> <strong>Médio</strong></div>
+            <div class="meta-item"><span class="meta-item-icone">👥</span> <strong>187</strong> realizaram</div>
+          </div>
+          <div class="simulado-card-criador">
+            <div class="criador-avatar">JL</div>
+            <div class="criador-info">
+              <span class="criador-nome">Prof. João Lima</span>
+              <span class="criador-tipo">Conteudista</span>
+            </div>
+          </div>
+          <div class="simulado-card-acoes">
+            <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Ver detalhes</a>
+            <a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">▶ Iniciar</a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Paginação -->
+      <div class="paginacao-bar">
+        <button class="paginacao-item">← Anterior</button>
+        <button class="paginacao-item ativo">1</button>
+        <button class="paginacao-item">2</button>
+        <button class="paginacao-item">3</button>
+        <button class="paginacao-item">4</button>
+        <button class="paginacao-item">5</button>
+        <button class="paginacao-item">Próxima →</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    function trocarTab(btn, id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
+      btn.classList.add('ativo');
+    }
+
+    function trocarStatus(btn) {
+      document.querySelectorAll('.status-chip').forEach(c => c.classList.remove('ativo'));
+      btn.classList.add('ativo');
+    }
+  </script>
+
+</body>
+</html>

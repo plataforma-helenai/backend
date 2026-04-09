@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Realizando Simulado</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Layout sem sidebar regular === */
+    body {
+      background: var(--cinza-azulado);
+    }
+
+    .layout-prova {
+      min-height: 100vh;
+      padding-top: 76px; /* espaço para a top bar */
+    }
+
+    /* === Top Bar fixa === */
+    .prova-topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 76px;
+      background: var(--branco);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--espacamento-xl);
+      z-index: 100;
+    }
+
+    .prova-topbar-esq {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      flex: 1;
+    }
+
+    .btn-sair-prova {
+      background: transparent;
+      color: var(--texto-secundario);
+      border: 1px solid var(--borda-cor);
+      padding: 8px 14px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transicao);
+    }
+
+    .btn-sair-prova:hover {
+      border-color: var(--cor-erro);
+      color: var(--cor-erro);
+    }
+
+    .prova-nome {
+      font-size: var(--fonte-tamanho-base);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      max-width: 320px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .prova-nome small {
+      display: block;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 500;
+      color: var(--texto-secundario);
+      margin-top: 2px;
+    }
+
+    .prova-topbar-centro {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--espacamento-lg);
+    }
+
+    .progresso-info {
+      text-align: center;
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .progresso-numero {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .progresso-barra-wrap {
+      width: 280px;
+    }
+
+    .progresso-barra {
+      height: 8px;
+      background: var(--borda-cor);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progresso-barra-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--azul-medio) 0%, var(--ciano) 100%);
+      border-radius: var(--borda-radius-full);
+      transition: width 0.3s ease;
+    }
+
+    .cronometro {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      background: linear-gradient(135deg, #FFFAF0 0%, #FFF5F0 100%);
+      border: 1px solid #FED7AA;
+      padding: 10px 18px;
+      border-radius: var(--borda-radius);
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-lg);
+      color: #C05621;
+    }
+
+    .cronometro-icone {
+      font-size: 1.2rem;
+    }
+
+    .prova-topbar-dir {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--espacamento-sm);
+    }
+
+    .btn-finalizar {
+      background: var(--cor-sucesso);
+      color: var(--branco);
+      border: none;
+      padding: 10px 22px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      transition: var(--transicao);
+    }
+
+    .btn-finalizar:hover {
+      background: #2F855A;
+      transform: translateY(-1px);
+    }
+
+    /* === Layout principal === */
+    .prova-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: var(--espacamento-lg);
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: var(--espacamento-lg) var(--espacamento-xl);
+    }
+
+    /* === Card da questão === */
+    .questao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      padding: var(--espacamento-xl);
+      box-shadow: var(--sombra-card);
+    }
+
+    .questao-meta-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      padding-bottom: var(--espacamento-md);
+      border-bottom: 1px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-md);
+      flex-wrap: wrap;
+    }
+
+    .questao-codigo {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .questao-area-tag {
+      background: #BEE3F8;
+      color: #2A4365;
+      padding: 3px 10px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+    }
+
+    .questao-meta-bar .badge {
+      font-size: var(--fonte-tamanho-xs);
+    }
+
+    .btn-marcar-revisao {
+      margin-left: auto;
+      background: transparent;
+      border: 1px solid var(--borda-cor);
+      color: var(--texto-secundario);
+      padding: 6px 14px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      transition: var(--transicao);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-marcar-revisao:hover,
+    .btn-marcar-revisao.ativo {
+      border-color: #ECC94B;
+      color: #B7791F;
+      background: #FEFCBF;
+    }
+
+    /* === IA Toolbar (Fase 8.1 - 8.4) === */
+    .ia-toolbar {
+      display: flex;
+      gap: var(--espacamento-sm);
+      padding: var(--espacamento-sm);
+      background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-lg);
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ia-toolbar-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 var(--espacamento-sm);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ia-toolbar-label .ia-tag-mini {
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: 0.6rem;
+      padding: 1px 6px;
+      border-radius: var(--borda-radius-full);
+    }
+
+    .btn-ia {
+      background: var(--branco);
+      border: 1px solid #BEE3F8;
+      color: var(--azul-profundo);
+      padding: 8px 14px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transicao);
+    }
+
+    .btn-ia:hover {
+      border-color: var(--azul-medio);
+      background: var(--cinza-azulado);
+      transform: translateY(-1px);
+    }
+
+    .btn-ia.ativo {
+      background: var(--azul-medio);
+      color: var(--branco);
+      border-color: var(--azul-medio);
+    }
+
+    /* === Enunciado === */
+    .enunciado {
+      font-size: var(--fonte-tamanho-base);
+      line-height: 1.7;
+      color: var(--texto-primario);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .enunciado p {
+      margin-bottom: var(--espacamento-md);
+    }
+
+    /* Palavras-chave destacadas (Fase 8.3) */
+    .palavra-chave {
+      background: linear-gradient(180deg, transparent 60%, #FEFCBF 60%);
+      padding: 0 2px;
+      cursor: help;
+      font-weight: 600;
+      position: relative;
+    }
+
+    /* === Versão Linguagem Simples (Fase 8.1) === */
+    .versao-simples {
+      background: linear-gradient(135deg, #F0FFF4 0%, #E6FFFA 100%);
+      border-left: 4px solid var(--cor-sucesso);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .versao-simples-titulo {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: #22543D;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .versao-simples p {
+      font-size: var(--fonte-tamanho-base);
+      line-height: 1.6;
+      color: var(--texto-primario);
+      margin: 0;
+    }
+
+    /* === Dica IA (Fase 8.4) === */
+    .dica-ia {
+      background: linear-gradient(135deg, #FEFCBF 0%, #FFF8DC 100%);
+      border-left: 4px solid #ECC94B;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .dica-ia-titulo {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: #744210;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .dica-ia p {
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.6;
+      color: var(--texto-primario);
+      margin: 0;
+      font-style: italic;
+    }
+
+    /* === Alternativas === */
+    .alternativas {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .alternativa {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      background: var(--branco);
+      border: 2px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      cursor: pointer;
+      transition: var(--transicao);
+      position: relative;
+    }
+
+    .alternativa:hover {
+      border-color: var(--azul-medio);
+      background: #F7FAFC;
+      transform: translateX(2px);
+    }
+
+    .alternativa.selecionada {
+      border-color: var(--azul-medio);
+      background: #EBF8FF;
+    }
+
+    .alternativa-letra {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--cinza-azulado);
+      color: var(--azul-profundo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-base);
+      flex-shrink: 0;
+      transition: var(--transicao);
+    }
+
+    .alternativa.selecionada .alternativa-letra {
+      background: var(--azul-medio);
+      color: var(--branco);
+    }
+
+    .alternativa-texto {
+      flex: 1;
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.6;
+      color: var(--texto-primario);
+    }
+
+    /* === Navegação anterior/próxima === */
+    .nav-questoes {
+      display: flex;
+      gap: var(--espacamento-md);
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .btn-nav-questao {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--fonte-principal);
+      transition: var(--transicao);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .btn-nav-anterior {
+      background: var(--branco);
+      color: var(--texto-secundario);
+      border: 1px solid var(--borda-cor);
+    }
+
+    .btn-nav-anterior:hover {
+      border-color: var(--azul-medio);
+      color: var(--azul-medio);
+    }
+
+    .btn-nav-proxima {
+      background: var(--azul-medio);
+      color: var(--branco);
+      border: 1px solid var(--azul-medio);
+    }
+
+    .btn-nav-proxima:hover {
+      background: var(--azul-profundo);
+      transform: translateY(-1px);
+    }
+
+    /* === Painel de navegação lateral === */
+    .nav-painel {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-lg);
+      position: sticky;
+      top: 96px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+
+    .nav-painel-titulo {
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .nav-questao-btn {
+      aspect-ratio: 1;
+      border-radius: var(--borda-radius);
+      background: var(--cinza-azulado);
+      border: 2px solid transparent;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      cursor: pointer;
+      transition: var(--transicao);
+      font-family: var(--fonte-principal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-questao-btn:hover {
+      border-color: var(--azul-medio);
+    }
+
+    .nav-questao-btn.atual {
+      background: var(--azul-medio);
+      color: var(--branco);
+      border-color: var(--azul-profundo);
+    }
+
+    .nav-questao-btn.respondida {
+      background: #C6F6D5;
+      color: #22543D;
+    }
+
+    .nav-questao-btn.marcada {
+      background: #FEFCBF;
+      color: #744210;
+    }
+
+    .nav-questao-btn.respondida.marcada {
+      background: linear-gradient(135deg, #C6F6D5 50%, #FEFCBF 50%);
+    }
+
+    .nav-legenda {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .legenda-item {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .legenda-quadrado {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .legenda-respondida { background: #C6F6D5; }
+    .legenda-marcada { background: #FEFCBF; }
+    .legenda-atual { background: var(--azul-medio); }
+    .legenda-vazia { background: var(--cinza-azulado); }
+
+    .nav-resumo {
+      background: var(--cinza-azulado);
+      padding: var(--espacamento-sm) var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-align: center;
+    }
+
+    .nav-resumo strong {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-base);
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 1024px) {
+      .prova-grid { grid-template-columns: 1fr; }
+      .nav-painel { position: static; max-height: none; }
+    }
+
+    @media (max-width: 768px) {
+      .prova-topbar { padding: 0 var(--espacamento-md); flex-wrap: wrap; height: auto; }
+      .prova-topbar-centro { order: 3; flex: 1 0 100%; padding: var(--espacamento-sm) 0; }
+      .layout-prova { padding-top: 130px; }
+      .ia-toolbar { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Top Bar -->
+  <div class="prova-topbar">
+    <div class="prova-topbar-esq">
+      <button class="btn-sair-prova" title="Seu progresso será salvo" onclick="sairProva()">
+        ✕ Sair
+      </button>
+      <div class="prova-nome">
+        ENEM 2025 — Caderno Amarelo
+        <small>Matemática · Médio</small>
+      </div>
+    </div>
+
+    <div class="prova-topbar-centro">
+      <div>
+        <div class="progresso-info">Progresso</div>
+        <div class="progresso-numero">Questão 5 de 30</div>
+      </div>
+      <div class="progresso-barra-wrap">
+        <div class="progresso-barra">
+          <div class="progresso-barra-fill" style="width: 16.6%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prova-topbar-dir">
+      <div class="cronometro">
+        <span class="cronometro-icone">⏱</span>
+        <span>00:42:15</span>
+      </div>
+      <button class="btn-finalizar" onclick="finalizarProva()">✓ Finalizar</button>
+    </div>
+  </div>
+
+  <!-- Layout principal -->
+  <div class="layout-prova">
+    <div class="prova-grid">
+
+      <!-- Card da questão -->
+      <div class="questao-card">
+
+        <!-- Meta bar -->
+        <div class="questao-meta-bar">
+          <span class="questao-codigo">ENEM-2025-AM-Q05</span>
+          <span class="questao-area-tag">Matemática</span>
+          <span class="badge badge-medio">Médio</span>
+          <button class="btn-marcar-revisao">⚐ Marcar para revisão</button>
+        </div>
+
+        <!-- IA Toolbar (Fase 8) -->
+        <div class="ia-toolbar">
+          <span class="ia-toolbar-label">
+            ✨ Helen <span class="ia-tag-mini">IA</span>
+          </span>
+          <button class="btn-ia ativo">💡 Versão simplificada</button>
+          <button class="btn-ia">🔑 Palavras-chave</button>
+          <button class="btn-ia">📖 Pedir uma dica</button>
+          <button class="btn-ia">▶ Ouvir questão</button>
+        </div>
+
+        <!-- Versão em Linguagem Simples (Fase 8.1) -->
+        <div class="versao-simples">
+          <div class="versao-simples-titulo">
+            ✨ Versão em Linguagem Simples
+          </div>
+          <p>
+            O <span class="palavra-chave" title="IBGE: Instituto que faz pesquisas sobre a população">IBGE</span>
+            fez uma pesquisa sobre quantas pessoas não sabem ler.
+            A pesquisa mostra que pessoas com deficiência têm <strong>mais dificuldade</strong>
+            para aprender a ler do que pessoas sem deficiência.
+            <br><br>
+            O gráfico mostra duas porcentagens:
+            <br>• Pessoas com deficiência que não sabem ler: <strong>26,8%</strong>
+            <br>• Pessoas sem deficiência que não sabem ler: <strong>11,5%</strong>
+            <br><br>
+            <strong>Quantos pontos percentuais separam as duas porcentagens?</strong>
+          </p>
+        </div>
+
+        <!-- Enunciado original (recolhido) -->
+        <div class="enunciado">
+          <p>
+            <strong>Enunciado original:</strong>
+            Uma pesquisa realizada pelo
+            <span class="palavra-chave" title="IBGE: Instituto Brasileiro de Geografia e Estatística">IBGE</span>
+            revelou que a
+            <span class="palavra-chave" title="Taxa de analfabetismo: porcentagem da população que não sabe ler nem escrever">taxa de analfabetismo</span>
+            entre pessoas com deficiência é significativamente maior do que entre pessoas sem deficiência.
+            Considerando os dados apresentados no gráfico (26,8% para pessoas com deficiência e 11,5% para pessoas sem deficiência),
+            qual é a diferença percentual entre as duas taxas?
+          </p>
+        </div>
+
+        <!-- Dica da IA (Fase 8.4) -->
+        <div class="dica-ia">
+          <div class="dica-ia-titulo">
+            📖 Dica da Helen
+          </div>
+          <p>
+            Para encontrar a diferença entre duas porcentagens, você precisa
+            <strong>subtrair a menor da maior</strong>. Pense: 26,8 menos 11,5 dá quanto?
+            Não vou te dar a resposta, mas você está perto! 💪
+          </p>
+        </div>
+
+        <!-- Alternativas -->
+        <div class="alternativas">
+          <div class="alternativa">
+            <div class="alternativa-letra">A</div>
+            <div class="alternativa-texto">8,2 pontos percentuais</div>
+          </div>
+          <div class="alternativa">
+            <div class="alternativa-letra">B</div>
+            <div class="alternativa-texto">12,5 pontos percentuais</div>
+          </div>
+          <div class="alternativa selecionada">
+            <div class="alternativa-letra">C</div>
+            <div class="alternativa-texto">15,3 pontos percentuais</div>
+          </div>
+          <div class="alternativa">
+            <div class="alternativa-letra">D</div>
+            <div class="alternativa-texto">18,7 pontos percentuais</div>
+          </div>
+          <div class="alternativa">
+            <div class="alternativa-letra">E</div>
+            <div class="alternativa-texto">21,1 pontos percentuais</div>
+          </div>
+        </div>
+
+        <!-- Navegação anterior/próxima -->
+        <div class="nav-questoes">
+          <button class="btn-nav-questao btn-nav-anterior">← Anterior</button>
+          <button class="btn-nav-questao btn-nav-proxima">Próxima →</button>
+        </div>
+
+      </div>
+
+      <!-- Painel de navegação lateral -->
+      <aside class="nav-painel">
+        <div class="nav-painel-titulo">
+          🗂 Mapa de questões
+        </div>
+
+        <div class="nav-grid">
+          <button class="nav-questao-btn respondida">1</button>
+          <button class="nav-questao-btn respondida">2</button>
+          <button class="nav-questao-btn respondida marcada">3</button>
+          <button class="nav-questao-btn respondida">4</button>
+          <button class="nav-questao-btn atual">5</button>
+          <button class="nav-questao-btn">6</button>
+          <button class="nav-questao-btn">7</button>
+          <button class="nav-questao-btn marcada">8</button>
+          <button class="nav-questao-btn">9</button>
+          <button class="nav-questao-btn">10</button>
+          <button class="nav-questao-btn">11</button>
+          <button class="nav-questao-btn">12</button>
+          <button class="nav-questao-btn">13</button>
+          <button class="nav-questao-btn">14</button>
+          <button class="nav-questao-btn">15</button>
+          <button class="nav-questao-btn">16</button>
+          <button class="nav-questao-btn">17</button>
+          <button class="nav-questao-btn">18</button>
+          <button class="nav-questao-btn">19</button>
+          <button class="nav-questao-btn">20</button>
+          <button class="nav-questao-btn">21</button>
+          <button class="nav-questao-btn">22</button>
+          <button class="nav-questao-btn">23</button>
+          <button class="nav-questao-btn">24</button>
+          <button class="nav-questao-btn">25</button>
+          <button class="nav-questao-btn">26</button>
+          <button class="nav-questao-btn">27</button>
+          <button class="nav-questao-btn">28</button>
+          <button class="nav-questao-btn">29</button>
+          <button class="nav-questao-btn">30</button>
+        </div>
+
+        <div class="nav-legenda">
+          <div class="legenda-item">
+            <span class="legenda-quadrado legenda-atual"></span>
+            <span>Questão atual</span>
+          </div>
+          <div class="legenda-item">
+            <span class="legenda-quadrado legenda-respondida"></span>
+            <span>Respondida</span>
+          </div>
+          <div class="legenda-item">
+            <span class="legenda-quadrado legenda-marcada"></span>
+            <span>Marcada para revisão</span>
+          </div>
+          <div class="legenda-item">
+            <span class="legenda-quadrado legenda-vazia"></span>
+            <span>Não respondida</span>
+          </div>
+        </div>
+
+        <div class="nav-resumo">
+          Você respondeu <strong>4 de 30</strong> questões<br>
+          <span style="font-size: 0.9em;">2 marcadas para revisão</span>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script>
+    function sairProva() {
+      if (confirm('Tem certeza que deseja sair?\n\nSeu progresso será salvo automaticamente. Você pode continuar de onde parou a qualquer momento pelo Dashboard.')) {
+        window.location.href = '/aluno/dashboard.html';
+      }
+    }
+
+    function finalizarProva() {
+      if (confirm('Você tem 26 questões sem resposta.\n\nDeseja realmente finalizar o simulado agora? Esta ação não pode ser desfeita.')) {
+        window.location.href = '/aluno/simulado-resultado.html';
+      }
+    }
+  </script>
+
+</body>
+</html>

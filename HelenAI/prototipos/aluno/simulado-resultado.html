@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Resultado do Simulado</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* === Header de comemoração === */
+    .resultado-header {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      padding: var(--espacamento-2xl) var(--espacamento-xl);
+      margin-bottom: var(--espacamento-lg);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .resultado-header::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .resultado-header::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      left: -100px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(60, 200, 208, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .resultado-emoji {
+      font-size: 3.5rem;
+      margin-bottom: var(--espacamento-sm);
+      position: relative;
+    }
+
+    .resultado-titulo {
+      color: var(--branco);
+      font-size: var(--fonte-tamanho-3xl);
+      margin-bottom: var(--espacamento-xs);
+      position: relative;
+    }
+
+    .resultado-subtitulo {
+      font-size: var(--fonte-tamanho-base);
+      opacity: 0.92;
+      margin: 0;
+      position: relative;
+    }
+
+    .nota-grande {
+      font-size: 5rem;
+      font-weight: 800;
+      line-height: 1;
+      margin: var(--espacamento-md) 0 var(--espacamento-sm);
+      position: relative;
+      letter-spacing: -2px;
+    }
+
+    .nota-fracao {
+      font-size: var(--fonte-tamanho-lg);
+      opacity: 0.9;
+      position: relative;
+    }
+
+    /* === Stats grid === */
+    .resultado-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .stat-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      text-align: center;
+    }
+
+    .stat-card-icone {
+      font-size: 2rem;
+      margin-bottom: var(--espacamento-xs);
+    }
+
+    .stat-card-valor {
+      font-size: var(--fonte-tamanho-2xl);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .stat-card-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card.acertos { border-top: 4px solid var(--cor-sucesso); }
+    .stat-card.erros { border-top: 4px solid var(--cor-erro); }
+    .stat-card.tempo { border-top: 4px solid var(--azul-medio); }
+    .stat-card.xp { border-top: 4px solid #ECC94B; }
+
+    /* === XP ganho === */
+    .xp-ganho {
+      color: var(--cor-sucesso);
+    }
+
+    .xp-ganho strong {
+      font-size: 1.4em;
+    }
+
+    /* === Cards de seções === */
+    .secao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .secao-card h3 {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    /* === Badge desbloqueado === */
+    .badge-desbloqueado {
+      background: linear-gradient(135deg, #FEFCBF 0%, #FFF8DC 100%);
+      border: 2px solid #ECC94B;
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      animation: brilhar 2s ease-in-out infinite;
+    }
+
+    @keyframes brilhar {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(236, 201, 75, 0.4); }
+      50%      { box-shadow: 0 0 30px 4px rgba(236, 201, 75, 0.3); }
+    }
+
+    .badge-desbloqueado-icone {
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+
+    .badge-desbloqueado-info {
+      flex: 1;
+    }
+
+    .badge-desbloqueado-titulo {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: #B7791F;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .badge-desbloqueado-nome {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 2px;
+    }
+
+    .badge-desbloqueado-desc {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+    }
+
+    /* === Layout duas colunas === */
+    .resultado-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .grafico-radar-container {
+      max-height: 320px;
+    }
+
+    /* === Comparativo === */
+    .comparativo-bar {
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      padding: var(--espacamento-md);
+      margin-bottom: var(--espacamento-md);
+      position: relative;
+    }
+
+    .comparativo-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      margin-bottom: 6px;
+    }
+
+    .comparativo-barra-bg {
+      height: 24px;
+      background: var(--branco);
+      border-radius: var(--borda-radius);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      position: relative;
+    }
+
+    .comparativo-barra-fill {
+      height: 16px;
+      border-radius: var(--borda-radius);
+      transition: width 0.6s ease;
+      position: absolute;
+      left: 4px;
+    }
+
+    .comparativo-valor {
+      position: relative;
+      z-index: 2;
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-left: auto;
+    }
+
+    .comparativo-voce .comparativo-barra-fill {
+      background: linear-gradient(90deg, var(--azul-medio) 0%, var(--ciano) 100%);
+    }
+
+    .comparativo-media .comparativo-barra-fill {
+      background: var(--texto-terciario);
+    }
+
+    /* === Gabarito === */
+    .gabarito-lista {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+    }
+
+    .gabarito-item {
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      overflow: hidden;
+    }
+
+    .gabarito-item.acerto {
+      border-left: 4px solid var(--cor-sucesso);
+    }
+
+    .gabarito-item.erro {
+      border-left: 4px solid var(--cor-erro);
+    }
+
+    .gabarito-header {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-md);
+      background: var(--branco);
+    }
+
+    .gabarito-numero {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-sm);
+      flex-shrink: 0;
+    }
+
+    .gabarito-item.acerto .gabarito-numero {
+      background: #C6F6D5;
+      color: #22543D;
+    }
+
+    .gabarito-item.erro .gabarito-numero {
+      background: #FED7D7;
+      color: #742A2A;
+    }
+
+    .gabarito-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .gabarito-pergunta {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-bottom: 2px;
+    }
+
+    .gabarito-meta {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    .gabarito-respostas {
+      display: flex;
+      gap: var(--espacamento-sm);
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .resposta-bolha {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-xs);
+    }
+
+    .resposta-bolha.sua-acerto {
+      background: var(--cor-sucesso);
+      color: var(--branco);
+    }
+
+    .resposta-bolha.sua-erro {
+      background: var(--cor-erro);
+      color: var(--branco);
+    }
+
+    .resposta-bolha.correta {
+      background: var(--cor-sucesso);
+      color: var(--branco);
+      border: 2px solid var(--branco);
+      box-shadow: 0 0 0 1px var(--cor-sucesso);
+    }
+
+    .resposta-flecha {
+      color: var(--texto-terciario);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    /* === Explicação IA (Fase 8.5) === */
+    .explicacao-ia {
+      padding: var(--espacamento-md) var(--espacamento-md) var(--espacamento-md) calc(36px + var(--espacamento-md) + var(--espacamento-md));
+      background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+      border-top: 1px solid #BEE3F8;
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.6;
+      color: var(--texto-primario);
+    }
+
+    .explicacao-ia-header {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-sm);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ia-tag-mini {
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: 0.6rem;
+      padding: 1px 6px;
+      border-radius: var(--borda-radius-full);
+    }
+
+    /* === Posição no ranking === */
+    .ranking-card {
+      background: linear-gradient(135deg, #FAF5FF 0%, #FFF5F7 100%);
+      border-left: 4px solid #805AD5;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .ranking-icone {
+      font-size: 2.4rem;
+    }
+
+    .ranking-info {
+      flex: 1;
+    }
+
+    .ranking-titulo {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: #553C9A;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .ranking-texto {
+      font-size: var(--fonte-tamanho-base);
+      color: var(--texto-primario);
+    }
+
+    .ranking-texto strong {
+      color: #553C9A;
+      font-size: 1.2em;
+    }
+
+    /* === Ações === */
+    .resultado-acoes {
+      display: flex;
+      gap: var(--espacamento-md);
+      margin-top: var(--espacamento-lg);
+    }
+
+    .resultado-acoes .btn {
+      flex: 1;
+      padding: 16px;
+      font-size: var(--fonte-tamanho-base);
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 1024px) {
+      .resultado-stats { grid-template-columns: repeat(2, 1fr); }
+      .resultado-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .resultado-acoes { flex-direction: column; }
+      .nota-grande { font-size: 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <!-- Header de comemoração -->
+      <div class="resultado-header">
+        <div class="resultado-emoji">🎉</div>
+        <h1 class="resultado-titulo">Parabéns, Maria!</h1>
+        <p class="resultado-subtitulo">Você concluiu o simulado <strong>ENEM 2025 — Caderno Amarelo</strong></p>
+        <div class="nota-grande">82%</div>
+        <div class="nota-fracao">74 acertos de 90 questões</div>
+      </div>
+
+      <!-- Stats principais -->
+      <div class="resultado-stats">
+        <div class="stat-card acertos">
+          <div class="stat-card-icone">✓</div>
+          <div class="stat-card-valor">74</div>
+          <div class="stat-card-label">Acertos</div>
+        </div>
+        <div class="stat-card erros">
+          <div class="stat-card-icone">✗</div>
+          <div class="stat-card-valor">16</div>
+          <div class="stat-card-label">Erros</div>
+        </div>
+        <div class="stat-card tempo">
+          <div class="stat-card-icone">⏱</div>
+          <div class="stat-card-valor">4h 18m</div>
+          <div class="stat-card-label">Tempo total</div>
+        </div>
+        <div class="stat-card xp">
+          <div class="stat-card-icone">⭐</div>
+          <div class="stat-card-valor xp-ganho">+150</div>
+          <div class="stat-card-label">XP ganho</div>
+        </div>
+      </div>
+
+      <!-- Badge desbloqueado -->
+      <div class="badge-desbloqueado">
+        <div class="badge-desbloqueado-icone">🏃</div>
+        <div class="badge-desbloqueado-info">
+          <div class="badge-desbloqueado-titulo">🎉 Nova conquista desbloqueada!</div>
+          <div class="badge-desbloqueado-nome">Maratonista</div>
+          <div class="badge-desbloqueado-desc">Você completou 10 simulados — continue no ritmo!</div>
+        </div>
+      </div>
+
+      <!-- Posição no ranking -->
+      <div class="ranking-card">
+        <div class="ranking-icone">🏆</div>
+        <div class="ranking-info">
+          <div class="ranking-titulo">Sua posição neste simulado</div>
+          <div class="ranking-texto">
+            Você ficou em <strong>#23</strong> de <strong>1.247</strong> alunos que fizeram este simulado.
+            Top <strong>2%</strong>! 🎯
+          </div>
+        </div>
+      </div>
+
+      <!-- Layout duas colunas: gráfico + comparativo -->
+      <div class="resultado-grid">
+
+        <!-- Desempenho por área BNCC -->
+        <div class="secao-card" style="margin: 0;">
+          <h3>📊 Seu desempenho por área</h3>
+          <div class="grafico-radar-container">
+            <canvas id="grafico-radar"></canvas>
+          </div>
+        </div>
+
+        <!-- Comparativo com a média -->
+        <div class="secao-card" style="margin: 0;">
+          <h3>📈 Comparativo com outros alunos</h3>
+          <div class="comparativo-bar comparativo-voce">
+            <div class="comparativo-label">
+              <span>SUA NOTA</span>
+              <span>82%</span>
+            </div>
+            <div class="comparativo-barra-bg">
+              <div class="comparativo-barra-fill" style="width: 82%;"></div>
+            </div>
+          </div>
+          <div class="comparativo-bar comparativo-media">
+            <div class="comparativo-label">
+              <span>MÉDIA GERAL</span>
+              <span>67%</span>
+            </div>
+            <div class="comparativo-barra-bg">
+              <div class="comparativo-barra-fill" style="width: 67%;"></div>
+            </div>
+          </div>
+          <div class="comparativo-bar comparativo-media">
+            <div class="comparativo-label">
+              <span>MELHOR NOTA</span>
+              <span>96%</span>
+            </div>
+            <div class="comparativo-barra-bg">
+              <div class="comparativo-barra-fill" style="width: 96%;"></div>
+            </div>
+          </div>
+          <p class="text-small text-muted" style="margin-top: var(--espacamento-md); margin-bottom: 0;">
+            Você está <strong style="color: var(--cor-sucesso);">15 pontos acima</strong> da média geral. Excelente trabalho! 🌟
+          </p>
+        </div>
+      </div>
+
+      <!-- Gabarito -->
+      <div class="secao-card">
+        <h3>📋 Gabarito comentado</h3>
+        <p class="text-small text-muted" style="margin-top: -8px; margin-bottom: var(--espacamento-md);">
+          Veja as questões que você errou e a explicação da Helen para cada uma
+        </p>
+
+        <div class="gabarito-lista">
+
+          <!-- Questão errada com explicação IA -->
+          <div class="gabarito-item erro">
+            <div class="gabarito-header">
+              <div class="gabarito-numero">5</div>
+              <div class="gabarito-info">
+                <div class="gabarito-pergunta">Diferença entre as taxas de analfabetismo (gráfico do IBGE)</div>
+                <div class="gabarito-meta">Matemática · EM13MAT101 · Médio</div>
+              </div>
+              <div class="gabarito-respostas">
+                <div class="resposta-bolha sua-erro">B</div>
+                <span class="resposta-flecha">→</span>
+                <div class="resposta-bolha correta">C</div>
+              </div>
+            </div>
+            <div class="explicacao-ia">
+              <div class="explicacao-ia-header">
+                ✨ Helen explica <span class="ia-tag-mini">IA</span>
+              </div>
+              Para encontrar a diferença entre duas porcentagens, você subtrai a menor da maior:
+              <strong>26,8% − 11,5% = 15,3 pontos percentuais</strong>. A alternativa correta é a <strong>C</strong>.
+              Cuidado: <em>"diferença percentual"</em> nesse caso é apenas a subtração das duas porcentagens
+              (em "pontos percentuais"), não uma divisão. Vamos revisar esse tipo de questão juntas? 💪
+            </div>
+          </div>
+
+          <!-- Outra errada -->
+          <div class="gabarito-item erro">
+            <div class="gabarito-header">
+              <div class="gabarito-numero">12</div>
+              <div class="gabarito-info">
+                <div class="gabarito-pergunta">Função quadrática — vértice e raízes</div>
+                <div class="gabarito-meta">Matemática · EM13MAT301 · Médio</div>
+              </div>
+              <div class="gabarito-respostas">
+                <div class="resposta-bolha sua-erro">A</div>
+                <span class="resposta-flecha">→</span>
+                <div class="resposta-bolha correta">D</div>
+              </div>
+            </div>
+            <div class="explicacao-ia">
+              <div class="explicacao-ia-header">
+                ✨ Helen explica <span class="ia-tag-mini">IA</span>
+              </div>
+              O vértice da parábola está em <strong>x = -b/2a</strong>. No problema, a = 2 e b = -8,
+              então o vértice está em x = 2. Substituindo, y = -6. A alternativa correta é a <strong>D</strong>.
+              Você foi quase lá — só faltou substituir x no resultado final.
+            </div>
+          </div>
+
+          <!-- Questão correta -->
+          <div class="gabarito-item acerto">
+            <div class="gabarito-header">
+              <div class="gabarito-numero">1</div>
+              <div class="gabarito-info">
+                <div class="gabarito-pergunta">Lei 15.263/2025 — Política Nacional de Linguagem Simples</div>
+                <div class="gabarito-meta">Linguagens · EM13LGG101 · Fácil</div>
+              </div>
+              <div class="gabarito-respostas">
+                <div class="resposta-bolha sua-acerto">B</div>
+                <span class="resposta-flecha">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="gabarito-item acerto">
+            <div class="gabarito-header">
+              <div class="gabarito-numero">2</div>
+              <div class="gabarito-info">
+                <div class="gabarito-pergunta">Princípios do Desenho Universal para Aprendizagem (DUA)</div>
+                <div class="gabarito-meta">Ciências Humanas · EM13CHS101 · Difícil</div>
+              </div>
+              <div class="gabarito-respostas">
+                <div class="resposta-bolha sua-acerto">A</div>
+                <span class="resposta-flecha">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="gabarito-item acerto">
+            <div class="gabarito-header">
+              <div class="gabarito-numero">3</div>
+              <div class="gabarito-info">
+                <div class="gabarito-pergunta">Interpretação de texto — figuras de linguagem</div>
+                <div class="gabarito-meta">Linguagens · EM13LGG301 · Médio</div>
+              </div>
+              <div class="gabarito-respostas">
+                <div class="resposta-bolha sua-acerto">D</div>
+                <span class="resposta-flecha">✓</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="gabarito-item acerto">
+            <div class="gabarito-header">
+              <div class="gabarito-numero">4</div>
+              <div class="gabarito-info">
+                <div class="gabarito-pergunta">Cálculo de probabilidade — eventos independentes</div>
+                <div class="gabarito-meta">Matemática · EM13MAT501 · Médio</div>
+              </div>
+              <div class="gabarito-respostas">
+                <div class="resposta-bolha sua-acerto">C</div>
+                <span class="resposta-flecha">✓</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Ações -->
+        <div class="resultado-acoes">
+          <button class="btn btn-secundario">📋 Ver todas as 90 questões</button>
+          <a href="/aluno/simulado-inicio.html" class="btn btn-secundario">↻ Refazer simulado</a>
+          <a href="/aluno/dashboard.html" class="btn btn-primario">📊 Voltar ao Dashboard</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Gráfico radar de desempenho por área
+    new Chart(document.getElementById('grafico-radar'), {
+      type: 'radar',
+      data: {
+        labels: ['Matemática', 'Linguagens', 'Ciências da Natureza', 'Ciências Humanas'],
+        datasets: [{
+          label: 'Sua nota neste simulado',
+          data: [78, 92, 75, 85],
+          borderColor: '#2B6CB0',
+          backgroundColor: 'rgba(60, 200, 208, 0.25)',
+          pointBackgroundColor: '#2B6CB0',
+          pointBorderColor: '#fff',
+          pointRadius: 5,
+          borderWidth: 2
+        }, {
+          label: 'Média geral',
+          data: [62, 70, 65, 68],
+          borderColor: '#A0AEC0',
+          backgroundColor: 'rgba(160, 174, 192, 0.1)',
+          pointBackgroundColor: '#A0AEC0',
+          pointBorderColor: '#fff',
+          pointRadius: 4,
+          borderWidth: 2,
+          borderDash: [4, 4]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            beginAtZero: true,
+            max: 100,
+            ticks: { stepSize: 20, font: { size: 10 } },
+            pointLabels: { font: { size: 11, weight: '600' } }
+          }
+        },
+        plugins: { legend: { position: 'bottom' } }
+      }
+    });
+  </script>
+
+</body>
+</html>

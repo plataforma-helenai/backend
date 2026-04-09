@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Meu Perfil</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .perfil-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: var(--espacamento-lg);
+      align-items: start;
+    }
+
+    /* === Card de avatar/identidade === */
+    .perfil-identidade {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      text-align: center;
+      position: sticky;
+      top: 80px;
+    }
+
+    .perfil-avatar-grande {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+      font-weight: 700;
+      margin: 0 auto var(--espacamento-md);
+      box-shadow: var(--sombra-card);
+      border: 4px solid var(--branco);
+      position: relative;
+    }
+
+    .perfil-avatar-grande::after {
+      content: '📷';
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 32px;
+      height: 32px;
+      background: var(--branco);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      box-shadow: var(--sombra-card);
+      cursor: pointer;
+    }
+
+    .perfil-nome {
+      font-size: var(--fonte-tamanho-xl);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .perfil-email {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .perfil-nivel-card {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .perfil-nivel-card .nivel-titulo {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .perfil-nivel-card .nivel-numero-grande {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .perfil-nivel-card .nivel-barra {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+
+    .perfil-nivel-card .nivel-barra-fill {
+      height: 100%;
+      background: var(--branco);
+      border-radius: var(--borda-radius-full);
+    }
+
+    .perfil-nivel-card .nivel-info {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+    }
+
+    .perfil-stats-mini {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .stat-mini {
+      background: var(--cinza-azulado);
+      padding: var(--espacamento-sm);
+      border-radius: var(--borda-radius);
+      text-align: center;
+    }
+
+    .stat-mini-valor {
+      font-size: var(--fonte-tamanho-xl);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .stat-mini-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 2px;
+    }
+
+    .perfil-membro {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    /* === Cards de seções === */
+    .secao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .secao-card h3 {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .secao-card h3 .secao-icone {
+      font-size: 1.4em;
+    }
+
+    .secao-card-subtitulo {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-top: -8px;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    /* === Formulário === */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-md);
+    }
+
+    .form-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-grupo.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      background: var(--branco);
+      color: var(--texto-primario);
+      transition: var(--transicao);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--azul-medio);
+      box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.15);
+    }
+
+    .form-acoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-md);
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    /* === Badges === */
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: var(--espacamento-md);
+    }
+
+    .badge-item {
+      text-align: center;
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      background: var(--cinza-azulado);
+      transition: var(--transicao);
+      position: relative;
+    }
+
+    .badge-item.conquistado {
+      background: linear-gradient(135deg, #FEFCBF 0%, #FFF8DC 100%);
+      border: 2px solid #ECC94B;
+    }
+
+    .badge-item.conquistado:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .badge-item.bloqueado {
+      opacity: 0.5;
+      filter: grayscale(0.8);
+    }
+
+    .badge-icone {
+      font-size: 2.5rem;
+      margin-bottom: var(--espacamento-sm);
+      display: block;
+    }
+
+    .badge-nome {
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .badge-desc {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      line-height: 1.3;
+    }
+
+    .badge-conquistado-tag {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--cor-sucesso);
+      color: var(--branco);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      box-shadow: var(--sombra-card);
+    }
+
+    /* === Configurações IA + Acessibilidade === */
+    .config-grupo {
+      padding: var(--espacamento-md) 0;
+      border-bottom: 1px solid var(--borda-cor);
+    }
+
+    .config-grupo:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .config-linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-sm) 0;
+    }
+
+    .config-info {
+      flex: 1;
+    }
+
+    .config-titulo {
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      color: var(--texto-primario);
+      margin-bottom: 2px;
+    }
+
+    .config-desc {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    /* Toggle switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--borda-cor);
+      transition: 0.3s;
+      border-radius: var(--borda-radius-full);
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--branco);
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .switch input:checked + .slider {
+      background: var(--azul-medio);
+    }
+
+    .switch input:checked + .slider::before {
+      transform: translateX(20px);
+    }
+
+    .config-select {
+      padding: 8px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      background: var(--branco);
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .config-grupo-titulo {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--azul-medio);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .ia-tag {
+      display: inline-block;
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: var(--borda-radius-full);
+      font-weight: 700;
+    }
+
+    /* === Métricas de desempenho === */
+    .desempenho-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .desempenho-stat {
+      text-align: center;
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+    }
+
+    .desempenho-stat-valor {
+      font-size: var(--fonte-tamanho-2xl);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .desempenho-stat-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 4px;
+    }
+
+    .grafico-evolucao {
+      max-height: 280px;
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 1024px) {
+      .perfil-grid { grid-template-columns: 1fr; }
+      .perfil-identidade { position: static; }
+      .desempenho-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .badges-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item ativo">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Meu Perfil</h1>
+          <p class="conteudo-subtitulo">Gerencie seus dados, conquistas e preferências de aprendizagem</p>
+        </div>
+      </div>
+
+      <div class="perfil-grid">
+
+        <!-- Coluna esquerda: identidade -->
+        <div class="perfil-identidade">
+          <div class="perfil-avatar-grande">MO</div>
+          <div class="perfil-nome">Maria Oliveira</div>
+          <div class="perfil-email">maria.oliveira@email.com</div>
+
+          <div class="perfil-nivel-card">
+            <div class="nivel-titulo">Seu nível</div>
+            <div class="nivel-numero-grande">Nível 5</div>
+            <div class="nivel-barra">
+              <div class="nivel-barra-fill" style="width: 78%;"></div>
+            </div>
+            <div class="nivel-info">2.350 / 3.000 XP</div>
+          </div>
+
+          <div class="perfil-stats-mini">
+            <div class="stat-mini">
+              <div class="stat-mini-valor">23</div>
+              <div class="stat-mini-label">Simulados</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-mini-valor">74%</div>
+              <div class="stat-mini-label">Acerto</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-mini-valor">🔥 12</div>
+              <div class="stat-mini-label">Streak</div>
+            </div>
+            <div class="stat-mini">
+              <div class="stat-mini-valor">4</div>
+              <div class="stat-mini-label">Badges</div>
+            </div>
+          </div>
+
+          <div class="perfil-membro">
+            Membro desde Fevereiro de 2026
+          </div>
+        </div>
+
+        <!-- Coluna direita: seções -->
+        <div>
+
+          <!-- Dados pessoais -->
+          <div class="secao-card">
+            <h3><span class="secao-icone">👤</span> Dados Pessoais</h3>
+            <div class="form-grid">
+              <div class="form-grupo">
+                <label class="form-label">Nome completo</label>
+                <input type="text" class="form-input" value="Maria Oliveira">
+              </div>
+              <div class="form-grupo">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" value="maria.oliveira@email.com">
+              </div>
+              <div class="form-grupo">
+                <label class="form-label">Senha atual</label>
+                <input type="password" class="form-input" placeholder="••••••••">
+              </div>
+              <div class="form-grupo">
+                <label class="form-label">Nova senha</label>
+                <input type="password" class="form-input" placeholder="Deixe em branco para manter">
+              </div>
+            </div>
+            <div class="form-acoes">
+              <button class="btn btn-secundario">Cancelar</button>
+              <button class="btn btn-primario">Salvar alterações</button>
+            </div>
+          </div>
+
+          <!-- Minhas Conquistas -->
+          <div class="secao-card">
+            <h3><span class="secao-icone">🏆</span> Minhas Conquistas</h3>
+            <p class="secao-card-subtitulo">4 de 8 badges conquistados — continue assim!</p>
+
+            <div class="badges-grid">
+              <div class="badge-item conquistado">
+                <span class="badge-conquistado-tag">✓</span>
+                <span class="badge-icone">🎯</span>
+                <div class="badge-nome">Primeiro Passo</div>
+                <div class="badge-desc">Completou o primeiro simulado</div>
+              </div>
+              <div class="badge-item bloqueado">
+                <span class="badge-icone">⭐</span>
+                <div class="badge-nome">Nota Máxima</div>
+                <div class="badge-desc">100% em um simulado</div>
+              </div>
+              <div class="badge-item conquistado">
+                <span class="badge-conquistado-tag">✓</span>
+                <span class="badge-icone">🏃</span>
+                <div class="badge-nome">Maratonista</div>
+                <div class="badge-desc">Completou 10 simulados</div>
+              </div>
+              <div class="badge-item bloqueado">
+                <span class="badge-icone">📐</span>
+                <div class="badge-nome">Especialista Mat.</div>
+                <div class="badge-desc">80%+ em 20 questões</div>
+              </div>
+              <div class="badge-item conquistado">
+                <span class="badge-conquistado-tag">✓</span>
+                <span class="badge-icone">🔥</span>
+                <div class="badge-nome">Streak 7</div>
+                <div class="badge-desc">7 dias consecutivos</div>
+              </div>
+              <div class="badge-item bloqueado">
+                <span class="badge-icone">💪</span>
+                <div class="badge-nome">Streak 30</div>
+                <div class="badge-desc">30 dias consecutivos</div>
+              </div>
+              <div class="badge-item bloqueado">
+                <span class="badge-icone">🤝</span>
+                <div class="badge-nome">Colaborador</div>
+                <div class="badge-desc">Simulado aprovado</div>
+              </div>
+              <div class="badge-item conquistado">
+                <span class="badge-conquistado-tag">✓</span>
+                <span class="badge-icone">📤</span>
+                <div class="badge-nome">Social</div>
+                <div class="badge-desc">Compartilhou 5 simulados</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desempenho Geral -->
+          <div class="secao-card">
+            <h3><span class="secao-icone">📊</span> Desempenho Geral</h3>
+            <div class="desempenho-stats">
+              <div class="desempenho-stat">
+                <div class="desempenho-stat-valor">23</div>
+                <div class="desempenho-stat-label">Simulados realizados</div>
+              </div>
+              <div class="desempenho-stat">
+                <div class="desempenho-stat-valor">690</div>
+                <div class="desempenho-stat-label">Questões respondidas</div>
+              </div>
+              <div class="desempenho-stat">
+                <div class="desempenho-stat-valor">74%</div>
+                <div class="desempenho-stat-label">Taxa de acerto geral</div>
+              </div>
+              <div class="desempenho-stat">
+                <div class="desempenho-stat-valor">2.350</div>
+                <div class="desempenho-stat-label">XP acumulado</div>
+              </div>
+            </div>
+            <canvas id="grafico-evolucao" class="grafico-evolucao"></canvas>
+          </div>
+
+          <!-- Configurações de IA e Linguagem Simples (Fase 8.8) -->
+          <div class="secao-card">
+            <h3><span class="secao-icone">✨</span> IA e Linguagem Simples <span class="ia-tag">IA</span></h3>
+            <p class="secao-card-subtitulo">Personalize como a IA te ajuda durante os simulados</p>
+
+            <div class="config-grupo">
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Sempre usar Linguagem Simples</div>
+                  <div class="config-desc">Abre todas as questões já no formato simplificado (Lei 15.263/2025)</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Mostrar dicas da IA</div>
+                  <div class="config-desc">Botão de dica disponível em cada questão (sem revelar a resposta)</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Receber sugestões de estudo</div>
+                  <div class="config-desc">Trilhas personalizadas e recomendações no dashboard</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Resumo semanal da IA</div>
+                  <div class="config-desc">Relatório semanal com insights sobre seu progresso</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked>
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Nível de simplificação</div>
+                  <div class="config-desc">O quanto a IA simplifica o texto das questões</div>
+                </div>
+                <select class="config-select">
+                  <option>Leve</option>
+                  <option selected>Moderado</option>
+                  <option>Máximo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configurações de Acessibilidade -->
+          <div class="secao-card">
+            <h3><span class="secao-icone">♿</span> Acessibilidade</h3>
+            <p class="secao-card-subtitulo">Suas preferências definidas no cadastro — você pode mudar a qualquer momento</p>
+
+            <div class="config-grupo">
+              <div class="config-grupo-titulo">📖 Leitura</div>
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Alto contraste</div>
+                  <div class="config-desc">Cores com maior contraste para melhor visibilidade</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Fonte para dislexia</div>
+                  <div class="config-desc">Usar OpenDyslexic para facilitar a leitura</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Paleta para daltonismo</div>
+                  <div class="config-desc">Cores adaptadas para deuteranopia/protanopia</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="config-grupo">
+              <div class="config-grupo-titulo">🎧 Áudio e LIBRAS</div>
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Ledor automático</div>
+                  <div class="config-desc">Lê o conteúdo da tela em voz alta automaticamente</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Velocidade do ledor</div>
+                  <div class="config-desc">Quão rápido a voz lê o conteúdo</div>
+                </div>
+                <select class="config-select">
+                  <option>0.75x</option>
+                  <option selected>1.0x (normal)</option>
+                  <option>1.25x</option>
+                  <option>1.5x</option>
+                </select>
+              </div>
+              <div class="config-linha">
+                <div class="config-info">
+                  <div class="config-titulo">Janela de LIBRAS</div>
+                  <div class="config-desc">Mostra o intérprete virtual em todas as telas</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="form-acoes">
+              <button class="btn btn-primario">Salvar preferências</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Gráfico de evolução ao longo do tempo
+    new Chart(document.getElementById('grafico-evolucao'), {
+      type: 'line',
+      data: {
+        labels: ['Fev', 'Mar (S1)', 'Mar (S2)', 'Mar (S3)', 'Mar (S4)', 'Abr (S1)', 'Abr (S2)'],
+        datasets: [{
+          label: 'Sua média de acerto (%)',
+          data: [52, 58, 64, 67, 71, 73, 74],
+          borderColor: '#2B6CB0',
+          backgroundColor: 'rgba(60, 200, 208, 0.15)',
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: '#2B6CB0',
+          pointBorderColor: '#fff',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 100,
+            ticks: { callback: v => v + '%' }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

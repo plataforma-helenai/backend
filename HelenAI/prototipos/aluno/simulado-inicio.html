@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Iniciar Simulado</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .inicio-wrapper {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: var(--espacamento-md) 0;
+    }
+
+    /* === Card principal === */
+    .inicio-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+    }
+
+    .inicio-header {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      padding: var(--espacamento-2xl) var(--espacamento-xl);
+      text-align: center;
+      position: relative;
+    }
+
+    .inicio-header::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .inicio-header::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(60, 200, 208, 0.18) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .inicio-tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      padding: 4px 14px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-md);
+      position: relative;
+    }
+
+    .inicio-titulo {
+      color: var(--branco);
+      font-size: var(--fonte-tamanho-3xl);
+      font-weight: 700;
+      margin-bottom: var(--espacamento-sm);
+      position: relative;
+    }
+
+    .inicio-subtitulo {
+      font-size: var(--fonte-tamanho-base);
+      opacity: 0.92;
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .inicio-corpo {
+      padding: var(--espacamento-xl);
+    }
+
+    /* === Stats em destaque === */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .stat-bloco {
+      text-align: center;
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+    }
+
+    .stat-bloco-icone {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .stat-bloco-valor {
+      font-size: var(--fonte-tamanho-2xl);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .stat-bloco-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* === Áreas BNCC === */
+    .areas-cobertas {
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .areas-cobertas-titulo {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .areas-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--espacamento-sm);
+    }
+
+    .area-tag {
+      background: #BEE3F8;
+      color: #2A4365;
+      padding: 6px 14px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+    }
+
+    /* === Box de instruções (DUA) === */
+    .instrucoes {
+      background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+      border-left: 4px solid var(--azul-medio);
+      padding: var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .instrucoes-titulo {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-base);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .instrucoes-lista {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-sm) var(--espacamento-md);
+    }
+
+    .instrucoes-lista li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+    }
+
+    .instrucoes-lista li::before {
+      content: '✓';
+      color: var(--cor-sucesso);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* === Toggle do cronômetro === */
+    .cronometro-toggle {
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .cronometro-info {
+      flex: 1;
+    }
+
+    .cronometro-titulo {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-base);
+      font-weight: 600;
+      color: var(--azul-profundo);
+      margin-bottom: 2px;
+    }
+
+    .cronometro-desc {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+    }
+
+    /* Switch reuso do perfil */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--borda-cor);
+      transition: 0.3s;
+      border-radius: var(--borda-radius-full);
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background: var(--branco);
+      transition: 0.3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .switch input:checked + .slider { background: var(--azul-medio); }
+    .switch input:checked + .slider::before { transform: translateX(24px); }
+
+    /* === Recursos de acessibilidade ativos === */
+    .recursos-ativos {
+      background: linear-gradient(135deg, #FAF5FF 0%, #FFF5F7 100%);
+      border-left: 4px solid #805AD5;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .recursos-titulo {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      color: #553C9A;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .recursos-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--espacamento-sm);
+    }
+
+    .recurso-tag {
+      background: var(--branco);
+      color: #553C9A;
+      padding: 4px 12px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      border: 1px solid #E9D8FD;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* === Botões === */
+    .inicio-acoes {
+      display: flex;
+      gap: var(--espacamento-md);
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .btn-comecar {
+      flex: 2;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border: none;
+      padding: 18px 24px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transicao);
+      font-family: var(--fonte-principal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--espacamento-sm);
+      box-shadow: 0 4px 12px rgba(43, 108, 176, 0.3);
+      text-decoration: none;
+    }
+
+    .btn-comecar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(43, 108, 176, 0.4);
+      color: var(--branco);
+      text-decoration: none;
+    }
+
+    .btn-voltar {
+      flex: 1;
+      background: var(--branco);
+      color: var(--texto-secundario);
+      border: 1px solid var(--borda-cor);
+      padding: 18px 24px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transicao);
+      font-family: var(--fonte-principal);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .btn-voltar:hover {
+      border-color: var(--texto-secundario);
+      color: var(--texto-primario);
+      text-decoration: none;
+    }
+
+    /* === Criador info === */
+    .criador-info-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    .criador-info-bar .criador-avatar-mini {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+
+    /* === Responsivo === */
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .instrucoes-lista { grid-template-columns: 1fr; }
+      .inicio-acoes { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button>
+    <button id="ledor-pause">⏸ Pausar</button>
+    <button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button>
+    <span class="velocidade-atual">1x</span>
+    <button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header">
+      <span>LIBRAS</span>
+      <button id="libras-fechar">✕</button>
+    </div>
+    <div class="libras-janela-corpo">
+      <p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item ativo">🔍 Explorar Simulados</a>
+        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="conteudo-principal">
+
+      <div class="inicio-wrapper">
+        <div class="inicio-card">
+
+          <!-- Header -->
+          <div class="inicio-header">
+            <span class="inicio-tag">📝 Você está prestes a começar</span>
+            <h1 class="inicio-titulo">ENEM 2025 — Caderno Amarelo</h1>
+            <p class="inicio-subtitulo">
+              Simulado completo do ENEM com 90 questões cobrindo todas as áreas do conhecimento. Prepare-se com calma e respire fundo.
+            </p>
+          </div>
+
+          <!-- Corpo -->
+          <div class="inicio-corpo">
+
+            <!-- Stats -->
+            <div class="stats-grid">
+              <div class="stat-bloco">
+                <div class="stat-bloco-icone">📄</div>
+                <div class="stat-bloco-valor">90</div>
+                <div class="stat-bloco-label">Questões</div>
+              </div>
+              <div class="stat-bloco">
+                <div class="stat-bloco-icone">⏱</div>
+                <div class="stat-bloco-valor">5h 30m</div>
+                <div class="stat-bloco-label">Tempo sugerido</div>
+              </div>
+              <div class="stat-bloco">
+                <div class="stat-bloco-icone">📊</div>
+                <div class="stat-bloco-valor">Médio</div>
+                <div class="stat-bloco-label">Dificuldade</div>
+              </div>
+              <div class="stat-bloco">
+                <div class="stat-bloco-icone">👥</div>
+                <div class="stat-bloco-valor">1.247</div>
+                <div class="stat-bloco-label">Já fizeram</div>
+              </div>
+            </div>
+
+            <!-- Áreas cobertas -->
+            <div class="areas-cobertas">
+              <div class="areas-cobertas-titulo">📚 Áreas do conhecimento</div>
+              <div class="areas-tags">
+                <span class="area-tag">Matemática e suas Tecnologias</span>
+                <span class="area-tag">Linguagens, Códigos e suas Tecnologias</span>
+                <span class="area-tag">Ciências da Natureza</span>
+                <span class="area-tag">Ciências Humanas</span>
+              </div>
+            </div>
+
+            <!-- Instruções DUA -->
+            <div class="instrucoes">
+              <div class="instrucoes-titulo">
+                <span>💡</span> Antes de começar, lembre-se:
+              </div>
+              <ul class="instrucoes-lista">
+                <li>Você pode <strong>pausar</strong> e voltar quando quiser</li>
+                <li>O cronômetro é <strong>opcional</strong> — sem pressão</li>
+                <li>Questões podem ser <strong>marcadas para revisão</strong></li>
+                <li>A IA pode <strong>simplificar</strong> qualquer enunciado</li>
+                <li>Use <strong>dicas</strong> sem revelar a resposta</li>
+                <li>Navegue livremente entre as questões</li>
+              </ul>
+            </div>
+
+            <!-- Toggle cronômetro -->
+            <div class="cronometro-toggle">
+              <div class="cronometro-info">
+                <div class="cronometro-titulo">
+                  <span>⏱</span> Usar cronômetro
+                </div>
+                <div class="cronometro-desc">
+                  Quando ativo, mostra contagem regressiva. Mesmo assim você pode finalizar antes ou pausar a qualquer momento.
+                </div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Recursos de acessibilidade ativos -->
+            <div class="recursos-ativos">
+              <div class="recursos-titulo">
+                <span>♿</span> Recursos ativos para você
+              </div>
+              <div class="recursos-tags">
+                <span class="recurso-tag">✨ Linguagem Simples (sempre)</span>
+                <span class="recurso-tag">💡 Dicas da IA</span>
+                <span class="recurso-tag">🔑 Palavras-chave</span>
+                <span class="recurso-tag">▶ Ledor disponível</span>
+              </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="inicio-acoes">
+              <a href="/aluno/explorar-simulados.html" class="btn-voltar">← Voltar</a>
+              <a href="/aluno/simulado-questao.html" class="btn-comecar">
+                ▶ Começar Simulado
+              </a>
+            </div>
+
+            <!-- Criador -->
+            <div class="criador-info-bar">
+              <span>Criado por</span>
+              <div class="criador-avatar-mini">CM</div>
+              <span><strong>Prof. Carlos Mendes</strong> · UFRPE</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+
+</body>
+</html>
