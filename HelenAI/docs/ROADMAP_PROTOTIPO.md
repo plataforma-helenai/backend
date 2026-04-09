@@ -152,10 +152,10 @@ HelenAI/
 
 | # | Tela | Arquivo | Referência MVP_TELAS.md | Status |
 |---|------|---------|-------------------------|--------|
-| 5.1 | Dashboard Aluno | `aluno/dashboard.html` | Seção 5.1 | [ ] |
-| 5.2 | Explorar Simulados | `aluno/explorar-simulados.html` | Seção 5.2 | [ ] |
-| 5.3 | Perfil do Aluno | `aluno/perfil.html` | Seção 5.6 | [ ] |
-| 5.4 | Ranking | `aluno/ranking.html` | Seção 7.3 | [ ] |
+| 5.1 | Dashboard Aluno | `aluno/dashboard.html` | Seção 5.1 | [x] |
+| 5.2 | Explorar Simulados | `aluno/explorar-simulados.html` | Seção 5.2 | [x] |
+| 5.3 | Perfil do Aluno | `aluno/perfil.html` | Seção 5.6 | [x] |
+| 5.4 | Ranking | `aluno/ranking.html` | Seção 7.3 | [x] |
 
 **Interações fake:**
 - Dashboard com dados mockados, gráficos de desempenho
@@ -167,12 +167,13 @@ HelenAI/
 
 ### Fase 6 — Módulo Aluno: Realizar Simulado
 > Fluxo mais importante do aluno — a experiência da prova.
+> Já integra os recursos de IA da Fase 8 (Simplificar, Palavras-chave, Dica, Explicação no resultado).
 
 | # | Tela | Arquivo | Referência MVP_TELAS.md | Status |
 |---|------|---------|-------------------------|--------|
-| 6.1 | Tela de Início do Simulado | `aluno/simulado-inicio.html` | Seção 5.3.1 | [ ] |
-| 6.2 | Tela de Questão (realizando) | `aluno/simulado-questao.html` | Seção 5.3.2 | [ ] |
-| 6.3 | Tela de Resultado | `aluno/simulado-resultado.html` | Seção 5.3.3 | [ ] |
+| 6.1 | Tela de Início do Simulado | `aluno/simulado-inicio.html` | Seção 5.3.1 | [x] |
+| 6.2 | Tela de Questão (realizando) | `aluno/simulado-questao.html` | Seção 5.3.2 | [x] |
+| 6.3 | Tela de Resultado | `aluno/simulado-resultado.html` | Seção 5.3.3 | [x] |
 
 **Interações fake:**
 - Toggle de cronômetro
@@ -265,8 +266,8 @@ HelenAI/
 | **2** | Admin | 5 | Baixa | ⏳ Pendente (virou Fase 9) |
 | **3** | Conteudista: Importação e Questões | 5 | Alta | ✅ Completa |
 | **4** | Conteudista: Simulados e Gestão | 5 | Alta | ✅ Completa |
-| **5** | Aluno: Dashboard e Explorar | 4 | Alta | ⏳ Próxima |
-| **6** | Aluno: Realizar Simulado | 3 | Alta | ⏳ Pendente |
+| **5** | Aluno: Dashboard e Explorar | 4 | Alta | ✅ Completa |
+| **6** | Aluno: Realizar Simulado | 3 | Alta | ✅ Completa |
 | **7** | Aluno: Criação e Compartilhamento | 4 | Média | ⏳ Pendente |
 | **8** | Aluno: IA, Linguagem Simples e DUA | 10 | **Alta** | ⏳ Pendente |
 | **9** | Admin (movido da Fase 2) | 5 | Baixa | ⏳ Pendente |
@@ -280,7 +281,7 @@ HelenAI/
 
 ```
 ✅ Fase 0 (base) → ✅ Fase 1 (login) → ✅ Fase 3 (importação/questões) → ✅ Fase 4 (simulados/gestão)
-→ Fase 5 (dashboard aluno) → Fase 6 (aluno fazendo simulado + IA/DUA da Fase 8)
+→ ✅ Fase 5 (dashboard/explorar/perfil/ranking) → ✅ Fase 6 (realizar simulado + IA/DUA da Fase 8)
 → Fase 7 (aluno criando) → Fase 8 restante → Fase 9 (admin) → Fase 10 (futuro)
 ```
 

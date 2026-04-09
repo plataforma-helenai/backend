@@ -469,6 +469,29 @@
   border-right: 3px solid var(--ciano);
 }
 
+.sidebar-item.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sidebar-item.disabled:hover {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+}
+
+.sidebar-item .em-breve {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--borda-radius-full);
+  margin-left: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .sidebar-item .notificacao {
   background: var(--cor-erro);
   color: var(--branco);
@@ -1086,5 +1109,134 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--espacamento-md);
+  }
+}
+
+/* === Impressão / PDF ===
+   Use Ctrl+P → Salvar como PDF.
+   Oculta navegação fixa, deixa o conteúdo fluir página a página
+   e força cores de fundo (cards, gráficos, badges) a serem impressas. */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  html, body {
+    background: var(--branco) !important;
+  }
+
+  /* Ocultar elementos de UI fixos / interativos */
+  .acessibilidade-bar,
+  .ledor-player,
+  .libras-janela,
+  .sidebar,
+  .appbar,
+  .appbar-dropdown,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  /* Conteúdo principal ocupa a página inteira */
+  .layout {
+    display: block !important;
+  }
+
+  .conteudo-principal {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    padding-top: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+  }
+
+  /* Forçar grids a NÃO colapsarem.
+     A4 com margens fica ~700px, abaixo do breakpoint mobile (768px),
+     então sem isto tudo viraria uma coluna. */
+  .metricas-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+
+  /* Grids específicos do dashboard do aluno */
+  .dashboard-grid     { grid-template-columns: 2fr 1fr !important; }
+  .habilidades-grid   { grid-template-columns: 1fr 1fr !important; }
+  .trilha-passos      { grid-template-columns: repeat(3, 1fr) !important; }
+  .simulados-disponiveis-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+  .saudacao-card {
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Cards de métrica menores na impressão */
+  .card-metrica {
+    padding: 10px !important;
+  }
+  .card-metrica .metrica-valor {
+    font-size: 1.4rem !important;
+  }
+  .card-metrica .metrica-icone {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 1rem !important;
+  }
+
+  /* Evitar quebras feias dentro de blocos */
+  .card,
+  .card-metrica,
+  .secao-card,
+  .grafico-card,
+  .simulado-card,
+  .trilha-passo,
+  .habilidade-item,
+  .simulado-linha,
+  table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  h1, h2, h3, h4, h5 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  /* Tirar sombras pesadas (não imprimem bem) */
+  .card,
+  .card-metrica,
+  .secao-card,
+  .grafico-card,
+  .simulado-card,
+  .filtros-bar {
+    box-shadow: none !important;
+    border: 1px solid var(--borda-cor) !important;
+  }
+
+  /* Não esticar gráficos demais na impressão */
+  canvas {
+    max-height: 320px !important;
+  }
+
+  /* Botões interativos não precisam aparecer no PDF */
+  .btn {
+    display: none !important;
+  }
+
+  a {
+    color: var(--texto-primario) !important;
+    text-decoration: none !important;
   }
 }

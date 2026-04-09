@@ -30,17 +30,17 @@ Ao iniciar uma nova conversa, leia este arquivo + `MVP_TELAS.md` + `ROADMAP_PROT
 
 ---
 
-## Progresso do Protótipo (atualizado 2026-04-06)
+## Progresso do Protótipo (atualizado 2026-04-08)
 
 ### Completas
 - **Fase 0:** Base (CSS global, componentes, acessibilidade, dados fake, navegação)
 - **Fase 1:** Login (3 usuários fake), Cadastro, Recuperação de senha
 - **Fase 3:** Conteudista — Dashboard, Importações (listagem + modal upload + loading), Revisão de questões, Banco de questões (Select2, filtros), Formulário (Quill.js)
 - **Fase 4:** Conteudista — Simulados (lista + detalhes modal + form com composição), Resultados (Chart.js), Meus Alunos (turmas múltiplas), Curadoria (questão por questão)
+- **Fase 5:** Aluno — Dashboard (continue de onde parou + trilha IA + resumo semanal IA + habilidades fracas/fortes + radar BNCC + simulados recentes com acertos/erros/em-andamento + simulados disponíveis), Explorar Simulados, Perfil (configs IA + acessibilidade), Ranking (top 3 + posição do aluno)
+- **Fase 6:** Realizar Simulado — Início (com instruções DUA + toggle cronômetro + recursos ativos), Tela de Questão (modo focado sem sidebar regular, top bar com cronômetro, IA toolbar com Simplificar/Palavras-chave/Dica/Ouvir, painel de navegação lateral com mapa de questões), Resultado (header de comemoração, badge desbloqueado animado, comparativo com média, gabarito comentado com explicação IA por questão errada — Fase 8.5)
 
 ### Próximas
-- **Fase 5:** Dashboard Aluno, Explorar Simulados, Perfil, Ranking
-- **Fase 6:** Realizar Simulado (início, questão com IA/DUA, resultado)
 - **Fase 7:** Aluno criando simulados, importando PDF, compartilhamento
 - **Fase 8:** IA, Linguagem Simples e DUA (integrar nas telas do aluno)
 - **Fase 9:** Admin
@@ -66,6 +66,29 @@ Ao iniciar uma nova conversa, leia este arquivo + `MVP_TELAS.md` + `ROADMAP_PROT
 - Professor pode convidar aluno por email (pré-cria o aluno)
 - Turma tem status: Ativa / Encerrada
 - Professor pode vincular simulados à turma
+
+### Realizar Simulado (Fase 6 — modo prova)
+- A tela `simulado-questao.html` é a única do módulo aluno **sem a sidebar regular** — substituída por uma top bar focada e um painel de navegação de questões à direita
+- Top bar tem: botão `Sair` (com aviso "progresso será salvo"), nome do simulado, progresso "Questão X de N", barra de progresso visual, cronômetro (cor laranja, monoespaçada), botão `Finalizar` verde
+- A IA é apresentada como **"Helen"** numa toolbar fixa acima do enunciado, com 4 botões: `Simplificar` (Linguagem Simples — Fase 8.1), `Palavras-chave` (Fase 8.3), `Pedir uma dica` (Fase 8.4), `Ouvir questão` (TTS)
+- Quando "Simplificar" está ativo, mostra um card verde com a versão em Linguagem Simples (Lei 15.263/2025) acima do enunciado original
+- Palavras-chave aparecem destacadas com underline amarelo + tooltip explicativo
+- Dica da Helen aparece em card amarelo, em itálico, sem revelar resposta
+- Mapa de questões: grid 5 colunas, cada botão tem cor por estado (atual/respondida/marcada/vazia)
+- Resultado: header em gradient com emoji 🎉 + nota grande, badge desbloqueado em card amarelo animado (pulse), comparativo da nota vs média geral vs melhor nota em barras horizontais
+- Gabarito comentado: cada questão errada tem **Helen explica** em card azul-ciano com texto humanizado ("Vamos revisar juntas? 💪") — DUA puro
+- Tom em todas as mensagens: 1ª pessoa, encorajador, sem termos punitivos
+
+### Continue de Onde Parou (futuro — backend)
+- O dashboard do aluno destaca um card no topo "Continue de onde parou" quando há simulado em andamento (não finalizado)
+- Estado a persistir por aluno: `{ simulado_id, questao_atual, respostas_parciais[], tempo_decorrido, ultima_atividade }`
+- Card mostra: nome do simulado, questão atual / total, tempo desde início, % concluído (sobre o total), botão "Continuar" e link "Descartar progresso"
+- Pode haver mais de um simulado pausado; o mais recente vira o card destacado, os outros aparecem na lista de "Simulados Recentes" com borda laranja e botão pequeno "Continuar"
+- Cor laranja (`#ED8936`) é o código visual de "em andamento" em todas as telas do aluno
+- Na lista de Simulados Recentes, a porcentagem dos em-andamento é calculada **sobre as questões já respondidas** (`acertos / (acertos + erros)`), não sobre o total
+- A tela `explorar-simulados.html` também exibe simulados em andamento como card laranja (com barra de progresso, stats parciais e botão `▶ Continuar`) — entrada alternativa pro mesmo fluxo, caso o aluno chegue pelo Explorar e não pelo Dashboard
+- Filtro por status no Explorar: chips no topo da barra de filtros — `Todos`, `⚪ Não iniciados`, `🟠 Em andamento`, `✓ Finalizados` — cada um com badge de contagem
+- Os botões "Continuar" (dashboard + explorar) apontam para `simulado-questao.html` (assumindo retomada do estado salvo)
 
 ### Curadoria
 - Curadoria é **somente para questões de importações de alunos** que marcaram como públicas
@@ -203,8 +226,15 @@ HelenAI/prototipos/
 │   ├── meus-alunos.html        # Turmas + alunos + solicitações
 │   └── curadoria.html          # Vista lista + vista detalhe
 ├── admin/                      # Fase 9 — pendente
-├── aluno/                      # Fases 5-8 — pendente
-└── index.html                  # Redireciona para login
+├── aluno/
+│   ├── dashboard.html              # Continue de onde parou + trilha IA + resumo semanal IA + radar BNCC + recentes em andamento
+│   ├── explorar-simulados.html     # Filtros (chips de status + selects) + cards + card "em andamento" exemplo + tabs
+│   ├── perfil.html                 # Dados + badges + desempenho + configs IA + acessibilidade
+│   ├── ranking.html                # Top 3 podium + tabela + posição do aluno fixa
+│   ├── simulado-inicio.html        # Stats + instruções DUA + toggle cronômetro + recursos ativos
+│   ├── simulado-questao.html       # Modo focado: top bar + IA toolbar + alternativas + nav grid
+│   └── simulado-resultado.html     # Comemoração + badge unlock + comparativo + gabarito IA
+└── index.html                      # Redireciona para login
 ```
 
 ---
@@ -229,3 +259,19 @@ HelenAI/prototipos/
 - Quill 2.0.3 — editor rich text
 - OpenDyslexic — fonte para dislexia
 - Inter — fonte principal
+
+## Ferramentas de Apoio
+
+### gerar-pdf.sh
+Script na raiz do `backend/` que gera PDF de qualquer tela do protótipo via headless Chrome (modo screen, não print — preserva sidebar/appbar/barra de acessibilidade).
+
+```bash
+./gerar-pdf.sh aluno/dashboard.html              # default 1440x2300
+./gerar-pdf.sh aluno/dashboard.html 2500          # altura customizada
+./gerar-pdf.sh conteudista/banco-questoes.html 2800 1440  # altura + largura
+```
+
+- Salva em `HelenAI/pdfs/<modulo>-<tela>.pdf`
+- Usa Pillow do venv local pra converter PNG → PDF (ImageMagick tem PDF bloqueado por policy no Ubuntu)
+- Por que screenshot e não `--print-to-pdf`: modo print força `@media print`, e `position: fixed` (sidebar/appbar) não renderiza corretamente. Screenshot mantém o layout idêntico ao navegador.
+- Pillow está em `requirements.txt`
