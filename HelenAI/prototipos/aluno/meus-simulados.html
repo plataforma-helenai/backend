@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Meus Simulados</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Header da página === */
+    .header-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+      flex-shrink: 0;
+    }
+
+    /* === Mini métricas no topo === */
+    .mini-metricas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .mini-metrica {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      border-left: 4px solid var(--azul-medio);
+    }
+
+    .mini-metrica.importados { border-left-color: #805AD5; }
+    .mini-metrica.realizados  { border-left-color: var(--cor-sucesso); }
+
+    .mini-metrica-icone {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .mini-metrica.importados .mini-metrica-icone {
+      background: #E9D8FD;
+      color: #6B46C1;
+    }
+
+    .mini-metrica.realizados .mini-metrica-icone {
+      background: #C6F6D5;
+      color: #22543D;
+    }
+
+    .mini-metrica-info .valor {
+      font-size: var(--fonte-tamanho-xl);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .mini-metrica-info .label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* === Tabs customizados === */
+    .tabs-meus {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-lg);
+      background: var(--branco);
+      border-top-left-radius: var(--borda-radius-lg);
+      border-top-right-radius: var(--borda-radius-lg);
+      padding: 0 var(--espacamento-md);
+      box-shadow: var(--sombra-card);
+    }
+
+    .tab-meus {
+      padding: 16px 20px;
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transicao);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      font-family: var(--fonte-principal);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-meus:hover { color: var(--azul-medio); }
+
+    .tab-meus.ativo {
+      color: var(--azul-medio);
+      border-bottom-color: var(--azul-medio);
+    }
+
+    .tab-meus .tab-contador {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 7px;
+      background: var(--cinza-azulado);
+      color: var(--texto-secundario);
+      border-radius: var(--borda-radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .tab-meus.ativo .tab-contador {
+      background: var(--azul-medio);
+      color: var(--branco);
+    }
+
+    /* === Cards de simulados === */
+    .sim-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-md);
+      border-left: 4px solid var(--borda-cor);
+      transition: var(--transicao);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-lg);
+    }
+
+    .sim-card:hover { box-shadow: var(--sombra-card-hover); }
+
+    .sim-card.status-privado       { border-left-color: #718096; }
+    .sim-card.status-compartilhado { border-left-color: var(--azul-medio); }
+    .sim-card.status-publico       { border-left-color: var(--cor-sucesso); }
+    .sim-card.status-pendente      { border-left-color: #D69E2E; }
+    .sim-card.status-rejeitado     { border-left-color: var(--cor-erro); }
+    .sim-card.realizado            { border-left-color: var(--ciano); }
+
+    .sim-card-icone {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--borda-radius-lg);
+      background: var(--cinza-azulado);
+      color: var(--azul-medio);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .sim-card-info { flex: 1; min-width: 0; }
+
+    .sim-card-nome {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 6px;
+    }
+
+    .sim-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: 8px;
+    }
+
+    .sim-card-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .sim-card-status {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .sim-card-rejeicao {
+      display: block;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: #FFF5F5;
+      border-left: 3px solid var(--cor-erro);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-xs);
+      color: #742A2A;
+    }
+
+    .sim-card-acoes {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      min-width: 140px;
+    }
+
+    .sim-card-acoes .btn {
+      justify-content: center;
+      padding: 8px 14px;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    /* Card de simulado realizado (tem nota) */
+    .sim-card-nota {
+      text-align: center;
+      flex-shrink: 0;
+      padding: 0 var(--espacamento-md);
+      border-left: 1px solid var(--borda-cor);
+      border-right: 1px solid var(--borda-cor);
+    }
+
+    .sim-card-nota .valor {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .sim-card-nota .label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    .sim-card-nota.boa .valor      { color: var(--cor-sucesso); }
+    .sim-card-nota.media .valor    { color: #B7791F; }
+    .sim-card-nota.baixa .valor    { color: var(--cor-erro); }
+
+    /* Empty state */
+    .empty-tab {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-2xl);
+      text-align: center;
+      box-shadow: var(--sombra-card);
+    }
+
+    .empty-tab .icone {
+      font-size: 3.5rem;
+      margin-bottom: var(--espacamento-md);
+      display: block;
+    }
+
+    .empty-tab h3 {
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .empty-tab p {
+      color: var(--texto-terciario);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    /* === Modal Compartilhar === */
+    .modal-compartilhar { max-width: 620px; }
+
+    .modal-compartilhar .status-atual {
+      background: var(--cinza-azulado);
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .compartilhar-secao {
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .compartilhar-secao-titulo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .compartilhar-secao-titulo .icone {
+      width: 32px;
+      height: 32px;
+      background: #EBF8FF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--azul-medio);
+      font-size: 1rem;
+    }
+
+    .compartilhar-secao-desc {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .link-copy-row {
+      display: flex;
+      gap: var(--espacamento-sm);
+    }
+
+    .link-copy-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      background: var(--cinza-azulado);
+      color: var(--texto-primario);
+      font-family: monospace;
+    }
+
+    .destinatarios-row {
+      display: flex;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .destinatarios-row input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+    }
+
+    .destinatarios-lista {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 1px;
+    }
+
+    .destinatario-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EBF8FF;
+      color: var(--azul-profundo);
+      border: 1px solid var(--azul-claro);
+      padding: 5px 10px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+    }
+
+    .destinatario-chip button {
+      background: none;
+      border: none;
+      color: var(--cor-erro);
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .compartilhar-secao.publicacao {
+      background: #FFFBF0;
+      border-color: #FEEBC8;
+    }
+
+    .compartilhar-secao.publicacao .icone {
+      background: #FEEBC8;
+      color: #C05621;
+    }
+
+    .compartilhar-secao.publicacao-pendente {
+      background: #FFFBF0;
+      border-color: #D69E2E;
+    }
+
+    /* Toast simples */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--azul-profundo);
+      color: var(--branco);
+      padding: 12px 20px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      box-shadow: var(--sombra-modal);
+      z-index: 3000;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.visivel {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+
+    /* === Responsive === */
+    @media (max-width: 900px) {
+      .sim-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .sim-card-acoes {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+
+      .sim-card-nota {
+        border: none;
+        padding: 0;
+        align-self: center;
+      }
+
+      .mini-metricas {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Modal: Compartilhar -->
+  <div class="modal-overlay" id="modal-compartilhar">
+    <div class="modal modal-compartilhar">
+      <h3 class="modal-titulo">Compartilhar simulado</h3>
+
+      <div class="status-atual">
+        <span class="badge" id="share-status-badge">Privado</span>
+        <span id="share-status-texto">Somente você tem acesso a este simulado.</span>
+      </div>
+
+      <!-- Opção 1: Por link -->
+      <div class="compartilhar-secao">
+        <div class="compartilhar-secao-titulo">
+          <span class="icone">🔗</span> Compartilhar por link
+        </div>
+        <p class="compartilhar-secao-desc">
+          Qualquer pessoa com o link acessa. Se não tiver conta, é direcionada ao cadastro.
+        </p>
+        <div class="link-copy-row">
+          <input type="text" id="share-link" readonly>
+          <button class="btn btn-primario btn-sm" onclick="copiarLink()">📋 Copiar</button>
+        </div>
+      </div>
+
+      <!-- Opção 2: Por email/username -->
+      <div class="compartilhar-secao">
+        <div class="compartilhar-secao-titulo">
+          <span class="icone">📧</span> Compartilhar por email ou username
+        </div>
+        <p class="compartilhar-secao-desc">
+          Somente as pessoas que você adicionar terão acesso.
+        </p>
+        <div class="destinatarios-row">
+          <input type="text" id="input-destinatario" placeholder="email@exemplo.com ou @username">
+          <button class="btn btn-secundario btn-sm" onclick="adicionarDestinatario()">+ Adicionar</button>
+        </div>
+        <div class="destinatarios-lista" id="destinatarios-lista"></div>
+      </div>
+
+      <!-- Opção 3: Solicitar publicação -->
+      <div class="compartilhar-secao publicacao" id="secao-publicacao">
+        <div class="compartilhar-secao-titulo">
+          <span class="icone">🌟</span> Solicitar publicação pública
+        </div>
+        <p class="compartilhar-secao-desc">
+          Envia o simulado para a fila de curadoria. Um conteudista da sua área vai revisar
+          cada questão antes de aprovar.
+        </p>
+        <button class="btn btn-sucesso btn-sm" onclick="solicitarPublicacao()">
+          Enviar para curadoria
+        </button>
+      </div>
+
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal('modal-compartilhar')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmar exclusão -->
+  <div class="modal-overlay" id="modal-excluir">
+    <div class="modal" style="max-width: 440px;">
+      <h3 class="modal-titulo">Excluir simulado?</h3>
+      <p style="color: var(--texto-secundario); margin-bottom: var(--espacamento-md);">
+        Esta ação não pode ser desfeita. O simulado <strong id="excluir-nome"></strong> será
+        removido permanentemente.
+      </p>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal('modal-excluir')">Cancelar</button>
+        <button class="btn btn-perigo" onclick="confirmarExclusao()">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">Ação concluída!</div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <!-- Sidebar Aluno -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item ativo">📝 Meus Simulados</a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <!-- Conteúdo -->
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Meus Simulados</h1>
+          <p class="conteudo-subtitulo">Simulados que você criou, importou e realizou</p>
+        </div>
+        <div class="header-acoes">
+          <a href="/aluno/importar-pdf.html" class="btn btn-secundario">📄 Importar PDF</a>
+          <a href="/aluno/criar-simulado.html" class="btn btn-primario">+ Novo Simulado</a>
+        </div>
+      </div>
+
+      <!-- Mini métricas -->
+      <div class="mini-metricas">
+        <div class="mini-metrica">
+          <div class="mini-metrica-icone">📝</div>
+          <div class="mini-metrica-info">
+            <div class="valor" id="count-criados">0</div>
+            <div class="label">Criados por mim</div>
+          </div>
+        </div>
+        <div class="mini-metrica importados">
+          <div class="mini-metrica-icone">📄</div>
+          <div class="mini-metrica-info">
+            <div class="valor" id="count-importados">0</div>
+            <div class="label">Importados</div>
+          </div>
+        </div>
+        <div class="mini-metrica realizados">
+          <div class="mini-metrica-icone">✅</div>
+          <div class="mini-metrica-info">
+            <div class="valor" id="count-realizados">0</div>
+            <div class="label">Realizados</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-meus">
+        <button class="tab-meus ativo" data-tab="criados">
+          📝 Criados por mim <span class="tab-contador" id="tab-count-criados">0</span>
+        </button>
+        <button class="tab-meus" data-tab="importados">
+          📄 Importados <span class="tab-contador" id="tab-count-importados">0</span>
+        </button>
+        <button class="tab-meus" data-tab="realizados">
+          ✅ Realizados <span class="tab-contador" id="tab-count-realizados">0</span>
+        </button>
+      </div>
+
+      <!-- Lista -->
+      <div id="lista-criados" class="lista-tab"></div>
+      <div id="lista-importados" class="lista-tab" style="display:none;"></div>
+      <div id="lista-realizados" class="lista-tab" style="display:none;"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // === Dados fake (locais desta tela) ===
+    const meusCriados = [
+      {
+        id: 101,
+        nome: 'Revisão de Matemática — Funções',
+        qtdQuestoes: 10,
+        tempo: null,
+        dataCriacao: '2026-04-06',
+        status: 'privado',
+        area: 'Matemática'
+      },
+      {
+        id: 102,
+        nome: 'Treino de Interpretação de Texto',
+        qtdQuestoes: 15,
+        tempo: 30,
+        dataCriacao: '2026-04-02',
+        status: 'compartilhado',
+        compartilhadoCom: 3,
+        area: 'Linguagens'
+      },
+      {
+        id: 103,
+        nome: 'Simulado Exercícios de Lógica',
+        qtdQuestoes: 12,
+        tempo: 25,
+        dataCriacao: '2026-03-28',
+        status: 'pendente',
+        area: 'Matemática'
+      },
+      {
+        id: 104,
+        nome: 'Revisão Cidadania e Direitos',
+        qtdQuestoes: 20,
+        tempo: null,
+        dataCriacao: '2026-03-20',
+        status: 'rejeitado',
+        motivoRejeicao: 'Algumas questões precisam de revisão no enunciado. Confira as questões 7 e 13 e reenvie.',
+        area: 'Ciências Humanas'
+      }
+    ];
+
+    const meusImportados = [
+      {
+        id: 201,
+        nome: 'ENEM 2024 — Caderno Amarelo (meu PDF)',
+        qtdQuestoes: 45,
+        dataImportacao: '2026-04-04',
+        status: 'privado',
+        origem: 'PDF importado'
+      },
+      {
+        id: 202,
+        nome: 'Apostila — Revisão Química Orgânica',
+        qtdQuestoes: 8,
+        dataImportacao: '2026-03-30',
+        status: 'compartilhado',
+        compartilhadoCom: 1,
+        origem: 'PDF importado'
+      }
+    ];
+
+    const meusRealizados = [
+      {
+        id: 301,
+        nome: 'ENEM 2025 — Caderno Azul',
+        qtdQuestoes: 45,
+        dataRealizacao: '2026-04-05',
+        nota: 76,
+        acertos: 34,
+        tempoTotal: '2h 18min',
+        criador: 'Prof. Carlos Mendes'
+      },
+      {
+        id: 302,
+        nome: 'Simulado Matemática Básica',
+        qtdQuestoes: 20,
+        dataRealizacao: '2026-04-03',
+        nota: 85,
+        acertos: 17,
+        tempoTotal: '28min',
+        criador: 'Prof. Carlos Mendes'
+      },
+      {
+        id: 303,
+        nome: 'Linguagens — Interpretação de Texto',
+        qtdQuestoes: 15,
+        dataRealizacao: '2026-03-28',
+        nota: 60,
+        acertos: 9,
+        tempoTotal: '22min',
+        criador: 'Prof. Ana Costa'
+      },
+      {
+        id: 304,
+        nome: 'Simulado Diagnóstico — Ciências Humanas',
+        qtdQuestoes: 25,
+        dataRealizacao: '2026-03-22',
+        nota: 48,
+        acertos: 12,
+        tempoTotal: '45min',
+        criador: 'Prof. João Lima'
+      }
+    ];
+
+    // === Utils ===
+    function formatarData(data) {
+      const [ano, mes, dia] = data.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    const STATUS_META = {
+      privado:       { label: 'Privado',       classe: 'badge-privado',       texto: 'Somente você tem acesso a este simulado.' },
+      compartilhado: { label: 'Compartilhado', classe: 'badge-compartilhado', texto: 'Compartilhado com pessoas específicas.' },
+      publico:       { label: 'Público',       classe: 'badge-publicado',     texto: 'Disponível para todos os alunos na Explorar Simulados.' },
+      pendente:      { label: 'Pendente de aprovação', classe: 'badge-pendente', texto: 'Aguardando revisão da curadoria.' },
+      rejeitado:     { label: 'Rejeitado',     classe: 'badge-rejeitado',     texto: 'A curadoria devolveu o simulado com um motivo.' }
+    };
+
+    function classePorNota(nota) {
+      if (nota >= 70) return 'boa';
+      if (nota >= 50) return 'media';
+      return 'baixa';
+    }
+
+    // === Render cards ===
+    function renderCriados() {
+      const lista = document.getElementById('lista-criados');
+      if (meusCriados.length === 0) {
+        lista.innerHTML = emptyCriados();
+        return;
+      }
+
+      lista.innerHTML = meusCriados.map(sim => {
+        const meta = STATUS_META[sim.status];
+        const compartilhadoInfo = sim.status === 'compartilhado'
+          ? ` · ${sim.compartilhadoCom} ${sim.compartilhadoCom === 1 ? 'pessoa' : 'pessoas'}`
+          : '';
+        const rejeicaoBloco = sim.status === 'rejeitado'
+          ? `<div class="sim-card-rejeicao">⚠ <strong>Motivo:</strong> ${sim.motivoRejeicao}</div>`
+          : '';
+
+        const podeSolicitarPub = sim.status === 'privado' || sim.status === 'compartilhado' || sim.status === 'rejeitado';
+        const labelCompartilhar = sim.status === 'pendente' ? 'Ver status' : 'Compartilhar';
+
+        return `
+          <div class="sim-card status-${sim.status}">
+            <div class="sim-card-icone">📝</div>
+            <div class="sim-card-info">
+              <div class="sim-card-nome">${sim.nome}</div>
+              <div class="sim-card-meta">
+                <span>📄 ${sim.qtdQuestoes} questões</span>
+                <span>${sim.tempo ? '⏱ ' + sim.tempo + ' min' : '⏱ Sem tempo limite'}</span>
+                <span>📚 ${sim.area}</span>
+                <span>📅 Criado em ${formatarData(sim.dataCriacao)}</span>
+              </div>
+              <div class="sim-card-status">
+                <span class="badge ${meta.classe}">${meta.label}${compartilhadoInfo}</span>
+              </div>
+              ${rejeicaoBloco}
+            </div>
+            <div class="sim-card-acoes">
+              <button class="btn btn-secundario btn-sm" onclick="editarSimulado(${sim.id})">✏ Editar</button>
+              <button class="btn btn-primario btn-sm" onclick="abrirCompartilhar(${sim.id}, 'criado')">🔗 ${labelCompartilhar}</button>
+              <button class="btn btn-perigo btn-sm" onclick="abrirExcluir(${sim.id}, 'criado', '${sim.nome.replace(/'/g, "\\'")}')">🗑 Excluir</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderImportados() {
+      const lista = document.getElementById('lista-importados');
+      if (meusImportados.length === 0) {
+        lista.innerHTML = emptyImportados();
+        return;
+      }
+
+      lista.innerHTML = meusImportados.map(sim => {
+        const meta = STATUS_META[sim.status];
+        const compartilhadoInfo = sim.status === 'compartilhado'
+          ? ` · ${sim.compartilhadoCom} ${sim.compartilhadoCom === 1 ? 'pessoa' : 'pessoas'}`
+          : '';
+
+        return `
+          <div class="sim-card status-${sim.status}">
+            <div class="sim-card-icone" style="background:#E9D8FD;color:#6B46C1;">📄</div>
+            <div class="sim-card-info">
+              <div class="sim-card-nome">${sim.nome}</div>
+              <div class="sim-card-meta">
+                <span>📄 ${sim.qtdQuestoes} questões</span>
+                <span>📅 Importado em ${formatarData(sim.dataImportacao)}</span>
+                <span>🗂 ${sim.origem}</span>
+              </div>
+              <div class="sim-card-status">
+                <span class="badge ${meta.classe}">${meta.label}${compartilhadoInfo}</span>
+              </div>
+            </div>
+            <div class="sim-card-acoes">
+              <button class="btn btn-secundario btn-sm" onclick="editarSimulado(${sim.id})">✏ Revisar questões</button>
+              <button class="btn btn-primario btn-sm" onclick="abrirCompartilhar(${sim.id}, 'importado')">🔗 Compartilhar</button>
+              <button class="btn btn-perigo btn-sm" onclick="abrirExcluir(${sim.id}, 'importado', '${sim.nome.replace(/'/g, "\\'")}')">🗑 Excluir</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRealizados() {
+      const lista = document.getElementById('lista-realizados');
+      if (meusRealizados.length === 0) {
+        lista.innerHTML = emptyRealizados();
+        return;
+      }
+
+      lista.innerHTML = meusRealizados.map(sim => {
+        const classeNota = classePorNota(sim.nota);
+        return `
+          <div class="sim-card realizado">
+            <div class="sim-card-icone" style="background:#C6F6D5;color:#22543D;">✅</div>
+            <div class="sim-card-info">
+              <div class="sim-card-nome">${sim.nome}</div>
+              <div class="sim-card-meta">
+                <span>📄 ${sim.qtdQuestoes} questões</span>
+                <span>🎯 ${sim.acertos} acertos</span>
+                <span>⏱ ${sim.tempoTotal}</span>
+                <span>📅 ${formatarData(sim.dataRealizacao)}</span>
+                <span>👤 ${sim.criador}</span>
+              </div>
+            </div>
+            <div class="sim-card-nota ${classeNota}">
+              <div class="valor">${sim.nota}%</div>
+              <div class="label">Sua nota</div>
+            </div>
+            <div class="sim-card-acoes">
+              <a href="/aluno/simulado-resultado.html" class="btn btn-primario btn-sm">📊 Ver resultado</a>
+              <a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">🔄 Refazer</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function emptyCriados() {
+      return `
+        <div class="empty-tab">
+          <span class="icone">📝</span>
+          <h3>Você ainda não criou nenhum simulado</h3>
+          <p>Monte um simulado do zero escolhendo questões do banco público ou das suas importações.</p>
+          <a href="/aluno/criar-simulado.html" class="btn btn-primario">+ Criar meu primeiro simulado</a>
+        </div>
+      `;
+    }
+
+    function emptyImportados() {
+      return `
+        <div class="empty-tab">
+          <span class="icone">📄</span>
+          <h3>Você ainda não importou nenhum PDF</h3>
+          <p>Importe um PDF com questões e a IA extrai automaticamente pra você revisar.</p>
+          <a href="/aluno/importar-pdf.html" class="btn btn-primario">📄 Importar PDF</a>
+        </div>
+      `;
+    }
+
+    function emptyRealizados() {
+      return `
+        <div class="empty-tab">
+          <span class="icone">✅</span>
+          <h3>Você ainda não realizou nenhum simulado</h3>
+          <p>Explore simulados disponíveis e comece a praticar.</p>
+          <a href="/aluno/explorar-simulados.html" class="btn btn-primario">🔍 Explorar Simulados</a>
+        </div>
+      `;
+    }
+
+    // === Tabs ===
+    document.querySelectorAll('.tab-meus').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-meus').forEach(t => t.classList.remove('ativo'));
+        btn.classList.add('ativo');
+
+        document.querySelectorAll('.lista-tab').forEach(l => l.style.display = 'none');
+        document.getElementById('lista-' + tab).style.display = 'block';
+      });
+    });
+
+    // === Contadores ===
+    function atualizarContadores() {
+      document.getElementById('count-criados').textContent = meusCriados.length;
+      document.getElementById('count-importados').textContent = meusImportados.length;
+      document.getElementById('count-realizados').textContent = meusRealizados.length;
+      document.getElementById('tab-count-criados').textContent = meusCriados.length;
+      document.getElementById('tab-count-importados').textContent = meusImportados.length;
+      document.getElementById('tab-count-realizados').textContent = meusRealizados.length;
+    }
+
+    // === Modal: Compartilhar ===
+    let simuladoAtual = null;
+    let simuladoAtualLista = null;
+    let destinatarios = [];
+
+    function abrirCompartilhar(id, listaTipo) {
+      const fonte = listaTipo === 'criado' ? meusCriados : meusImportados;
+      simuladoAtual = fonte.find(s => s.id === id);
+      simuladoAtualLista = listaTipo;
+      if (!simuladoAtual) return;
+
+      // Status atual
+      const meta = STATUS_META[simuladoAtual.status];
+      const badge = document.getElementById('share-status-badge');
+      badge.className = 'badge ' + meta.classe;
+      badge.textContent = meta.label;
+      document.getElementById('share-status-texto').textContent = meta.texto;
+
+      // Link fake
+      document.getElementById('share-link').value = `https://helen.ai/s/${simuladoAtual.id}-${btoa(simuladoAtual.nome).substring(0, 8)}`;
+
+      // Destinatários
+      destinatarios = simuladoAtual.destinatarios ? [...simuladoAtual.destinatarios] : [];
+      renderDestinatarios();
+      document.getElementById('input-destinatario').value = '';
+
+      // Ajustar seção de publicação
+      const secaoPub = document.getElementById('secao-publicacao');
+      if (simuladoAtual.status === 'pendente') {
+        secaoPub.classList.add('publicacao-pendente');
+        secaoPub.innerHTML = `
+          <div class="compartilhar-secao-titulo">
+            <span class="icone">⏳</span> Aguardando curadoria
+          </div>
+          <p class="compartilhar-secao-desc">
+            O simulado já foi enviado para a fila de curadoria. Assim que um conteudista
+            revisar, você receberá uma notificação.
+          </p>
+        `;
+      } else {
+        secaoPub.classList.remove('publicacao-pendente');
+        secaoPub.innerHTML = `
+          <div class="compartilhar-secao-titulo">
+            <span class="icone">🌟</span> Solicitar publicação pública
+          </div>
+          <p class="compartilhar-secao-desc">
+            Envia o simulado para a fila de curadoria. Um conteudista da sua área vai
+            revisar cada questão antes de aprovar.
+          </p>
+          <button class="btn btn-sucesso btn-sm" onclick="solicitarPublicacao()">
+            Enviar para curadoria
+          </button>
+        `;
+      }
+
+      document.getElementById('modal-compartilhar').classList.add('visivel');
+    }
+
+    function renderDestinatarios() {
+      const lista = document.getElementById('destinatarios-lista');
+      if (destinatarios.length === 0) {
+        lista.innerHTML = '<span style="font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario);">Ninguém adicionado ainda.</span>';
+        return;
+      }
+      lista.innerHTML = destinatarios.map((d, i) => `
+        <span class="destinatario-chip">
+          ${d}
+          <button onclick="removerDestinatario(${i})" title="Remover">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function adicionarDestinatario() {
+      const input = document.getElementById('input-destinatario');
+      const valor = input.value.trim();
+      if (!valor) return;
+      destinatarios.push(valor);
+      input.value = '';
+      renderDestinatarios();
+
+      // Se estava privado, vira compartilhado
+      if (simuladoAtual && simuladoAtual.status === 'privado') {
+        simuladoAtual.status = 'compartilhado';
+        simuladoAtual.compartilhadoCom = destinatarios.length;
+        atualizarStatusModal();
+        reRenderLista();
+      } else if (simuladoAtual) {
+        simuladoAtual.compartilhadoCom = destinatarios.length;
+        reRenderLista();
+      }
+
+      mostrarToast(`${valor} foi adicionado.`);
+    }
+
+    document.getElementById('input-destinatario').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        adicionarDestinatario();
+      }
+    });
+
+    function removerDestinatario(i) {
+      destinatarios.splice(i, 1);
+      renderDestinatarios();
+      if (simuladoAtual) {
+        simuladoAtual.compartilhadoCom = destinatarios.length;
+        if (destinatarios.length === 0 && simuladoAtual.status === 'compartilhado') {
+          simuladoAtual.status = 'privado';
+          delete simuladoAtual.compartilhadoCom;
+          atualizarStatusModal();
+        }
+        reRenderLista();
+      }
+    }
+
+    function copiarLink() {
+      const input = document.getElementById('share-link');
+      input.select();
+      try {
+        navigator.clipboard.writeText(input.value);
+      } catch {}
+      mostrarToast('Link copiado! 🔗');
+    }
+
+    function solicitarPublicacao() {
+      if (!simuladoAtual) return;
+      simuladoAtual.status = 'pendente';
+      atualizarStatusModal();
+
+      // Re-render da seção de publicação para mostrar aguardando
+      const secaoPub = document.getElementById('secao-publicacao');
+      secaoPub.classList.add('publicacao-pendente');
+      secaoPub.innerHTML = `
+        <div class="compartilhar-secao-titulo">
+          <span class="icone">⏳</span> Aguardando curadoria
+        </div>
+        <p class="compartilhar-secao-desc">
+          O simulado já foi enviado para a fila de curadoria. Assim que um conteudista
+          revisar, você receberá uma notificação.
+        </p>
+      `;
+
+      reRenderLista();
+      mostrarToast('Enviado para curadoria. Você será notificada pelo resultado.');
+    }
+
+    function atualizarStatusModal() {
+      if (!simuladoAtual) return;
+      const meta = STATUS_META[simuladoAtual.status];
+      const badge = document.getElementById('share-status-badge');
+      badge.className = 'badge ' + meta.classe;
+      badge.textContent = meta.label;
+      document.getElementById('share-status-texto').textContent = meta.texto;
+    }
+
+    function reRenderLista() {
+      if (simuladoAtualLista === 'criado') renderCriados();
+      if (simuladoAtualLista === 'importado') renderImportados();
+    }
+
+    // === Modal: Excluir ===
+    let idParaExcluir = null;
+    let listaParaExcluir = null;
+
+    function abrirExcluir(id, tipoLista, nome) {
+      idParaExcluir = id;
+      listaParaExcluir = tipoLista;
+      document.getElementById('excluir-nome').textContent = nome;
+      document.getElementById('modal-excluir').classList.add('visivel');
+    }
+
+    function confirmarExclusao() {
+      if (listaParaExcluir === 'criado') {
+        const i = meusCriados.findIndex(s => s.id === idParaExcluir);
+        if (i >= 0) meusCriados.splice(i, 1);
+        renderCriados();
+      } else if (listaParaExcluir === 'importado') {
+        const i = meusImportados.findIndex(s => s.id === idParaExcluir);
+        if (i >= 0) meusImportados.splice(i, 1);
+        renderImportados();
+      }
+      atualizarContadores();
+      fecharModal('modal-excluir');
+      mostrarToast('Simulado excluído.');
+    }
+
+    // === Modais genéricos ===
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('visivel');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.visivel').forEach(m => m.classList.remove('visivel'));
+      }
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('visivel');
+      });
+    });
+
+    // === Ações placeholder ===
+    function editarSimulado(id) {
+      window.location.href = '/aluno/criar-simulado.html?id=' + id;
+    }
+
+    // === Toast ===
+    let toastTimer = null;
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('visivel');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('visivel'), 2800);
+    }
+
+    // === Init ===
+    renderCriados();
+    renderImportados();
+    renderRealizados();
+    atualizarContadores();
+  </script>
+
+</body>
+</html>

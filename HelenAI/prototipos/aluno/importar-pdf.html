@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Importar PDF</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Info box === */
+    .info-aluno {
+      background: #EBF8FF;
+      border-left: 4px solid var(--azul-medio);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      gap: var(--espacamento-md);
+      align-items: flex-start;
+    }
+
+    .info-aluno .icone {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .info-aluno h3 {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: 6px;
+    }
+
+    .info-aluno p {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.5;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .info-aluno ul {
+      margin-left: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+    }
+
+    .info-aluno ul li {
+      margin-bottom: 4px;
+    }
+
+    /* === Card de upload inline (não precisa modal, é tela principal) === */
+    .upload-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-xl);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .upload-card h3 {
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-lg);
+    }
+
+    .dropzone {
+      border: 2px dashed var(--azul-claro);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-2xl);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transicao);
+      background: #F7FAFC;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .dropzone:hover,
+    .dropzone.dragover {
+      border-color: var(--azul-medio);
+      background: #EBF8FF;
+    }
+
+    .dropzone .icone { font-size: 3rem; margin-bottom: var(--espacamento-md); display: block; }
+    .dropzone .texto-principal { font-size: var(--fonte-tamanho-lg); font-weight: 500; color: var(--azul-profundo); margin-bottom: var(--espacamento-xs); }
+    .dropzone .texto-secundario { font-size: var(--fonte-tamanho-sm); color: var(--texto-terciario); }
+    .dropzone input[type="file"] { display: none; }
+
+    .arquivo-selecionado {
+      display: none;
+      align-items: center;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-md);
+      background: #EBF8FF;
+      border: 1px solid var(--azul-claro);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .arquivo-selecionado.visivel { display: flex; }
+    .arquivo-selecionado .arquivo-icone { font-size: 1.5rem; }
+    .arquivo-selecionado .arquivo-info { flex: 1; }
+    .arquivo-selecionado .arquivo-nome { font-weight: 600; font-size: var(--fonte-tamanho-sm); color: var(--azul-profundo); }
+    .arquivo-selecionado .arquivo-tamanho { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); }
+    .arquivo-selecionado .arquivo-remover { background: none; border: none; color: var(--cor-erro); cursor: pointer; font-size: 1.2rem; padding: 4px; }
+
+    .acoes-upload {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--espacamento-sm);
+    }
+
+    /* === Histórico de importações === */
+    .historico-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .historico-header h3 {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+    }
+
+    .importacao-item {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-md);
+      transition: var(--transicao);
+      border-left: 4px solid #805AD5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--espacamento-lg);
+    }
+
+    .importacao-item:hover {
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .importacao-info { flex: 1; }
+
+    .importacao-nome {
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .importacao-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      flex-wrap: wrap;
+    }
+
+    .importacao-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .importacao-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+      flex-shrink: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--espacamento-xl);
+      color: var(--texto-terciario);
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+    }
+
+    .empty-state .icone {
+      font-size: 3rem;
+      margin-bottom: var(--espacamento-md);
+      display: block;
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-overlay.visivel { display: flex; }
+
+    .loading-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      padding: var(--espacamento-2xl);
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: var(--sombra-modal);
+    }
+
+    .loading-card .spinner {
+      width: 60px; height: 60px;
+      border: 4px solid var(--azul-claro);
+      border-top-color: var(--azul-medio);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto var(--espacamento-lg);
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-card h3 { margin-bottom: var(--espacamento-sm); color: var(--azul-profundo); }
+    .loading-card .loading-status { color: var(--texto-secundario); font-size: var(--fonte-tamanho-sm); margin-bottom: var(--espacamento-lg); }
+
+    .progress-bar { width: 100%; height: 8px; background: var(--cinza-azulado); border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--gradiente-header); border-radius: 4px; width: 0%; transition: width 0.3s ease; }
+    .progress-percent { font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario); margin-top: var(--espacamento-sm); }
+
+    @media (max-width: 768px) {
+      .importacao-item { flex-direction: column; align-items: flex-start; }
+      .importacao-acoes { width: 100%; }
+      .info-aluno { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-overlay" id="loading">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <h3>Processando seu PDF</h3>
+      <p class="loading-status" id="loading-status">Extraindo questões...</p>
+      <div class="progress-bar">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-percent" id="progress-percent">0%</p>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item ativo">📝 Meus Simulados</a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Importar PDF</h1>
+          <p class="conteudo-subtitulo">A IA extrai as questões do seu PDF e cria um simulado pessoal</p>
+        </div>
+        <a href="/aluno/meus-simulados.html" class="btn btn-secundario">← Voltar</a>
+      </div>
+
+      <!-- Info de privacidade/fluxo -->
+      <div class="info-aluno">
+        <div class="icone">🔒</div>
+        <div>
+          <h3>Suas questões ficam privadas por padrão</h3>
+          <p>
+            Ao importar um PDF, as questões extraídas vão pro <strong>seu banco pessoal</strong>,
+            não pro banco público da plataforma. Um simulado privado é criado automaticamente
+            com todas elas.
+          </p>
+          <ul>
+            <li>Você pode <strong>editar</strong> os enunciados, alternativas e campos BNCC depois.</li>
+            <li>Pode <strong>compartilhar</strong> com amigos por link ou email.</li>
+            <li>Pode <strong>solicitar publicação pública</strong> — um professor revisa antes de aprovar.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Card de upload -->
+      <div class="upload-card">
+        <h3>📎 Novo upload</h3>
+
+        <div class="form-grupo">
+          <label class="form-label" for="nome-importacao">Nome da importação</label>
+          <input type="text" class="form-input" id="nome-importacao" placeholder="Ex: ENEM 2024 — Caderno Amarelo">
+          <span class="form-helper">Dê um nome que te ajude a identificar depois.</span>
+          <span class="form-erro" id="erro-nome">Informe o nome da importação</span>
+        </div>
+
+        <label class="form-label">Arquivo PDF</label>
+        <div class="dropzone" id="dropzone">
+          <span class="icone">📎</span>
+          <p class="texto-principal">Arraste o PDF aqui ou clique para selecionar</p>
+          <p class="texto-secundario">Formato aceito: .pdf · até 20 MB</p>
+          <input type="file" id="file-input" accept=".pdf">
+        </div>
+
+        <div class="arquivo-selecionado" id="arquivo-selecionado">
+          <span class="arquivo-icone">📄</span>
+          <div class="arquivo-info">
+            <div class="arquivo-nome" id="arquivo-nome">documento.pdf</div>
+            <div class="arquivo-tamanho" id="arquivo-tamanho">2.4 MB</div>
+          </div>
+          <button class="arquivo-remover" id="arquivo-remover" title="Remover">✕</button>
+        </div>
+
+        <div class="acoes-upload">
+          <a href="/aluno/meus-simulados.html" class="btn btn-secundario">Cancelar</a>
+          <button class="btn btn-primario" id="btn-importar" disabled>📤 Importar e extrair questões</button>
+        </div>
+      </div>
+
+      <!-- Histórico -->
+      <div class="historico-header">
+        <h3>Minhas importações anteriores</h3>
+      </div>
+
+      <div id="lista-importacoes"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // === Histórico fake do aluno ===
+    const minhasImportacoes = [
+      {
+        id: 1,
+        nome: 'ENEM 2024 — Caderno Amarelo (meu PDF)',
+        totalQuestoes: 45,
+        data: '2026-04-04',
+        status: 'privado'
+      },
+      {
+        id: 2,
+        nome: 'Apostila — Revisão Química Orgânica',
+        totalQuestoes: 8,
+        data: '2026-03-30',
+        status: 'compartilhado'
+      }
+    ];
+
+    function formatarData(data) {
+      const partes = data.split('-');
+      return partes[2] + '/' + partes[1] + '/' + partes[0];
+    }
+
+    function renderImportacoes() {
+      const lista = document.getElementById('lista-importacoes');
+      if (minhasImportacoes.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-state">
+            <span class="icone">📄</span>
+            <h4>Nenhuma importação ainda</h4>
+            <p style="color: var(--texto-terciario); margin-top: 4px;">Importe seu primeiro PDF para começar.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const statusLabel = {
+        privado:       { classe: 'badge-privado',       label: 'Privado' },
+        compartilhado: { classe: 'badge-compartilhado', label: 'Compartilhado' }
+      };
+
+      lista.innerHTML = minhasImportacoes.map(imp => {
+        const badge = statusLabel[imp.status] || statusLabel.privado;
+        return `
+          <div class="importacao-item">
+            <div class="importacao-info">
+              <div class="importacao-nome">${imp.nome}</div>
+              <div class="importacao-meta">
+                <span>📄 ${imp.totalQuestoes} questões</span>
+                <span>📅 ${formatarData(imp.data)}</span>
+                <span class="badge ${badge.classe}">${badge.label}</span>
+              </div>
+            </div>
+            <div class="importacao-acoes">
+              <button class="btn btn-secundario btn-sm" onclick="verImportacao(${imp.id})">✏ Revisar questões</button>
+              <a href="/aluno/meus-simulados.html" class="btn btn-primario btn-sm">🔗 Ver no Meus Simulados</a>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function verImportacao(id) {
+      localStorage.setItem('helenai_importacao_aluno', id);
+      window.location.href = '/aluno/criar-simulado.html?importacao=' + id;
+    }
+
+    renderImportacoes();
+
+    // === Upload ===
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const arquivoSelecionado = document.getElementById('arquivo-selecionado');
+    const btnImportar = document.getElementById('btn-importar');
+    let temArquivo = false;
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) selecionarArquivo(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) selecionarArquivo(fileInput.files[0]);
+    });
+
+    function selecionarArquivo(file) {
+      document.getElementById('arquivo-nome').textContent = file.name;
+      document.getElementById('arquivo-tamanho').textContent = (file.size / 1024 / 1024).toFixed(1) + ' MB';
+      arquivoSelecionado.classList.add('visivel');
+      dropzone.style.display = 'none';
+      temArquivo = true;
+      verificarForm();
+    }
+
+    document.getElementById('arquivo-remover').addEventListener('click', () => {
+      arquivoSelecionado.classList.remove('visivel');
+      dropzone.style.display = 'block';
+      fileInput.value = '';
+      temArquivo = false;
+      verificarForm();
+    });
+
+    function verificarForm() {
+      const nome = document.getElementById('nome-importacao').value.trim();
+      btnImportar.disabled = !(nome && temArquivo);
+    }
+
+    document.getElementById('nome-importacao').addEventListener('input', verificarForm);
+
+    // === Importar (fake) ===
+    btnImportar.addEventListener('click', () => {
+      const nome = document.getElementById('nome-importacao').value.trim();
+
+      if (!nome) {
+        document.getElementById('nome-importacao').classList.add('erro');
+        document.getElementById('erro-nome').classList.add('visivel');
+        return;
+      }
+
+      localStorage.setItem('helenai_importacao', JSON.stringify({ nome, tipo: 'aluno' }));
+
+      const loading = document.getElementById('loading');
+      const fill = document.getElementById('progress-fill');
+      const percent = document.getElementById('progress-percent');
+      const status = document.getElementById('loading-status');
+      loading.classList.add('visivel');
+
+      const etapas = [
+        { p: 18, t: 'Lendo o PDF...' },
+        { p: 38, t: 'Identificando questões...' },
+        { p: 58, t: 'Extraindo alternativas...' },
+        { p: 75, t: 'Gerando versão em Linguagem Simples...' },
+        { p: 90, t: 'Classificando pela BNCC com IA...' },
+        { p: 100, t: 'Tudo pronto!' }
+      ];
+
+      let i = 0;
+      const intervalo = setInterval(() => {
+        if (i < etapas.length) {
+          fill.style.width = etapas[i].p + '%';
+          percent.textContent = etapas[i].p + '%';
+          status.textContent = etapas[i].t;
+          i++;
+        } else {
+          clearInterval(intervalo);
+          setTimeout(() => {
+            window.location.href = '/aluno/revisao-questoes.html';
+          }, 600);
+        }
+      }, 800);
+    });
+  </script>
+
+</body>
+</html>

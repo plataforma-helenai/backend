@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Revisão de Questões</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* Info box — contexto do aluno */
+    .info-aluno {
+      background: #EBF8FF;
+      border-left: 4px solid var(--azul-medio);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      gap: var(--espacamento-md);
+      align-items: flex-start;
+    }
+
+    .info-aluno .icone { font-size: 2rem; flex-shrink: 0; }
+
+    .info-aluno h3 {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: 6px;
+    }
+
+    .info-aluno p {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.5;
+    }
+
+    .info-aluno p strong {
+      color: var(--azul-profundo);
+    }
+
+    /* Questão cards (mesma estrutura do conteudista) */
+    .questao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-md);
+      overflow: hidden;
+      transition: var(--transicao);
+    }
+
+    .questao-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      cursor: pointer;
+      background: #F7FAFC;
+      border-bottom: 1px solid var(--borda-cor);
+      transition: var(--transicao);
+    }
+
+    .questao-header:hover { background: #EBF8FF; }
+
+    .questao-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      flex-wrap: wrap;
+    }
+
+    .questao-numero {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-lg);
+    }
+
+    .questao-codigo {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      font-family: monospace;
+    }
+
+    .questao-tags {
+      display: flex;
+      gap: var(--espacamento-xs);
+      flex-wrap: wrap;
+    }
+
+    .questao-header .chevron {
+      font-size: 1.2rem;
+      color: var(--texto-terciario);
+      transition: transform 0.2s ease;
+    }
+
+    .questao-card.aberta .chevron { transform: rotate(180deg); }
+
+    .questao-corpo { display: none; padding: var(--espacamento-lg); }
+
+    .questao-card.aberta .questao-corpo { display: block; }
+
+    .ia-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 500;
+    }
+
+    .ls-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: #F0FFF4;
+      color: var(--cor-sucesso);
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 500;
+    }
+
+    .alternativas-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .alternativa-row {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .alternativa-label {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      min-width: 24px;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .alternativa-row .form-input { flex: 1; }
+
+    .resposta-correta {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+      padding: var(--espacamento-md);
+      background: #F0FFF4;
+      border-radius: var(--borda-radius);
+      border: 1px solid #C6F6D5;
+    }
+
+    .resposta-correta label {
+      font-weight: 500;
+      color: var(--cor-sucesso);
+      font-size: var(--fonte-tamanho-sm);
+      white-space: nowrap;
+    }
+
+    .resposta-options { display: flex; gap: var(--espacamento-md); }
+
+    .resposta-options label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+      font-weight: 400;
+    }
+
+    .resposta-options input[type="radio"] { accent-color: var(--cor-sucesso); }
+
+    /* Versão em linguagem simples (diferencial do aluno) */
+    .versao-ls {
+      margin-bottom: var(--espacamento-md);
+      padding: var(--espacamento-md);
+      background: #F0FFF4;
+      border: 1px solid #C6F6D5;
+      border-radius: var(--borda-radius);
+    }
+
+    .versao-ls-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: var(--cor-sucesso);
+      font-weight: 600;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .versao-ls-texto {
+      color: var(--texto-primario);
+      font-size: var(--fonte-tamanho-sm);
+      line-height: 1.5;
+    }
+
+    .bncc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .questao-acoes {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--espacamento-md);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .acoes-globais {
+      display: flex;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+      flex-wrap: wrap;
+    }
+
+    /* Modal salvar */
+    .modal-salvar .form-grupo { margin-bottom: var(--espacamento-md); }
+
+    @media (max-width: 768px) {
+      .bncc-grid { grid-template-columns: 1fr; }
+      .acoes-globais { flex-direction: column; }
+      .info-aluno { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Modal: Salvar no meu banco + criar simulado -->
+  <div class="modal-overlay" id="modal-salvar">
+    <div class="modal modal-salvar">
+      <h3 class="modal-titulo">Salvar no meu banco pessoal</h3>
+
+      <p style="color: var(--texto-secundario); font-size: var(--fonte-tamanho-sm); margin-bottom: var(--espacamento-md);">
+        Vamos criar um simulado privado com essas questões. Você poderá editar,
+        compartilhar ou solicitar publicação pública depois.
+      </p>
+
+      <div class="form-grupo">
+        <label class="form-label">Nome do simulado</label>
+        <input type="text" class="form-input" id="simulado-nome" placeholder="Ex: ENEM 2024 — Caderno Amarelo">
+      </div>
+
+      <div class="form-grupo">
+        <label class="form-label">Tempo limite (opcional)</label>
+        <input type="number" class="form-input" id="simulado-tempo" placeholder="em minutos">
+        <span class="form-helper">Deixe vazio pra não ter tempo — você decide na hora de fazer.</span>
+      </div>
+
+      <div class="alerta alerta-info" style="margin-bottom: var(--espacamento-md);">
+        <span>🔒</span>
+        <span>
+          O simulado nasce <strong>privado</strong>. Apenas você terá acesso até decidir
+          compartilhar ou solicitar publicação.
+        </span>
+      </div>
+
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal()">Cancelar</button>
+        <button class="btn btn-sucesso" onclick="salvarSimulado()">💾 Salvar no meu banco</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item ativo">📝 Meus Simulados</a>
+        <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Revisão — <span id="titulo-importacao">Meu PDF</span></h1>
+          <p class="conteudo-subtitulo"><span id="total-questoes">3</span> questões extraídas pela IA</p>
+        </div>
+        <a href="/aluno/importar-pdf.html" class="btn btn-secundario">← Voltar</a>
+      </div>
+
+      <!-- Info de privacidade / contexto -->
+      <div class="info-aluno">
+        <div class="icone">🤖</div>
+        <div>
+          <h3>A Helen já processou seu PDF</h3>
+          <p>
+            A IA extraiu as questões, gerou versões em <strong>Linguagem Simples</strong>,
+            classificou pela BNCC e estimou o nível de dificuldade. Revise o que quiser
+            e salve quando estiver pronto — as questões vão pro <strong>seu banco pessoal</strong>
+            e um simulado privado é criado automaticamente.
+          </p>
+        </div>
+      </div>
+
+      <!-- Ações globais -->
+      <div class="acoes-globais">
+        <button class="btn btn-secundario" id="btn-salvar-todas">Salvar edições</button>
+        <button class="btn btn-sucesso" onclick="abrirModalSalvar()">
+          💾 Salvar no meu banco e criar simulado
+        </button>
+      </div>
+
+      <!-- Questões -->
+      <div id="lista-questoes"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Carregar dados da importação
+    const importacao = JSON.parse(localStorage.getItem('helenai_importacao') || '{}');
+    const nomeImportacao = importacao.nome || 'Meu PDF';
+
+    document.getElementById('titulo-importacao').textContent = nomeImportacao;
+    document.getElementById('simulado-nome').value = nomeImportacao;
+
+    const questoes = HELEN_DATA.questoes;
+    document.getElementById('total-questoes').textContent = questoes.length;
+
+    const areas = HELEN_DATA.areasBNCC;
+    const competencias = HELEN_DATA.competenciasGerais;
+    const habilidades = HELEN_DATA.habilidades;
+
+    // Versão em linguagem simples fake (pra cada questão)
+    const versoesLS = {
+      1: 'Uma pesquisa do IBGE mostrou que pessoas com deficiência estudam menos que pessoas sem deficiência. O gráfico mostra os números. Qual é a diferença entre as duas?',
+      2: 'A Lei nº 15.263/2025 foi criada para tornar a linguagem do governo mais fácil de entender. Qual é o principal objetivo dessa lei?',
+      3: 'O DUA (Desenho Universal para Aprendizagem) é uma forma de ensinar que serve para todas as pessoas. Ele tem três princípios importantes. Quais são?'
+    };
+
+    // Renderizar questões
+    const lista = document.getElementById('lista-questoes');
+
+    questoes.forEach((q, idx) => {
+      const aberta = idx === 0 ? 'aberta' : '';
+      const optionsArea = areas.map(a => `<option ${q.area === a ? 'selected' : ''}>${a}</option>`).join('');
+      const optionsComp = competencias.map(c => `<option ${q.competenciaGeral === c.codigo ? 'selected' : ''}>${c.codigo} — ${c.nome}</option>`).join('');
+      const optionsHab = habilidades.map(h => `<option ${q.habilidade === h.codigo ? 'selected' : ''}>${h.codigo} — ${h.descricao.substring(0, 50)}...</option>`).join('');
+      const niveis = ['Fácil', 'Médio', 'Difícil'];
+      const optionsNivel = niveis.map(n => `<option ${q.nivel === n ? 'selected' : ''}>${n}</option>`).join('');
+      const badgeNivel = q.nivel === 'Fácil' ? 'badge-facil' : q.nivel === 'Médio' ? 'badge-medio' : 'badge-dificil';
+
+      const radioLetras = ['A', 'B', 'C', 'D', 'E'].map(l =>
+        `<label><input type="radio" name="resposta-${q.id}" value="${l}" ${q.respostaCorreta === l ? 'checked' : ''}> ${l}</label>`
+      ).join('');
+
+      const altsHtml = ['A', 'B', 'C', 'D', 'E'].map(l =>
+        `<div class="alternativa-row">
+          <span class="alternativa-label">${l})</span>
+          <input type="text" class="form-input" value="${q.alternativas[l]}">
+        </div>`
+      ).join('');
+
+      const versaoLS = versoesLS[q.id] || 'Versão em Linguagem Simples gerada pela IA (exemplo).';
+
+      lista.innerHTML += `
+        <div class="questao-card ${aberta}" data-id="${q.id}">
+          <div class="questao-header" onclick="this.parentElement.classList.toggle('aberta')">
+            <div class="questao-header-left">
+              <span class="questao-numero">Questão ${String(idx + 1).padStart(2, '0')}</span>
+              <div class="questao-tags">
+                <span class="badge ${badgeNivel}">${q.nivel}</span>
+                <span class="ia-tag">🤖 Classificado por IA</span>
+                <span class="ls-tag">📝 Linguagem Simples pronta</span>
+              </div>
+            </div>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="questao-corpo">
+            <div class="form-grupo">
+              <label class="form-label">Enunciado original</label>
+              <textarea class="form-textarea" rows="3">${q.enunciado}</textarea>
+            </div>
+
+            <div class="versao-ls">
+              <div class="versao-ls-header">
+                📝 Versão em Linguagem Simples
+                <span class="ia-tag" style="margin-left:auto;">Gerado pela Helen</span>
+              </div>
+              <div class="versao-ls-texto" contenteditable="true">${versaoLS}</div>
+            </div>
+
+            <label class="form-label">Alternativas</label>
+            <div class="alternativas-grid">
+              ${altsHtml}
+            </div>
+
+            <div class="resposta-correta">
+              <label>✓ Resposta correta:</label>
+              <div class="resposta-options">
+                ${radioLetras}
+              </div>
+            </div>
+
+            <label class="form-label mb-sm">Classificação BNCC</label>
+            <div class="bncc-grid">
+              <div class="form-grupo">
+                <label class="form-label text-small">Área do Conhecimento</label>
+                <select class="form-select">${optionsArea}</select>
+              </div>
+              <div class="form-grupo">
+                <label class="form-label text-small">Competência Geral</label>
+                <select class="form-select">${optionsComp}</select>
+              </div>
+              <div class="form-grupo">
+                <label class="form-label text-small">Habilidade BNCC</label>
+                <select class="form-select">${optionsHab}</select>
+              </div>
+              <div class="form-grupo">
+                <label class="form-label text-small">Nível de Dificuldade</label>
+                <select class="form-select">${optionsNivel}</select>
+              </div>
+            </div>
+
+            <div class="questao-acoes">
+              <button class="btn btn-perigo btn-sm" onclick="excluirQuestao(this)">Descartar questão</button>
+              <button class="btn btn-primario btn-sm" onclick="salvarQuestao(this)">Salvar alterações</button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    function excluirQuestao(btn) {
+      if (confirm('Descartar esta questão? Ela não será incluída no seu banco pessoal.')) {
+        const card = btn.closest('.questao-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+          card.remove();
+          atualizarTotal();
+        }, 300);
+      }
+    }
+
+    function atualizarTotal() {
+      const total = document.querySelectorAll('.questao-card').length;
+      document.getElementById('total-questoes').textContent = total;
+    }
+
+    function salvarQuestao(btn) {
+      const textoOriginal = btn.textContent;
+      btn.textContent = 'Salvo ✓';
+      btn.classList.remove('btn-primario');
+      btn.classList.add('btn-sucesso');
+      setTimeout(() => {
+        btn.textContent = textoOriginal;
+        btn.classList.remove('btn-sucesso');
+        btn.classList.add('btn-primario');
+      }, 2000);
+    }
+
+    // Salvar todas as edições (sem ir pro modal)
+    document.getElementById('btn-salvar-todas').addEventListener('click', function () {
+      this.textContent = 'Edições salvas ✓';
+      this.classList.remove('btn-secundario');
+      this.classList.add('btn-sucesso');
+      setTimeout(() => {
+        this.textContent = 'Salvar edições';
+        this.classList.remove('btn-sucesso');
+        this.classList.add('btn-secundario');
+      }, 2000);
+    });
+
+    // Modal salvar + criar simulado
+    function abrirModalSalvar() {
+      document.getElementById('modal-salvar').classList.add('visivel');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-salvar').classList.remove('visivel');
+    }
+
+    function salvarSimulado() {
+      fecharModal();
+      // Redireciona pro meus-simulados com mensagem de sucesso
+      window.location.href = '/aluno/meus-simulados.html';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') fecharModal();
+    });
+
+    document.getElementById('modal-salvar').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal-salvar')) fecharModal();
+    });
+  </script>
+
+</body>
+</html>
