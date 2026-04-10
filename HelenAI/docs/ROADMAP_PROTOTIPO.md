@@ -190,10 +190,10 @@ HelenAI/
 
 | # | Tela | Arquivo | Referência MVP_TELAS.md | Status |
 |---|------|---------|-------------------------|--------|
-| 7.1 | Meus Simulados | `aluno/meus-simulados.html` | Seção 5.4.1 | [ ] |
-| 7.2 | Criar Simulado | `aluno/criar-simulado.html` | Seção 5.4.2 | [ ] |
-| 7.3 | Importar PDF (Aluno) | `aluno/importar-pdf.html` | Seção 5.4.3 | [ ] |
-| 7.4 | Modal de Compartilhamento | (componente em meus-simulados) | Seção 5.5.1 | [ ] |
+| 7.1 | Meus Simulados | `aluno/meus-simulados.html` | Seção 5.4.1 | [x] |
+| 7.2 | Criar Simulado | `aluno/criar-simulado.html` | Seção 5.4.2 | [x] |
+| 7.3 | Importar PDF (Aluno) | `aluno/importar-pdf.html` | Seção 5.4.3 | [x] |
+| 7.4 | Modal de Compartilhamento | (componente em meus-simulados) | Seção 5.5.1 | [x] |
 
 **Interações fake:**
 - Tabs (Criados / Importados / Realizados)
@@ -217,8 +217,8 @@ HelenAI/
 | 8.6 | Trilha personalizada no dashboard | `aluno/dashboard.html` (seção) | Seção 6.5.3 | [ ] |
 | 8.7 | Resumo semanal da IA | `aluno/dashboard.html` (seção) | Seção 6.5.3 | [ ] |
 | 8.8 | Configurações de IA e Linguagem Simples | `aluno/perfil.html` (seção) | Seção 6.5.3 | [ ] |
-| 8.9 | Onboarding inclusivo (tipo de deficiência, preferências) | `aluno/onboarding.html` | Seção 6.5.4 | [ ] |
-| 8.10 | Feedback humanizado (mensagens DUA) | Global — todos os textos do módulo aluno | Seção 6.5.4 | [ ] |
+| 8.9 | Onboarding inclusivo (tipo de deficiência, preferências) | `aluno/onboarding.html` | Seção 6.5.4 | [x] |
+| 8.10 | Feedback humanizado (mensagens DUA) | Global — todos os textos do módulo aluno | Seção 6.5.4 | [x] |
 
 **Interações fake:**
 - Botão "Simplificar" mostra versão simplificada fake do enunciado
@@ -232,15 +232,15 @@ HelenAI/
 ---
 
 ### Fase 9 — Módulo Admin
-> Gerenciamento da plataforma. Prioridade menor — fazer depois do fluxo do aluno.
+> Gerenciamento da plataforma + **cards de Inclusão no dashboard** (diferencial HelenAI pro Centelha).
 
 | # | Tela | Arquivo | Referência MVP_TELAS.md | Status |
 |---|------|---------|-------------------------|--------|
-| 9.1 | Dashboard Admin | `admin/dashboard.html` | Seção 3.1 | [ ] |
-| 9.2 | Lista de Conteudistas | `admin/conteudistas.html` | Seção 3.2.1 | [ ] |
-| 9.3 | Cadastro/Edição de Conteudista | `admin/conteudista-form.html` | Seção 3.2.2 | [ ] |
-| 9.4 | Lista de Alunos | `admin/alunos.html` | Seção 3.2.3 | [ ] |
-| 9.5 | Edição de Aluno | `admin/aluno-form.html` | Seção 3.2.4 | [ ] |
+| 9.1 | Dashboard Admin — 5 métricas + seção **Impacto e Inclusão** (PcD por tipo + uso de acessibilidade) + cadastros/mês + questões/área + top 10 simulados + top 5 acerto/erro | `admin/dashboard.html` | Seção 3.1 + extras | [x] |
+| 9.2 | Lista de Conteudistas — tabela com áreas coloridas + filtros + ações | `admin/conteudistas.html` | Seção 3.2.1 | [x] |
+| 9.3 | Cadastro/Edição de Conteudista — formulário com seletor de áreas em cards | `admin/conteudista-form.html` | Seção 3.2.2 | [x] |
+| 9.4 | Lista de Alunos — tabela com **badges de deficiência** + filtro por tipo de deficiência | `admin/alunos.html` | Seção 3.2.3 + extras | [x] |
+| 9.5 | Edição de Aluno — form + painel lateral somente leitura com acessibilidade declarada | `admin/aluno-form.html` | Seção 3.2.4 + extras | [x] |
 
 ---
 
@@ -257,6 +257,31 @@ HelenAI/
 
 ---
 
+### Fase 11 — Desafios e Ranking Periodizado
+> Sistema de Desafios (períodos de estudo) + evolução da tela de ranking do aluno com múltiplos períodos visíveis ao mesmo tempo.
+
+| # | Tela/Feature | Arquivo | Referência MVP_TELAS.md | Status |
+|---|-----|-------|-----|-----|
+| 11.1 | Ranking Geral — 4 cards de período (semana/quinzena/mês/ano) + pódio + tabela completa | `aluno/ranking.html` | Seção 7.3 | [x] |
+| 11.2 | Ranking Desafios — lista única ordenada por meu status + filtros + cards grandes | `aluno/ranking-desafios.html` | Seção 7.3 + 11 | [x] |
+| 11.3 | Ranking Por Simulado — lista de simulados + modal de ranking específico | `aluno/ranking-simulados.html` | Seção 7.3 | [x] |
+| 11.4 | Nav de tabs em `<a href>` linkando as 3 páginas acima (compartilhado) | (nas 3 telas) | — | [x] |
+| 11.5 | Detalhe do Desafio (header + progresso + lista de simulados + pódio + ranking) | `aluno/desafio-detalhe.html` | Seção 11.4 | [x] |
+| 11.6 | Criar Desafio (aluno) | `aluno/criar-desafio.html` | Seção 11.5 | [x] |
+| 11.7 | Lista de Desafios (conteudista) | `conteudista/desafios.html` | Seção 11.6 | [x] |
+| 11.8 | Form de Desafio (conteudista) — com seleção de turma | `conteudista/desafio-form.html` | Seção 11.6 | [x] |
+| 11.9 | Cards de desafios ativos no dashboard do aluno | (seção em dashboard.html) | Seção 11.7 | [x] |
+| 11.10 | Nova entrada "⚔ Desafios" no menu do conteudista (10 telas) | (sidebar) | Seção 10 | [x] |
+
+**Interações fake:**
+- Ranking Geral: cards de período renderizados via fake-data com top 5 de cada
+- Ranking Desafios: 6 desafios (4 do fake-data + 2 inline: 1 feito pela Maria + 1 encerrado oficial), ordenação fixa por meu status, filtros reativos
+- Ranking Por Simulado: simulados públicos, modal com ranking fake gerado a partir do ranking geral
+- Criar desafio: seletor de ícone (10 opções), cor (7 opções), visibilidade, preview sticky
+- Modal de seleção de simulados reusando padrão do `criar-simulado.html`
+
+---
+
 ## Resumo por Fase
 
 | Fase | Descrição | Itens | Prioridade | Status |
@@ -268,12 +293,13 @@ HelenAI/
 | **4** | Conteudista: Simulados e Gestão | 5 | Alta | ✅ Completa |
 | **5** | Aluno: Dashboard e Explorar | 4 | Alta | ✅ Completa |
 | **6** | Aluno: Realizar Simulado | 3 | Alta | ✅ Completa |
-| **7** | Aluno: Criação e Compartilhamento | 4 | Média | ⏳ Pendente |
-| **8** | Aluno: IA, Linguagem Simples e DUA | 10 | **Alta** | ⏳ Pendente |
-| **9** | Admin (movido da Fase 2) | 5 | Baixa | ⏳ Pendente |
+| **7** | Aluno: Criação e Compartilhamento | 4 | Média | ✅ Completa |
+| **8** | Aluno: IA, Linguagem Simples e DUA | 10 | **Alta** | ✅ Completa |
+| **9** | Admin (movido da Fase 2) | 5 | Baixa | ✅ Completa |
 | **10** | IA no Conteudista/Admin (futuro) | 5 | Baixa | ⏳ Futuro |
+| **11** | Desafios e Ranking Periodizado | 10 | **Alta** | ✅ Completa |
 
-**Total: 55 itens**
+**Total: 65 itens** — Fases 0, 1, 3, 4, 5, 6, 7, 8, 9, 11 completas. Fase 10 (IA Conteudista/Admin) é pós-MVP opcional.
 
 ---
 
@@ -282,8 +308,11 @@ HelenAI/
 ```
 ✅ Fase 0 (base) → ✅ Fase 1 (login) → ✅ Fase 3 (importação/questões) → ✅ Fase 4 (simulados/gestão)
 → ✅ Fase 5 (dashboard/explorar/perfil/ranking) → ✅ Fase 6 (realizar simulado + IA/DUA da Fase 8)
-→ Fase 7 (aluno criando) → Fase 8 restante → Fase 9 (admin) → Fase 10 (futuro)
+→ ✅ Fase 7 (aluno criando) → ✅ Fase 8 (onboarding fecha IA/DUA) → ✅ Fase 11 (desafios e ranking)
+→ ✅ Fase 9 (admin com cards de inclusão) → Fase 10 (futuro pós-MVP)
 ```
+
+**🎉 MVP completo** — todas as fases obrigatórias estão finalizadas. Só sobra a Fase 10 (IA no Conteudista/Admin), que é pós-MVP.
 
 **IMPORTANTE:** As funcionalidades da Fase 8 (IA, Linguagem Simples, DUA) devem ser integradas nas telas das Fases 5 e 6 ao construí-las. Não são telas separadas — são componentes e interações dentro das telas do aluno.
 

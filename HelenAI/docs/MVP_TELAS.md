@@ -578,15 +578,127 @@ O DUA define 3 princípios que devem estar presentes em TODAS as telas do aluno:
 
 - Badges exibidos no perfil do aluno e no ranking
 
-### 7.3 Ranking
+### 7.3 Ranking — 3 telas distintas
 
-- **Tela de Ranking** acessível pelo menu do aluno
-- **Abas:**
-  - `Geral` — todos os alunos da plataforma
-  - `Por simulado` — ranking específico de cada simulado público
-- **Tabela:** Posição, Avatar, Nome, Nível, XP total, Simulados completados
-- **Destaque:** Top 3 com visual diferenciado (ouro, prata, bronze)
-- **Posição do aluno logado sempre visível** (mesmo que esteja fora do top exibido)
+O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias (não é SPA com tabs JS). Todas compartilham o mesmo header (card gradient com posição do aluno) e uma barra de navegação em links que destaca a página ativa.
+
+**Tela 1 — Ranking Geral (`aluno/ranking.html`)**
+- Header + nav de links + 4 cards de período (sem filtros) + pódio top 3 + tabela completa com paginação
+- **4 cards de período simultâneos:**
+  - `🔥 Esta Semana` — últimos 7 dias (cor laranja)
+  - `📅 Quinzena` — últimos 14 dias (cor roxo)
+  - `🗓 Este Mês` — mês corrente (cor ciano)
+  - `🏆 Este Ano` — ano corrente (cor amarelo)
+  - Cada card mostra top 5 + linha do aluno logado destacada
+- **Todos os tempos:** pódio top 3 animado + tabela completa com posição, nome, nível, XP, simulados, taxa de acerto
+
+**Tela 2 — Ranking Desafios (`aluno/ranking-desafios.html`)**
+- Header + nav de links + filtros + lista única ordenada (sem paginação, sem colapsos)
+- **Filtros no topo:** busca textual + meu status (em andamento / feito / disponível / encerrado) + área + criador (professor / aluno / HelenAI oficial)
+- **Ordenação fixa:** "Em andamento por mim" → "Disponíveis" → "Feitos por mim" → "Encerrados"
+- **Cards grandes horizontais** com ícone colorido à esquerda, meio com info (título, criador, descrição, chips de metadados, avatares dos top 4 participantes + "+N outros") e bloco contextual:
+  - Se em andamento: barra de progresso + pontuação atual + posição no ranking
+  - Se feito: card azul com pontuação final, % média, posição final e período
+- Coluna direita com ações contextuais (Continuar / Ver resultado / Participar / Ver ranking final)
+- **Badge "meu status"** colorido no canto superior direito do card
+
+**Tela 3 — Por Simulado (`aluno/ranking-simulados.html`)**
+- Header + nav de links + filtros + lista de simulados públicos + modal de ranking
+- **Filtros:** busca + área + ordenação (mais participantes / sua nota / mais recentes)
+- Cada card: ícone + nome + meta (questões, tempo, participantes, criador) + sua nota (se fez) + sua posição + botão "🏆 Ver ranking"
+- Botão "Ver ranking" abre **modal** com ranking completo daquele simulado específico (tabela: posição, aluno, nota, tempo)
+
+---
+
+## 11. Desafios (Períodos de Estudo)
+
+> Desafios são pacotes temáticos de estudo que agrupam vários simulados, com ranking próprio. É uma forma de gamificar períodos de preparação específicos (ex: "Revisão de Matemática — Janeiro") e criar competições saudáveis entre alunos.
+
+### 11.1 Conceito
+
+- Um **Desafio** agrupa **N simulados** em torno de um tema ou período
+- Cada desafio tem **seu próprio ranking**, calculado pela **soma da % de acerto** do aluno em cada simulado do desafio (máximo = N × 100 pontos)
+- Desafios podem ter **prazo opcional** (data início / fim) ou ser **contínuos** (sem prazo)
+- Status possíveis: `em_andamento` | `encerrado` | `nao_iniciado`
+
+### 11.2 Quem pode criar
+
+- **Conteudista:** cria pra turma específica (vinculado a uma turma — só alunos da turma participam) ou público (todos os alunos). É a principal ferramenta pedagógica do professor pra criar períodos de revisão
+- **Aluno:** cria privado, compartilhado (por link/email) ou solicita publicação pública (vai pra curadoria do conteudista, mesma lógica dos simulados do aluno)
+- **Admin:** cria desafios oficiais da plataforma (ex: "Simulado Nacional HelenAI 2026")
+
+### 11.3 Lista de Desafios (aba dentro de Ranking)
+
+- **Desafios em andamento** (cards destacados) — desafios que o aluno está participando agora, com:
+  - Nome, ícone, cor de destaque
+  - Progresso: "3 de 8 simulados feitos"
+  - Pontuação atual / pontuação máxima possível
+  - Posição atual no ranking do desafio ("#12 de 45 participantes")
+  - Dias restantes (ou "Contínuo" se não tem prazo)
+  - Botão `Continuar desafio`
+- **Desafios disponíveis** — públicos que o aluno ainda não entrou (cards com botão `Participar`)
+- **Botão `+ Criar desafio`** no canto superior — abre `aluno/criar-desafio.html`
+
+### 11.4 Detalhe do Desafio
+
+- **Header:**
+  - Nome, descrição, ícone, cor/gradient de destaque
+  - Criador (conteudista, aluno, admin) + turma vinculada (se houver)
+  - Datas (início — fim) ou "Contínuo"
+  - Status: em andamento / encerrado
+- **Card "Seu progresso"** (se o aluno está participando):
+  - Simulados feitos / total
+  - Pontuação atual (ex: 240 / 800)
+  - Posição no ranking do desafio
+  - Barra de progresso visual
+- **Lista de simulados do desafio:**
+  - Cada linha: nome, área, tempo, status pra este aluno (🔒 Não iniciado / 🔄 Em andamento / ✓ Feito com nota)
+  - Botão "Fazer agora" pros não iniciados
+- **Ranking do desafio:**
+  - Pódio top 3 com animação
+  - Tabela completa: Posição, Aluno, Simulados feitos (X/N), Pontuação, % média de acerto
+  - Posição do aluno sempre visível (destacada)
+- **Ações:**
+  - `Compartilhar desafio` (link ou email)
+  - `Sair do desafio` (confirmação)
+
+### 11.5 Criar Desafio (aluno)
+
+- **Campos:**
+  - Nome do desafio
+  - Descrição (opcional)
+  - Ícone/emoji + cor de destaque
+  - Data início (opcional, default = hoje)
+  - Data fim (opcional — se vazio, é contínuo)
+  - Visibilidade: Privado / Compartilhado / Solicitar publicação pública
+- **Seleção de simulados:**
+  - Modal com tabs `Banco Público` + `Minhas Importações`
+  - Filtros BNCC (área, habilidade, dificuldade)
+  - Checkboxes pra seleção múltipla
+  - Mínimo 2 simulados, sem máximo definido
+- **Preview:** mostra pontuação máxima calculada (N × 100), duração, áreas cobertas
+- **Botões:** `Salvar rascunho` | `Criar desafio` | `Cancelar`
+
+### 11.6 Desafios (conteudista)
+
+- **Lista (`conteudista/desafios.html`):**
+  - Tabela ou cards dos desafios criados pelo conteudista
+  - Colunas: Nome, Turma vinculada, Qtd simulados, Qtd alunos participando, Status, Data fim
+  - Filtros: Status, Turma, Área
+  - Ações: Ver detalhes, Editar, Encerrar, Duplicar
+- **Formulário (`conteudista/desafio-form.html`):**
+  - Mesmos campos do aluno + extra: dropdown `Vincular à turma` (com as turmas do conteudista) ou "Público para todos"
+  - Conteudista pode publicar direto sem passar por curadoria
+
+### 11.7 Integração com Dashboard
+
+- **Dashboard do aluno:** card "Desafios ativos" mostra 1-2 desafios em andamento do aluno entre o "Continue de onde parou" e as métricas gerais
+
+### 11.8 Ranking Global vs Ranking do Desafio
+
+- **Ranking global** (aba Geral do `ranking.html`): XP total do aluno na plataforma inteira, independente de desafios
+- **Ranking do desafio** (dentro de cada desafio): pontuação calculada só pelos simulados daquele desafio
+- O aluno pode estar em posição muito diferente em cada contexto (ex: #45 global, mas #2 no desafio de Matemática)
 
 ---
 
@@ -734,6 +846,46 @@ O DUA define 3 princípios que devem estar presentes em TODAS as telas do aluno:
 }
 ```
 
+### 8.8 Desafio
+
+```
+{
+  id
+  nome                       // Ex: "Revisão de Matemática — Janeiro"
+  descricao
+  icone                      // Emoji ou código do ícone
+  cor                        // Cor de destaque (hex)
+  criado_por                 // ID de quem criou
+  tipo_criador               // "admin" | "conteudista" | "aluno"
+  turma_id                   // Opcional — só se criado por conteudista vinculado a turma
+  simulados[]                // Lista ordenada de IDs de simulados
+  data_inicio                // Null se contínuo
+  data_fim                   // Null se contínuo
+  visibilidade               // "privado" | "compartilhado" | "publico" | "pendente_aprovacao" | "rejeitado"
+  status                     // "em_andamento" | "encerrado" | "rascunho"
+  criterio_pontuacao         // Default: "soma_percentual_acerto"
+  pontuacao_maxima           // Calculado: len(simulados) * 100
+  total_participantes
+  created_at
+  updated_at
+}
+```
+
+### 8.9 Participação em Desafio
+
+```
+{
+  id
+  desafio_id
+  aluno_id
+  simulados_feitos[]         // Lista de {simulado_id, nota, data}
+  pontuacao_atual            // Soma das % de acerto dos simulados feitos
+  posicao_ranking            // Posição atual no ranking do desafio
+  entrou_em
+  ultima_atividade
+}
+```
+
 ---
 
 ## 9. Regras de Negócio
@@ -776,6 +928,19 @@ O DUA define 3 princípios que devem estar presentes em TODAS as telas do aluno:
 2. Streak conta dias consecutivos com pelo menos 1 simulado finalizado
 3. Badges são concedidos automaticamente quando o critério é atingido
 4. Ranking é atualizado em tempo real
+
+### 9.6 Desafios
+
+1. Desafios precisam de **no mínimo 2 simulados**
+2. **Pontuação no desafio = soma da % de acerto de cada simulado feito pelo aluno** (máximo N × 100)
+3. Apenas a **melhor tentativa** de cada simulado conta pra pontuação do desafio
+4. Desafio com `data_fim` definida é **encerrado automaticamente** na data — depois disso o ranking é congelado
+5. Desafios **contínuos** (sem data fim) ficam eternamente em andamento até o criador encerrar
+6. **Aluno criando desafio público:** mesma lógica dos simulados — nasce privado, precisa solicitar publicação → curadoria
+7. **Conteudista criando desafio:** pode publicar direto (pra turma ou público), sem passar por curadoria
+8. **Conteudista vincula desafio a turma:** só alunos da turma podem participar
+9. Aluno pode participar de **múltiplos desafios simultaneamente**
+10. Sair do desafio **remove a participação e as pontuações**, mas não afeta os simulados feitos (que continuam no histórico geral)
 
 ---
 
@@ -860,6 +1025,7 @@ Login → Dashboard Admin → Gerenciamento de Usuários → Conteudistas
 - Importar PDF
 - Banco de Questões
 - Simulados
+- Desafios
 - Meus Alunos (Sala)
 - Curadoria
 
@@ -867,5 +1033,5 @@ Login → Dashboard Admin → Gerenciamento de Usuários → Conteudistas
 - Dashboard
 - Explorar Simulados
 - Meus Simulados
-- Ranking
+- Ranking (inclui aba de Desafios)
 - Perfil
