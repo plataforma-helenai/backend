@@ -14,13 +14,19 @@
 #   - venv com Pillow (já configurado em ./venv)
 #
 # Uso:
-#   ./gerar-pdf.sh <caminho-da-tela> [largura-px]
+#   ./gerar-pdf.sh <caminho-da-tela> [largura-px] [altura-px]
 #   ./gerar-pdf.sh --all
 #
 # Exemplos:
 #   ./gerar-pdf.sh aluno/dashboard.html
 #   ./gerar-pdf.sh aluno/dashboard.html 1600
+#   ./gerar-pdf.sh compartilhado/login.html 1440 900   # hero page: usa 100vh, precisa altura real
 #   ./gerar-pdf.sh --all   (gera PDF de todas as telas existentes)
+#
+# Altura padrão é 5000 (captura alta, crop automático do bottom).
+# Para telas que usam min-height: 100vh + justify-content: center
+# (login, cadastro, recuperar-senha), passe altura realista (~900)
+# pra não afundar o conteúdo no meio do viewport.
 #
 # O PDF é salvo em ./HelenAI/pdfs/<modulo>-<tela>.pdf
 # ================================================================
@@ -30,7 +36,7 @@ set -e
 # === Configuração padrão ===
 HOST="http://127.0.0.1:8020"
 LARGURA="${2:-1440}"
-ALTURA_INICIAL=5000   # captura alta, depois corta no fim do conteúdo
+ALTURA_INICIAL="${3:-5000}"   # captura alta, depois corta no fim do conteúdo
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_PYTHON="$SCRIPT_DIR/venv/bin/python3"
 PASTA_PROTOTIPOS="$SCRIPT_DIR/HelenAI/prototipos"
@@ -113,29 +119,41 @@ x1 = max(w - RIGHT_FIXED_W, x0 + 200)
 regiao = arr[:, x0:x1, :]
 gray = regiao.mean(axis=2)
 
-# Pixels brancos (cards): valor > 248
-white_mask = gray > 248
+# Detecção de conteúdo por BORDAS (saltos pixel-a-pixel na horizontal).
+# Cards brancos sobre fundo cinza, texto preto sobre branco, bordas de
+# inputs, ícones — todos criam saltos abruptos de luminância (>25 de delta).
+# Gradients diagonais são suaves (delta <5 por pixel), fundos uniformes não
+# têm nenhum salto. Assim ignora o branding do login mas detecta texto/cards
+# nele.
+gray_diff = np.abs(np.diff(gray, axis=1))
+edges_per_row = (gray_diff > 25).sum(axis=1)
 
-# Conta quantos pixels brancos por linha
-white_per_row = white_mask.sum(axis=1)
+# Threshold: linhas com pelo menos 30 pixels de borda contam como conteúdo
+# real (ignora ruído / anti-aliasing esparso de gradientes).
+MIN_EDGES = 30
+linhas_com_conteudo = np.where(edges_per_row > MIN_EDGES)[0]
 
-# Linhas "com card" têm pelo menos N pixels brancos consecutivos.
-# Threshold: precisa de no mínimo 50 pixels brancos pra contar como conteúdo
-# (evita pegar pixels brancos isolados de bordas/sombras).
-MIN_WHITE = 50
-linhas_com_card = np.where(white_per_row > MIN_WHITE)[0]
-
-if len(linhas_com_card) > 0:
-    fim = int(linhas_com_card[-1])
+if len(linhas_com_conteudo) > 0:
+    inicio = int(linhas_com_conteudo[0])
+    fim = int(linhas_com_conteudo[-1])
 else:
-    # Sem cards detectados — fallback pra altura mínima
+    # Sem conteúdo detectado — fallback pra altura mínima
+    inicio = 0
     fim = h // 4
+
+# Se o conteúdo começa bem abaixo do topo (> 200px de vazio), provavelmente é
+# uma tela "hero" com conteúdo centralizado em 100vh. Nesse caso corta o topo
+# também, deixando uma margem pra preservar elementos decorativos (gradient,
+# círculos). Caso contrário, mantém o topo (telas normais com AppBar).
+crop_top = 0
+if inicio > 200:
+    crop_top = max(inicio - 180, 0)
 
 # Margem inferior + altura mínima
 crop_h = min(fim + 50, h)
-crop_h = max(crop_h, 700)
+crop_h = max(crop_h, crop_top + 700)
 
-cropped = img.crop((0, 0, w, crop_h))
+cropped = img.crop((0, crop_top, w, crop_h))
 cropped.save(pdf_path, "PDF", resolution=150.0)
 print(f"  ✓ {pdf_path.split('/')[-1]} ({cropped.size[0]}x{cropped.size[1]})")
 PYEOF

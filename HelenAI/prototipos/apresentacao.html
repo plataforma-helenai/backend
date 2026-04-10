@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Apresentação Centelha</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       Design system local (independente do global.css do protótipo)
+       ============================================================ */
+    :root {
+      --azul-profundo: #1A3A6B;
+      --azul-medio: #2B6CB0;
+      --azul-claro: #A8D4F0;
+      --ciano: #3CC8D0;
+      --cinza-azulado: #EEF4FA;
+      --branco: #FFFFFF;
+      --texto-primario: #2D3748;
+      --texto-secundario: #4A5568;
+      --texto-terciario: #718096;
+      --borda-cor: #E2E8F0;
+      --cor-sucesso: #38A169;
+      --cor-erro: #E53E3E;
+      --cor-aviso: #ECC94B;
+      --gradiente-principal: linear-gradient(135deg, #1A3A6B 0%, #2B6CB0 50%, #3CC8D0 100%);
+      --gradiente-suave: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+      --sombra-card: 0 4px 14px rgba(26, 58, 107, 0.08);
+      --sombra-modal: 0 20px 60px rgba(26, 58, 107, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #0F1F3A;
+      color: var(--texto-primario);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       Container principal — slides em 16:9 centralizados
+       ============================================================ */
+    .apresentacao {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: radial-gradient(circle at top left, #1A3A6B 0%, #0F1F3A 100%);
+    }
+
+    .slide-wrapper {
+      width: min(calc(100vw - 40px), 1600px);
+      height: min(calc(100vh - 100px), calc((100vw - 40px) * 9 / 16), 900px);
+      background: var(--branco);
+      border-radius: 16px;
+      box-shadow: var(--sombra-modal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      padding: 50px 60px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .slide.ativo { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================
+       Barra de progresso topo
+       ============================================================ */
+    .progresso-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+
+    .progresso-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3CC8D0 0%, #2B6CB0 100%);
+      width: 0;
+      transition: width 0.4s ease;
+    }
+
+    /* ============================================================
+       Controles inferiores
+       ============================================================ */
+    .controles {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      padding: 10px 18px;
+      border-radius: 999px;
+      z-index: 100;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .controles button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--branco);
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+    }
+
+    .controles button:hover {
+      background: var(--branco);
+      color: var(--azul-profundo);
+      transform: scale(1.06);
+    }
+
+    .controles button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .controles .contador {
+      color: var(--branco);
+      font-size: 0.85rem;
+      font-weight: 600;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .controles .menu {
+      position: relative;
+    }
+
+    /* Menu de slides */
+    .menu-slides {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--branco);
+      border-radius: 12px;
+      padding: 12px;
+      max-width: 90vw;
+      max-height: 60vh;
+      overflow-y: auto;
+      box-shadow: var(--sombra-modal);
+      display: none;
+      z-index: 200;
+    }
+
+    .menu-slides.aberto {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .menu-slides-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    .menu-slides-item {
+      padding: 10px 14px;
+      background: var(--cinza-azulado);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--azul-profundo);
+      font-weight: 500;
+      border: 2px solid transparent;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+
+    .menu-slides-item:hover {
+      background: #DCE9F5;
+      border-color: var(--azul-claro);
+    }
+
+    .menu-slides-item.atual {
+      background: var(--azul-medio);
+      color: var(--branco);
+      border-color: var(--azul-medio);
+    }
+
+    .menu-slides-item .num {
+      font-weight: 700;
+      opacity: 0.7;
+      margin-right: 8px;
+    }
+
+    /* ============================================================
+       Estilos comuns dos slides
+       ============================================================ */
+    .slide h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1.1;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .slide h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1.15;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .slide h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--azul-medio);
+      margin-bottom: 10px;
+    }
+
+    .slide p {
+      font-size: 1.05rem;
+      line-height: 1.55;
+      color: var(--texto-secundario);
+    }
+
+    .slide .lead {
+      font-size: 1.2rem;
+      color: var(--texto-secundario);
+      line-height: 1.5;
+      max-width: 800px;
+    }
+
+    .slide .badge-secao {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gradiente-suave);
+      color: var(--azul-medio);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+
+    /* ============================================================
+       SLIDE 1 — Capa
+       ============================================================ */
+    .slide.capa {
+      background: var(--gradiente-principal);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--branco);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide.capa h1,
+    .slide.capa h2,
+    .slide.capa p,
+    .slide.capa .slogan,
+    .slide.capa .lead { color: var(--branco); }
+
+    .slide.capa::before {
+      content: '';
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.15);
+      top: -200px;
+      right: -200px;
+    }
+
+    .slide.capa::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      bottom: -150px;
+      left: -150px;
+    }
+
+    .slide.capa .conteudo {
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide.capa .logo-marca {
+      font-size: 5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      color: var(--branco);
+    }
+
+    .slide.capa h1 {
+      color: var(--branco);
+      font-size: 2rem;
+      font-weight: 500;
+      margin-bottom: 30px;
+      opacity: 0.95;
+    }
+
+    .slide.capa .slogan {
+      font-size: 1.6rem;
+      font-weight: 300;
+      max-width: 700px;
+      margin: 0 auto 50px;
+      line-height: 1.4;
+      opacity: 0.95;
+    }
+
+    .slide.capa .programa {
+      display: inline-block;
+      padding: 10px 24px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* ============================================================
+       Layout: Texto à esquerda + screenshot à direita
+       ============================================================ */
+    .slide.split {
+      flex-direction: row;
+      align-items: stretch;
+      padding: 0;
+      gap: 0;
+    }
+
+    .slide.split .texto-lado {
+      flex: 1 1 50%;
+      padding: 50px 40px 50px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow-y: auto;
+    }
+
+    .slide.split h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .slide.split .imagem-lado {
+      flex: 1 1 50%;
+      background: var(--gradiente-suave);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide.split .imagem-lado::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.12);
+    }
+
+    .slide.split .imagem-lado img {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(26, 58, 107, 0.25);
+      position: relative;
+      z-index: 1;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .slide.split .lista-features {
+      list-style: none;
+      margin-top: 24px;
+    }
+
+    .slide.split .lista-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      font-size: 1.05rem;
+      color: var(--texto-primario);
+      line-height: 1.5;
+    }
+
+    .slide.split .lista-features li .check {
+      width: 24px;
+      height: 24px;
+      background: var(--cor-sucesso);
+      color: var(--branco);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .slide.split .lista-features li strong {
+      color: var(--azul-profundo);
+    }
+
+    /* ============================================================
+       Slide problema — destaque alarmante
+       ============================================================ */
+    .slide.problema {
+      background: linear-gradient(135deg, #FFF5F5 0%, #FFFAF0 100%);
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .slide.problema h1 {
+      max-width: 1100px;
+    }
+
+    .slide.problema .lead {
+      max-width: 1100px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .stat-card {
+      background: var(--branco);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--sombra-card);
+      border-left: 5px solid var(--cor-erro);
+    }
+
+    .stat-numero {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: var(--cor-erro);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 0.95rem;
+      color: var(--texto-secundario);
+      line-height: 1.4;
+    }
+
+    /* ============================================================
+       Slide solução — 3 frases impactantes
+       ============================================================ */
+    .slide.solucao {
+      background: var(--gradiente-suave);
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .slide.solucao h1 {
+      font-size: 2.6rem;
+      max-width: 1100px;
+      margin-bottom: 30px;
+    }
+
+    .pilares-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+      max-width: 1100px;
+    }
+
+    .pilar-card {
+      background: var(--branco);
+      border-radius: 16px;
+      padding: 32px 24px;
+      box-shadow: var(--sombra-card);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .pilar-card:hover { transform: translateY(-4px); }
+
+    .pilar-icone {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin: 0 auto 16px;
+    }
+
+    .pilar-card h3 {
+      font-size: 1.2rem;
+      color: var(--azul-profundo);
+      margin-bottom: 8px;
+    }
+
+    .pilar-card p {
+      font-size: 0.95rem;
+      color: var(--texto-secundario);
+      line-height: 1.5;
+    }
+
+    /* ============================================================
+       Slide mercado — números grandes
+       ============================================================ */
+    .slide.mercado {
+      background: linear-gradient(135deg, #FFFBEB 0%, #FEFCBF 100%);
+      align-items: flex-start;
+    }
+
+    .mercado-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 30px;
+    }
+
+    .mercado-numero-grande {
+      background: var(--branco);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--sombra-card);
+      border-top: 5px solid #D69E2E;
+    }
+
+    .mercado-numero-grande .valor {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .mercado-numero-grande .label {
+      font-size: 1rem;
+      color: var(--texto-secundario);
+      line-height: 1.4;
+    }
+
+    .ods-list {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .ods-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--branco);
+      border: 2px solid #D69E2E;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--azul-profundo);
+    }
+
+    /* ============================================================
+       Slide equipe — 4 cards
+       ============================================================ */
+    .slide.equipe {
+      align-items: flex-start;
+    }
+
+    .equipe-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 40px;
+      width: 100%;
+    }
+
+    .equipe-card {
+      background: var(--gradiente-suave);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      transition: transform 0.3s ease;
+      border: 1px solid var(--azul-claro);
+    }
+
+    .equipe-card:hover { transform: translateY(-4px); }
+
+    .equipe-avatar {
+      width: 80px;
+      height: 80px;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0 auto 16px;
+      box-shadow: var(--sombra-card);
+    }
+
+    .equipe-card h4 {
+      font-size: 1rem;
+      color: var(--azul-profundo);
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .equipe-card .role {
+      font-size: 0.8rem;
+      color: var(--azul-medio);
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .equipe-card .expertise {
+      font-size: 0.85rem;
+      color: var(--texto-secundario);
+      line-height: 1.4;
+    }
+
+    /* ============================================================
+       Slide roadmap — timeline horizontal
+       ============================================================ */
+    .roadmap-timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+      width: 100%;
+      position: relative;
+    }
+
+    .roadmap-timeline::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      left: 8%;
+      right: 8%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cor-sucesso) 0%, var(--azul-medio) 50%, var(--ciano) 100%);
+      z-index: 0;
+    }
+
+    .roadmap-fase {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .roadmap-numero {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--branco);
+      border: 4px solid var(--azul-medio);
+      color: var(--azul-profundo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin: 0 auto 16px;
+      box-shadow: var(--sombra-card);
+    }
+
+    .roadmap-fase:nth-child(1) .roadmap-numero { border-color: var(--cor-sucesso); }
+    .roadmap-fase:nth-child(2) .roadmap-numero { border-color: var(--azul-medio); }
+    .roadmap-fase:nth-child(3) .roadmap-numero { border-color: #805AD5; }
+    .roadmap-fase:nth-child(4) .roadmap-numero { border-color: var(--ciano); }
+
+    .roadmap-fase h4 {
+      font-size: 1rem;
+      color: var(--azul-profundo);
+      margin-bottom: 6px;
+    }
+
+    .roadmap-fase .periodo {
+      font-size: 0.75rem;
+      color: var(--texto-terciario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .roadmap-fase p {
+      font-size: 0.85rem;
+      line-height: 1.4;
+      color: var(--texto-secundario);
+    }
+
+    /* ============================================================
+       Slide CTA — fechamento
+       ============================================================ */
+    .slide.cta {
+      background: var(--gradiente-principal);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--branco);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide.cta::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.12);
+      top: -200px;
+      left: -200px;
+    }
+
+    .slide.cta .conteudo {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+    }
+
+    .slide.cta h1 {
+      color: var(--branco);
+      font-size: 3.4rem;
+      margin-bottom: 24px;
+    }
+
+    .slide.cta .lead {
+      color: rgba(255, 255, 255, 0.95);
+      font-size: 1.4rem;
+      max-width: 700px;
+      margin: 0 auto 50px;
+    }
+
+    .slide.cta .pedido {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 50px;
+    }
+
+    .slide.cta .pedido-item {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 14px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .slide.cta .pedido-item .icone {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .slide.cta .pedido-item h4 {
+      color: var(--branco);
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .slide.cta .pedido-item p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .slide.cta .obrigado {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-top: 20px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ============================================================
+       Slide tecnologia
+       ============================================================ */
+    .slide.tecnologia {
+      background: linear-gradient(135deg, #1A3A6B 0%, #2B6CB0 100%);
+      color: var(--branco);
+      align-items: flex-start;
+    }
+
+    .slide.tecnologia h1, .slide.tecnologia h2 { color: var(--branco); }
+    .slide.tecnologia p, .slide.tecnologia .lead { color: rgba(255, 255, 255, 0.9); }
+
+    .slide.tecnologia .badge-secao {
+      background: rgba(255, 255, 255, 0.18);
+      color: var(--branco);
+    }
+
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+      width: 100%;
+    }
+
+    .stack-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stack-card .icone {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .stack-card h4 {
+      color: var(--branco);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .stack-card p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    /* ============================================================
+       Slide impacto/inclusão (admin dashboard) — destaque especial
+       ============================================================ */
+    .slide.inclusao .imagem-lado {
+      background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+    }
+
+    .slide.inclusao .badge-destaque {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--azul-profundo) 0%, var(--azul-medio) 100%);
+      color: var(--branco);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* ============================================================
+       Indicador de teclado (canto)
+       ============================================================ */
+    .dica-teclado {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      color: var(--branco);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      z-index: 100;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .dica-teclado:hover { opacity: 1; }
+
+    .dica-teclado kbd {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      margin: 0 2px;
+      font-family: monospace;
+    }
+
+    /* ============================================================
+       Print mode (geração de PDF)
+       ============================================================ */
+    @media print {
+      body { background: white; overflow: visible; height: auto; }
+      .apresentacao { background: white; height: auto; display: block; }
+      .controles, .progresso-bar, .dica-teclado, .menu-slides { display: none !important; }
+      .slide-wrapper {
+        max-width: none;
+        width: 100%;
+        max-height: none;
+        aspect-ratio: 16/9;
+        border-radius: 0;
+        box-shadow: none;
+        page-break-after: always;
+        margin: 0;
+      }
+      .slide { display: flex !important; }
+      .slide:not(.ativo) { position: relative; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de progresso -->
+  <div class="progresso-bar">
+    <div class="progresso-fill" id="progresso-fill"></div>
+  </div>
+
+  <!-- Dica de teclado -->
+  <div class="dica-teclado">
+    Use <kbd>←</kbd> <kbd>→</kbd> ou <kbd>Espaço</kbd> · <kbd>F</kbd> tela cheia · <kbd>M</kbd> menu
+  </div>
+
+  <div class="apresentacao">
+    <div class="slide-wrapper">
+
+      <!-- ============================================================
+           SLIDE 1 — Capa
+           ============================================================ -->
+      <section class="slide capa ativo" data-titulo="Capa">
+        <div class="conteudo">
+          <div class="logo-marca">helen.ai</div>
+          <h1>Aprendizado sem barreiras</h1>
+          <p class="slogan">A primeira EdTech inclusiva desenhada desde o início para Pessoas com Deficiência se prepararem para ENEM, concursos e seleções públicas.</p>
+          <div class="programa">📍 Programa Centelha 2026</div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 2 — O Problema
+           ============================================================ -->
+      <section class="slide problema" data-titulo="Problema">
+        <div class="badge-secao">⚠ O problema</div>
+        <h1>Estudar para o ENEM ainda é <span style="color: var(--cor-erro);">privilégio</span></h1>
+        <p class="lead">No Brasil, pessoas com deficiência enfrentam barreiras desproporcionais no acesso a materiais didáticos adequados. As plataformas existentes tratam acessibilidade como "extra plugado depois", não como princípio de design.</p>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-numero">45M+</div>
+            <div class="stat-label">Brasileiros com algum tipo de deficiência (IBGE Censo 2022)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-numero">1,5M</div>
+            <div class="stat-label">PcDs inscritos no ENEM 2023 com atendimento especializado</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-numero">20%</div>
+            <div class="stat-label">Vagas reservadas para PcDs em concursos públicos (Lei de Cotas)</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 3 — A Solução
+           ============================================================ -->
+      <section class="slide solucao" data-titulo="Solução">
+        <div class="badge-secao">💡 A solução</div>
+        <h1>HelenAI — onde acessibilidade <span style="color: var(--cor-sucesso);">é o produto</span></h1>
+        <p class="lead">Uma plataforma de estudos onde cada tela e cada interação foi desenhada para remover barreiras. A HelenAI aplica três pilares fundamentais:</p>
+        <div class="pilares-grid">
+          <div class="pilar-card">
+            <div class="pilar-icone">♿</div>
+            <h3>DUA</h3>
+            <p>Desenho Universal para Aprendizagem em todas as telas</p>
+          </div>
+          <div class="pilar-card">
+            <div class="pilar-icone">📝</div>
+            <h3>Linguagem Simples</h3>
+            <p>Lei 15.263/2025 aplicada nas questões automaticamente</p>
+          </div>
+          <div class="pilar-card">
+            <div class="pilar-icone">🤖</div>
+            <h3>IA Helen</h3>
+            <p>Assistente pedagógica com dicas, explicações e trilhas</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 4 — Diferencial 1: Onboarding
+           ============================================================ -->
+      <section class="slide split" data-titulo="Onboarding inclusivo">
+        <div class="texto-lado">
+          <div class="badge-secao">🎯 Diferencial #1</div>
+          <h2>Onboarding inclusivo que adapta tudo automaticamente</h2>
+          <p>No primeiro acesso, o aluno responde 4 perguntas simples sobre seu perfil. A plataforma <strong>ativa automaticamente</strong> os recursos certos sozinha.</p>
+          <ul class="lista-features">
+            <li><span class="check">✓</span> <span><strong>Daltonismo</strong> → ativa paleta Color Blind</span></li>
+            <li><span class="check">✓</span> <span><strong>Dislexia</strong> → ativa fonte OpenDyslexic</span></li>
+            <li><span class="check">✓</span> <span><strong>Visual</strong> → ativa contraste + ledor + fonte grande</span></li>
+            <li><span class="check">✓</span> <span><strong>Auditiva</strong> → ativa intérprete LIBRAS</span></li>
+            <li><span class="check">✓</span> <span><strong>Intelectual</strong> → ativa Linguagem Simples + ledor</span></li>
+          </ul>
+        </div>
+        <div class="imagem-lado">
+          <img src="/assets/img/slides/onboarding.png" alt="Tela de onboarding inclusivo">
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 5 — Diferencial 2: IA Helen no simulado
+           ============================================================ -->
+      <section class="slide split" data-titulo="IA Helen">
+        <div class="texto-lado">
+          <div class="badge-secao">🤖 Diferencial #2</div>
+          <h2>IA "Helen" como assistente pedagógica</h2>
+          <p>Na hora da prova, o aluno tem uma toolbar com 4 botões poderosos integrados ao enunciado:</p>
+          <ul class="lista-features">
+            <li><span class="check">💡</span> <span><strong>Simplificar</strong> — reescreve em Linguagem Simples lado a lado</span></li>
+            <li><span class="check">🔑</span> <span><strong>Palavras-chave</strong> — destaca termos com tooltip</span></li>
+            <li><span class="check">📖</span> <span><strong>Pedir uma dica</strong> — sem revelar a resposta</span></li>
+            <li><span class="check">🔊</span> <span><strong>Ouvir questão</strong> — TTS com destaque do trecho</span></li>
+          </ul>
+        </div>
+        <div class="imagem-lado">
+          <img src="/assets/img/slides/simulado-questao.png" alt="Tela de questão com toolbar da Helen">
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 6 — Diferencial 3: Feedback humanizado
+           ============================================================ -->
+      <section class="slide split" data-titulo="Feedback humanizado">
+        <div class="texto-lado">
+          <div class="badge-secao">💙 Diferencial #3</div>
+          <h2>Feedback humanizado, nunca punitivo</h2>
+          <p>Aplicamos princípios DUA em <strong>cada mensagem</strong> da plataforma. A Helen explica cada questão errada com tom acolhedor:</p>
+          <ul class="lista-features">
+            <li><span class="check">✗</span> <span style="color: var(--cor-erro);">"Você errou" → ✓ <strong style="color: var(--cor-sucesso);">"Vamos revisar juntas? 💪"</strong></span></li>
+            <li><span class="check">✗</span> <span style="color: var(--cor-erro);">"Nota baixa" → ✓ <strong style="color: var(--cor-sucesso);">"Você está progredindo!"</strong></span></li>
+            <li><span class="check">✗</span> <span style="color: var(--cor-erro);">"Tempo esgotado" → ✓ <strong style="color: var(--cor-sucesso);">"Sem pressa, continue quando quiser"</strong></span></li>
+          </ul>
+          <p style="margin-top: 20px; font-style: italic; color: var(--azul-medio);">Cronômetro é sempre opcional. Pressão não educa.</p>
+        </div>
+        <div class="imagem-lado">
+          <img src="/assets/img/slides/simulado-resultado.png" alt="Tela de resultado com gabarito humanizado">
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 7 — Diferencial 4: Desafios
+           ============================================================ -->
+      <section class="slide split" data-titulo="Desafios gamificados">
+        <div class="texto-lado">
+          <div class="badge-secao">⚔ Diferencial #4</div>
+          <h2>Desafios temáticos com ranking próprio</h2>
+          <p>Professores <strong>e</strong> alunos podem criar "períodos de estudo" agrupando vários simulados, com ranking, pontuação e gamificação.</p>
+          <ul class="lista-features">
+            <li><span class="check">🎯</span> <span><strong>Mínimo 2 simulados</strong> · pontuação = soma da % de acerto</span></li>
+            <li><span class="check">📅</span> <span>Prazo opcional · pode ser <strong>contínuo</strong></span></li>
+            <li><span class="check">👥</span> <span>Vinculado a turmas ou aberto a todos</span></li>
+            <li><span class="check">🏆</span> <span>Ranking próprio + posição no global do aluno</span></li>
+          </ul>
+        </div>
+        <div class="imagem-lado">
+          <img src="/assets/img/slides/ranking-desafios.png" alt="Lista de desafios com ranking">
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 8 — DIFERENCIAL #5: Dashboard de Inclusão (PRINCIPAL)
+           ============================================================ -->
+      <section class="slide split inclusao" data-titulo="Métricas de inclusão">
+        <div class="texto-lado">
+          <span class="badge-destaque">⭐ Principal diferencial</span>
+          <h2>Métricas de inclusão como produto</h2>
+          <p>O dashboard administrativo tem uma seção dedicada chamada <strong>"💙 Impacto e Inclusão"</strong> mostrando o que mais nos importa:</p>
+          <ul class="lista-features">
+            <li><span class="check">📊</span> <span><strong>Donut chart</strong> — alunos PcD por tipo de deficiência</span></li>
+            <li><span class="check">♿</span> <span><strong>Barras animadas</strong> — % usando cada recurso de acessibilidade</span></li>
+            <li><span class="check">📈</span> <span>Linguagem Simples: <strong>47%</strong> · Ledor: <strong>34%</strong> · LIBRAS: <strong>11%</strong></span></li>
+            <li><span class="check">💙</span> <span>Não falamos de inclusão. <strong>Medimos.</strong></span></li>
+          </ul>
+        </div>
+        <div class="imagem-lado">
+          <img src="/assets/img/slides/admin-dashboard.png" alt="Dashboard admin com métricas de inclusão">
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 9 — Diferencial 6: Acessibilidade nativa
+           ============================================================ -->
+      <section class="slide split" data-titulo="Acessibilidade nativa">
+        <div class="texto-lado">
+          <div class="badge-secao">♿ Diferencial #6</div>
+          <h2>Acessibilidade nativa em cada tela</h2>
+          <p>Barra de acessibilidade fixa <strong>em todas as 36 telas</strong>, mesmo antes do login. 6 toggles sempre acessíveis:</p>
+          <ul class="lista-features">
+            <li><span class="check">◐</span> <span><strong>Alto contraste</strong> — paleta otimizada</span></li>
+            <li><span class="check">Aa</span> <span><strong>Fonte OpenDyslexic</strong> — para dislexia</span></li>
+            <li><span class="check">A+</span> <span><strong>Tamanho de fonte</strong> — 3 níveis</span></li>
+            <li><span class="check">👁</span> <span><strong>Color Blind</strong> — paleta acessível</span></li>
+            <li><span class="check">🔊</span> <span><strong>Ledor TTS</strong> — texto para voz com controle</span></li>
+            <li><span class="check">🤟</span> <span><strong>LIBRAS</strong> — janela com intérprete virtual</span></li>
+          </ul>
+        </div>
+        <div class="imagem-lado">
+          <img src="/assets/img/slides/dashboard-aluno.png" alt="Dashboard do aluno com barra de acessibilidade">
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 10 — Mercado e Impacto
+           ============================================================ -->
+      <section class="slide mercado" data-titulo="Mercado e impacto">
+        <div class="badge-secao">📊 Mercado e impacto</div>
+        <h1>Um mercado de <span style="color: #D69E2E;">milhões</span> esperando inclusão real</h1>
+        <div class="mercado-grid">
+          <div class="mercado-numero-grande">
+            <div class="valor">10.000</div>
+            <div class="label"><strong>Meta de alunos PcD</strong> no primeiro ano de operação após o piloto</div>
+          </div>
+          <div class="mercado-numero-grande">
+            <div class="valor">+30%</div>
+            <div class="label"><strong>Aumento esperado</strong> em taxa de aprovação de PcDs em ENEM/concursos</div>
+          </div>
+        </div>
+        <div class="ods-list">
+          <div class="ods-tag">🎓 ODS 4 — Educação de Qualidade</div>
+          <div class="ods-tag">⚖ ODS 10 — Redução das Desigualdades</div>
+          <div class="ods-tag">🚀 ODS 9 — Inovação Tecnológica</div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 11 — Tecnologia
+           ============================================================ -->
+      <section class="slide tecnologia" data-titulo="Tecnologia">
+        <div class="badge-secao">⚙ Tecnologia</div>
+        <h2>Stack pensada para acessibilidade</h2>
+        <p class="lead">HTML semântico, sem framework CSS pesado, persistência local, fontes acessíveis. A acessibilidade começa pelo código.</p>
+        <div class="stack-grid">
+          <div class="stack-card">
+            <div class="icone">🐍</div>
+            <h4>Django</h4>
+            <p>Backend Python robusto e maduro</p>
+          </div>
+          <div class="stack-card">
+            <div class="icone">🤖</div>
+            <h4>IA / LLMs</h4>
+            <p>Linguagem Simples, classificação BNCC, dicas contextuais</p>
+          </div>
+          <div class="stack-card">
+            <div class="icone">♿</div>
+            <h4>HTML semântico</h4>
+            <p>Sem framework CSS — controle total sobre acessibilidade</p>
+          </div>
+          <div class="stack-card">
+            <div class="icone">🔤</div>
+            <h4>OpenDyslexic</h4>
+            <p>Fonte open-source desenhada para leitores com dislexia</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 12 — Equipe
+           ============================================================ -->
+      <section class="slide equipe" data-titulo="Equipe">
+        <div class="badge-secao">👥 Equipe</div>
+        <h1>4 pessoas, 4 expertises complementares</h1>
+        <p class="lead">Pesquisa acadêmica + ML + full stack + experiência prática de campo com PcDs.</p>
+        <div class="equipe-grid">
+          <div class="equipe-card">
+            <div class="equipe-avatar">ES</div>
+            <h4>Ellen Souza</h4>
+            <div class="role">Líder de pesquisa</div>
+            <div class="expertise">IA e Tecnologias Assistivas</div>
+          </div>
+          <div class="equipe-card">
+            <div class="equipe-avatar">HA</div>
+            <h4>Hidelberg Albuquerque</h4>
+            <div class="role">ML Engineer</div>
+            <div class="expertise">Machine Learning e Processamento de Linguagem Natural</div>
+          </div>
+          <div class="equipe-card">
+            <div class="equipe-avatar">HA</div>
+            <h4>Héldon Albuquerque</h4>
+            <div class="role">Full Stack</div>
+            <div class="expertise">Full Stack e Sistemas Distribuídos</div>
+          </div>
+          <div class="equipe-card">
+            <div class="equipe-avatar">RE</div>
+            <h4>Romário Elias</h4>
+            <div class="role">Especialista em DI</div>
+            <div class="expertise">5+ anos na APAE — Tecnologias Assistivas</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 13 — Roadmap
+           ============================================================ -->
+      <section class="slide" data-titulo="Roadmap">
+        <div class="badge-secao">🗺 Roadmap</div>
+        <h1>De protótipo a plataforma em 12 meses</h1>
+        <p class="lead">65 itens de protótipo já implementados. Próximos passos pós-Centelha:</p>
+        <div class="roadmap-timeline">
+          <div class="roadmap-fase">
+            <div class="roadmap-numero">1</div>
+            <h4>Validação</h4>
+            <div class="periodo">Mês 1-3</div>
+            <p>Testes com PcDs reais. Parcerias APAE e ONGs.</p>
+          </div>
+          <div class="roadmap-fase">
+            <div class="roadmap-numero">2</div>
+            <h4>MVP Técnico</h4>
+            <div class="periodo">Mês 3-6</div>
+            <p>Backend completo. Integração com IA. Auth real.</p>
+          </div>
+          <div class="roadmap-fase">
+            <div class="roadmap-numero">3</div>
+            <h4>Piloto</h4>
+            <div class="periodo">Mês 6-9</div>
+            <p>Deploy. 3-5 cursinhos parceiros. Conteúdo curado.</p>
+          </div>
+          <div class="roadmap-fase">
+            <div class="roadmap-numero">4</div>
+            <h4>Escala</h4>
+            <div class="periodo">Mês 9-12</div>
+            <p>Abertura pública. Parceria governo (Lei 15.263).</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           SLIDE 14 — Call to action
+           ============================================================ -->
+      <section class="slide cta" data-titulo="O que pedimos">
+        <div class="conteudo">
+          <h1>Vamos transformar inclusão em código.</h1>
+          <p class="lead">Pedimos ao Programa Centelha o apoio para sair do protótipo e chegar nos primeiros 10.000 alunos PcDs em 1 ano.</p>
+          <div class="pedido">
+            <div class="pedido-item">
+              <span class="icone">💰</span>
+              <h4>Apoio financeiro</h4>
+              <p>Desenvolvimento técnico + 1-2 devs júnior</p>
+            </div>
+            <div class="pedido-item">
+              <span class="icone">🧭</span>
+              <h4>Mentoria</h4>
+              <p>Modelo de negócio EdTech com impacto social</p>
+            </div>
+            <div class="pedido-item">
+              <span class="icone">🤝</span>
+              <h4>Networking</h4>
+              <p>Conexões com inclusão e tecnologia assistiva</p>
+            </div>
+          </div>
+          <div class="obrigado">helen.ai · Aprendizado sem barreiras</div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Controles -->
+    <div class="controles">
+      <button id="btn-anterior" title="Anterior (←)">←</button>
+      <span class="contador" id="contador">1 / 14</span>
+      <button id="btn-proximo" title="Próximo (→)">→</button>
+      <button id="btn-menu" title="Menu de slides (M)">☰</button>
+      <button id="btn-fullscreen" title="Tela cheia (F)">⛶</button>
+    </div>
+
+    <!-- Menu de slides -->
+    <div class="menu-slides" id="menu-slides">
+      <div class="menu-slides-grid" id="menu-slides-grid"></div>
+    </div>
+
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let atual = 0;
+
+    const btnAnterior = document.getElementById('btn-anterior');
+    const btnProximo = document.getElementById('btn-proximo');
+    const btnMenu = document.getElementById('btn-menu');
+    const btnFullscreen = document.getElementById('btn-fullscreen');
+    const contador = document.getElementById('contador');
+    const progressoFill = document.getElementById('progresso-fill');
+    const menuSlides = document.getElementById('menu-slides');
+    const menuGrid = document.getElementById('menu-slides-grid');
+
+    function irPara(idx) {
+      if (idx < 0 || idx >= total) return;
+      slides[atual].classList.remove('ativo');
+      atual = idx;
+      slides[atual].classList.add('ativo');
+      contador.textContent = `${atual + 1} / ${total}`;
+      progressoFill.style.width = ((atual + 1) / total) * 100 + '%';
+      btnAnterior.disabled = atual === 0;
+      btnProximo.disabled = atual === total - 1;
+      atualizarMenuAtual();
+      // Atualiza hash sem disparar evento
+      history.replaceState(null, '', `#slide${atual + 1}`);
+    }
+
+    function proximo() { irPara(atual + 1); }
+    function anterior() { irPara(atual - 1); }
+
+    btnAnterior.addEventListener('click', anterior);
+    btnProximo.addEventListener('click', proximo);
+
+    // Navegação por teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        proximo();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        anterior();
+      } else if (e.key === 'Home') {
+        irPara(0);
+      } else if (e.key === 'End') {
+        irPara(total - 1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
+      } else if (e.key === 'm' || e.key === 'M') {
+        toggleMenu();
+      } else if (e.key === 'Escape') {
+        menuSlides.classList.remove('aberto');
+      }
+    });
+
+    // Fullscreen
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+    btnFullscreen.addEventListener('click', toggleFullscreen);
+
+    // Menu de slides
+    function toggleMenu() {
+      menuSlides.classList.toggle('aberto');
+    }
+    btnMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMenu();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!menuSlides.contains(e.target) && e.target !== btnMenu) {
+        menuSlides.classList.remove('aberto');
+      }
+    });
+
+    // Construir menu
+    slides.forEach((slide, i) => {
+      const titulo = slide.dataset.titulo || `Slide ${i + 1}`;
+      const item = document.createElement('div');
+      item.className = 'menu-slides-item';
+      item.innerHTML = `<span class="num">${String(i + 1).padStart(2, '0')}</span>${titulo}`;
+      item.addEventListener('click', () => {
+        irPara(i);
+        menuSlides.classList.remove('aberto');
+      });
+      menuGrid.appendChild(item);
+    });
+
+    function atualizarMenuAtual() {
+      menuGrid.querySelectorAll('.menu-slides-item').forEach((el, i) => {
+        el.classList.toggle('atual', i === atual);
+      });
+    }
+
+    // Init — lê hash inicial pra navegar direto pro slide
+    function getSlideFromHash() {
+      const m = window.location.hash.match(/#slide(\d+)/);
+      if (m) return Math.max(0, Math.min(total - 1, parseInt(m[1], 10) - 1));
+      return 0;
+    }
+    irPara(getSlideFromHash());
+
+    // Listener para mudanças de hash (back/forward do navegador)
+    window.addEventListener('hashchange', () => {
+      const novo = getSlideFromHash();
+      if (novo !== atual) irPara(novo);
+    });
+
+    // Touch / swipe support
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    document.addEventListener('touchend', (e) => {
+      const deltaX = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(deltaX) > 50) {
+        if (deltaX > 0) anterior();
+        else proximo();
+      }
+    });
+  </script>
+
+</body>
+</html>
