@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Cadastrar Conteudista</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .form-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-xl);
+      max-width: 860px;
+    }
+
+    .form-card h3 {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: var(--espacamento-md);
+      padding-bottom: var(--espacamento-sm);
+      border-bottom: 1px solid var(--borda-cor);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-card h3:not(:first-child) {
+      margin-top: var(--espacamento-lg);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-md);
+    }
+
+    .areas-checkbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-sm);
+    }
+
+    .area-checkbox {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      padding: var(--espacamento-md);
+      border: 2px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      cursor: pointer;
+      transition: var(--transicao);
+      background: var(--branco);
+    }
+
+    .area-checkbox:hover {
+      border-color: var(--azul-claro);
+      background: #F7FBFF;
+    }
+
+    .area-checkbox input[type="checkbox"]:checked + .area-info {
+      color: var(--azul-profundo);
+    }
+
+    .area-checkbox:has(input:checked) {
+      border-color: var(--azul-medio);
+      background: #EBF8FF;
+    }
+
+    .area-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--azul-medio);
+      cursor: pointer;
+    }
+
+    .area-info {
+      flex: 1;
+    }
+
+    .area-info .titulo {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .area-info .desc {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .acoes-bottom {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-lg);
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .alerta-info {
+      background: #EBF8FF;
+      border-left: 4px solid var(--azul-medio);
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      gap: var(--espacamento-sm);
+      align-items: flex-start;
+    }
+
+    .alerta-info .icone { font-size: 1.3rem; flex-shrink: 0; }
+
+    .alerta-info p {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      line-height: 1.5;
+    }
+
+    .alerta-info strong { color: var(--azul-profundo); }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--azul-profundo);
+      color: var(--branco);
+      padding: 12px 20px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      box-shadow: var(--sombra-modal);
+      z-index: 3000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.visivel { opacity: 1; }
+
+    @media (max-width: 768px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .areas-checkbox-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/admin/conteudistas.html" class="sidebar-item ativo">👨‍🏫 Conteudistas</a>
+        <a href="/admin/alunos.html" class="sidebar-item">👥 Alunos</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo" id="titulo-pagina">Novo Conteudista</h1>
+          <p class="conteudo-subtitulo">Cadastre um novo professor/curador na plataforma</p>
+        </div>
+        <a href="/admin/conteudistas.html" class="btn btn-secundario">← Voltar</a>
+      </div>
+
+      <div class="form-card">
+
+        <div class="alerta-info">
+          <span class="icone">ℹ</span>
+          <p>
+            O conteudista receberá um <strong>email de boas-vindas</strong> com as credenciais
+            para acessar a plataforma. Ele poderá criar questões, simulados e desafios na(s)
+            área(s) de atuação vinculadas abaixo, e será responsável pela curadoria de
+            publicações dos alunos nessas áreas.
+          </p>
+        </div>
+
+        <!-- Dados pessoais -->
+        <h3>👤 Dados pessoais</h3>
+
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label class="form-label" for="nome">Nome completo</label>
+            <input type="text" class="form-input" id="nome" placeholder="Ex: Prof. Maria Silva">
+          </div>
+          <div class="form-grupo">
+            <label class="form-label" for="email">Email</label>
+            <input type="email" class="form-input" id="email" placeholder="maria@instituicao.edu">
+          </div>
+        </div>
+
+        <div class="form-grupo" id="grupo-senha">
+          <label class="form-label" for="senha">Senha inicial</label>
+          <input type="password" class="form-input" id="senha" placeholder="Mínimo 8 caracteres">
+          <span class="form-helper">O conteudista poderá trocá-la no primeiro acesso.</span>
+        </div>
+
+        <!-- Formação -->
+        <h3>🎓 Formação acadêmica</h3>
+
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label class="form-label" for="formacao">Titulação + área</label>
+            <input type="text" class="form-input" id="formacao" placeholder="Ex: Doutor em Educação Matemática">
+          </div>
+          <div class="form-grupo">
+            <label class="form-label" for="instituicao">Instituição</label>
+            <input type="text" class="form-input" id="instituicao" placeholder="Ex: UFRPE, UFPE, UPE...">
+          </div>
+        </div>
+
+        <!-- Áreas de competência -->
+        <h3>📚 Áreas de competência (BNCC)</h3>
+        <p style="font-size: var(--fonte-tamanho-sm); color: var(--texto-secundario); margin-bottom: var(--espacamento-md);">
+          Selecione as áreas em que este conteudista pode criar questões e fazer curadoria.
+        </p>
+
+        <div class="areas-checkbox-grid">
+          <label class="area-checkbox">
+            <input type="checkbox" value="Matemática">
+            <div class="area-info">
+              <div class="titulo">📐 Matemática e suas Tecnologias</div>
+              <div class="desc">Álgebra, geometria, estatística, funções</div>
+            </div>
+          </label>
+
+          <label class="area-checkbox">
+            <input type="checkbox" value="Linguagens">
+            <div class="area-info">
+              <div class="titulo">📖 Linguagens e suas Tecnologias</div>
+              <div class="desc">Português, literatura, redação, línguas</div>
+            </div>
+          </label>
+
+          <label class="area-checkbox">
+            <input type="checkbox" value="Ciências da Natureza">
+            <div class="area-info">
+              <div class="titulo">🧪 Ciências da Natureza</div>
+              <div class="desc">Física, química, biologia</div>
+            </div>
+          </label>
+
+          <label class="area-checkbox">
+            <input type="checkbox" value="Ciências Humanas">
+            <div class="area-info">
+              <div class="titulo">🌎 Ciências Humanas</div>
+              <div class="desc">História, geografia, filosofia, sociologia</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Ações -->
+        <div class="acoes-bottom">
+          <a href="/admin/conteudistas.html" class="btn btn-secundario">Cancelar</a>
+          <button class="btn btn-sucesso" onclick="salvar()">💾 Salvar conteudista</button>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // Modo edição via ?id=
+    const params = new URLSearchParams(window.location.search);
+    const modoEdicao = params.has('id');
+
+    if (modoEdicao) {
+      const id = Number(params.get('id'));
+      const c = HELEN_DATA.adminConteudistasLista.find(x => x.id === id);
+      if (c) {
+        document.getElementById('titulo-pagina').textContent = 'Editar Conteudista';
+        document.querySelector('.conteudo-subtitulo').textContent = `Editando ${c.nome}`;
+        document.getElementById('nome').value = c.nome;
+        document.getElementById('email').value = c.email;
+        document.getElementById('formacao').value = c.formacao;
+        document.getElementById('instituicao').value = c.instituicao;
+
+        // Esconde senha no modo edição
+        document.getElementById('grupo-senha').style.display = 'none';
+
+        // Marca as áreas
+        c.areas.forEach(area => {
+          const cb = document.querySelector(`.area-checkbox input[value="${area}"]`);
+          if (cb) cb.checked = true;
+        });
+      }
+    }
+
+    function salvar() {
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!nome || !email) {
+        mostrarToast('Preencha nome e email.');
+        return;
+      }
+
+      const areas = Array.from(document.querySelectorAll('.area-checkbox input:checked')).map(el => el.value);
+      if (areas.length === 0) {
+        mostrarToast('Selecione pelo menos uma área de competência.');
+        return;
+      }
+
+      mostrarToast(modoEdicao ? 'Conteudista atualizado com sucesso!' : 'Conteudista cadastrado! Email de boas-vindas enviado.');
+      setTimeout(() => {
+        window.location.href = '/admin/conteudistas.html';
+      }, 1500);
+    }
+
+    let toastTimer;
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('visivel');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('visivel'), 2500);
+    }
+  </script>
+
+</body>
+</html>

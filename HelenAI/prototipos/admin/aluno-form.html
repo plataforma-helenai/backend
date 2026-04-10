@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Editar Aluno</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .body-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: var(--espacamento-lg);
+    }
+
+    .form-card,
+    .info-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-xl);
+    }
+
+    .form-card h3,
+    .info-card h3 {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: var(--espacamento-md);
+      padding-bottom: var(--espacamento-sm);
+      border-bottom: 1px solid var(--borda-cor);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-md);
+    }
+
+    .acoes-bottom {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-lg);
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    /* === Info card lateral — perfil do aluno === */
+    .perfil-header {
+      text-align: center;
+      padding: var(--espacamento-lg) 0;
+      border-bottom: 1px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .perfil-avatar-grande {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 0 auto var(--espacamento-md);
+      border: 4px solid var(--branco);
+      box-shadow: var(--sombra-card);
+    }
+
+    .perfil-nome-grande {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .perfil-desde {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    .info-secao {
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .info-secao:last-child { margin-bottom: 0; }
+
+    .info-secao-titulo {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--espacamento-sm);
+      font-weight: 700;
+    }
+
+    .info-grid-mini {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-sm);
+    }
+
+    .info-mini-card {
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      padding: var(--espacamento-md);
+      text-align: center;
+    }
+
+    .info-mini-card .valor {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .info-mini-card .label {
+      font-size: 0.7rem;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* Deficiências e recursos declarados */
+    .tags-lista {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag-def {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+    }
+
+    .tag-def.visual      { background: #BEE3F8; color: #2A4365; }
+    .tag-def.auditiva    { background: #E9D8FD; color: #44337A; }
+    .tag-def.intelectual { background: #C6F6D5; color: #22543D; }
+    .tag-def.motora      { background: #FEEBC8; color: #744210; }
+    .tag-def.dislexia    { background: #FEFCBF; color: #744210; }
+    .tag-def.daltonismo  { background: #FED7D7; color: #742A2A; }
+    .tag-def.tea         { background: #B2F5EA; color: #234E52; }
+
+    .tag-recurso {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+    }
+
+    .info-empty {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-terciario);
+      font-style: italic;
+    }
+
+    .alerta-somente-leitura {
+      background: #FFFBEB;
+      border-left: 4px solid #D69E2E;
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      margin-bottom: var(--espacamento-lg);
+      font-size: var(--fonte-tamanho-sm);
+      color: #744210;
+      display: flex;
+      gap: var(--espacamento-sm);
+      align-items: flex-start;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--azul-profundo);
+      color: var(--branco);
+      padding: 12px 20px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      box-shadow: var(--sombra-modal);
+      z-index: 3000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast.visivel { opacity: 1; }
+
+    @media (max-width: 1024px) {
+      .body-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/admin/conteudistas.html" class="sidebar-item">👨‍🏫 Conteudistas</a>
+        <a href="/admin/alunos.html" class="sidebar-item ativo">👥 Alunos</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Editar Aluno</h1>
+          <p class="conteudo-subtitulo" id="subtitulo-aluno">Editar informações do aluno</p>
+        </div>
+        <a href="/admin/alunos.html" class="btn btn-secundario">← Voltar</a>
+      </div>
+
+      <div class="body-grid">
+
+        <!-- Formulário de edição -->
+        <div class="form-card">
+          <h3>👤 Dados pessoais</h3>
+
+          <div class="form-grupo">
+            <label class="form-label" for="nome">Nome completo</label>
+            <input type="text" class="form-input" id="nome">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-grupo">
+              <label class="form-label" for="email">Email</label>
+              <input type="email" class="form-input" id="email">
+            </div>
+            <div class="form-grupo">
+              <label class="form-label" for="status">Status</label>
+              <select class="form-input" id="status">
+                <option value="ativo">Ativo</option>
+                <option value="bloqueado">Bloqueado</option>
+              </select>
+            </div>
+          </div>
+
+          <h3>🔐 Informações da conta</h3>
+
+          <div class="alerta-somente-leitura">
+            <span>ℹ</span>
+            <p style="margin:0;">
+              Você pode <strong>redefinir a senha</strong> do aluno. Um email será enviado com o link
+              para ele criar uma nova senha.
+            </p>
+          </div>
+
+          <div class="form-grupo">
+            <button class="btn btn-secundario">📧 Enviar email de redefinição de senha</button>
+          </div>
+
+          <div class="acoes-bottom">
+            <a href="/admin/alunos.html" class="btn btn-secundario">Cancelar</a>
+            <button class="btn btn-sucesso" onclick="salvar()">💾 Salvar alterações</button>
+          </div>
+        </div>
+
+        <!-- Info lateral: perfil e acessibilidade -->
+        <div class="info-card">
+          <div class="perfil-header">
+            <div class="perfil-avatar-grande" id="avatar-grande">MO</div>
+            <div class="perfil-nome-grande" id="nome-display">Maria Oliveira</div>
+            <div class="perfil-desde" id="desde-display">Cadastrada em 01/02/2026</div>
+          </div>
+
+          <!-- Estatísticas -->
+          <div class="info-secao">
+            <div class="info-secao-titulo">📊 Atividade</div>
+            <div class="info-grid-mini">
+              <div class="info-mini-card">
+                <div class="valor" id="stat-simulados">23</div>
+                <div class="label">Simulados feitos</div>
+              </div>
+              <div class="info-mini-card">
+                <div class="valor" id="stat-media">74%</div>
+                <div class="label">Média de acertos</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acessibilidade declarada (somente leitura — vem do onboarding) -->
+          <div class="info-secao">
+            <div class="info-secao-titulo">♿ Acessibilidade declarada</div>
+            <p style="font-size: 0.7rem; color: var(--texto-terciario); margin-bottom: var(--espacamento-sm);">
+              Informações do onboarding do aluno. <strong>Somente leitura</strong> — só ele pode alterar no perfil.
+            </p>
+
+            <div style="margin-bottom: var(--espacamento-md);">
+              <div style="font-size: var(--fonte-tamanho-xs); color: var(--texto-secundario); margin-bottom: 6px;">Tipo(s) de deficiência</div>
+              <div class="tags-lista" id="deficiencias"></div>
+            </div>
+
+            <div>
+              <div style="font-size: var(--fonte-tamanho-xs); color: var(--texto-secundario); margin-bottom: 6px;">Recursos ativados</div>
+              <div class="tags-lista" id="recursos"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = Number(params.get('id')) || 1;
+    const aluno = HELEN_DATA.adminAlunosLista.find(a => a.id === id) || HELEN_DATA.adminAlunosLista[0];
+
+    const DEF_LABELS = {
+      visual: '👁 Visual',
+      auditiva: '👂 Auditiva',
+      intelectual: '🧠 Intelectual',
+      motora: '♿ Motora',
+      dislexia: '📖 Dislexia',
+      daltonismo: '🎨 Daltonismo',
+      tea: '💠 TEA'
+    };
+
+    const RECURSO_LABELS = {
+      'linguagem-simples': '📝 Linguagem Simples',
+      'ledor': '🔊 Ledor',
+      'libras': '🤟 LIBRAS',
+      'contraste': '◐ Alto Contraste',
+      'color-blind': '👁 Color Blind',
+      'fonte-grande': 'A+ Fonte Grande',
+      'dislexia': '🔤 Fonte OpenDyslexic',
+      'calma': '💠 Interface calma'
+    };
+
+    function iniciais(nome) {
+      return nome.split(' ').map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    }
+
+    function formatarData(d) {
+      const [ano, mes, dia] = d.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    // Preencher formulário
+    document.getElementById('nome').value = aluno.nome;
+    document.getElementById('email').value = aluno.email;
+    document.getElementById('status').value = aluno.status;
+    document.querySelector('.conteudo-subtitulo').textContent = `Editando ${aluno.nome}`;
+
+    // Info lateral
+    document.getElementById('avatar-grande').textContent = iniciais(aluno.nome);
+    document.getElementById('nome-display').textContent = aluno.nome;
+    document.getElementById('desde-display').textContent = `Cadastrado(a) em ${formatarData(aluno.dataCadastro)}`;
+    document.getElementById('stat-simulados').textContent = aluno.simulados;
+    document.getElementById('stat-media').textContent = '74%'; // fake
+
+    // Deficiências
+    const defEl = document.getElementById('deficiencias');
+    if (aluno.deficiencias.length === 0) {
+      defEl.innerHTML = '<span class="info-empty">— Não declarou</span>';
+    } else {
+      defEl.innerHTML = aluno.deficiencias.map(d =>
+        `<span class="tag-def ${d}">${DEF_LABELS[d] || d}</span>`
+      ).join('');
+    }
+
+    // Recursos
+    const recEl = document.getElementById('recursos');
+    if (aluno.recursos.length === 0) {
+      recEl.innerHTML = '<span class="info-empty">— Nenhum recurso ativado</span>';
+    } else {
+      recEl.innerHTML = aluno.recursos.map(r =>
+        `<span class="tag-recurso">${RECURSO_LABELS[r] || r}</span>`
+      ).join('');
+    }
+
+    function salvar() {
+      mostrarToast('Alterações salvas com sucesso!');
+      setTimeout(() => {
+        window.location.href = '/admin/alunos.html';
+      }, 1500);
+    }
+
+    let toastTimer;
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('visivel');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('visivel'), 2500);
+    }
+  </script>
+
+</body>
+</html>

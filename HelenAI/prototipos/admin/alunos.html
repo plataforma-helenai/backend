@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Alunos</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    .filtros-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: var(--espacamento-md);
+      align-items: end;
+    }
+
+    .filtro-grupo { display: flex; flex-direction: column; gap: 6px; }
+
+    .filtro-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filtro-grupo input,
+    .filtro-grupo select {
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      background: var(--branco);
+    }
+
+    .tabela-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+    }
+
+    .tabela {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .tabela th {
+      text-align: left;
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      background: var(--cinza-azulado);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--borda-cor);
+    }
+
+    .tabela td {
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .tabela tr:last-child td { border-bottom: none; }
+    .tabela tr:hover td { background: #F7FAFC; }
+
+    .usuario-celula {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .usuario-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .usuario-info .nome {
+      font-weight: 600;
+      color: var(--azul-profundo);
+    }
+
+    .usuario-info .email {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    /* Badge de acessibilidade — diferencial do HelenAI admin */
+    .acessibilidade-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .deficiencia-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--borda-radius-full);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .deficiencia-badge.visual       { background: #BEE3F8; color: #2A4365; }
+    .deficiencia-badge.auditiva     { background: #E9D8FD; color: #44337A; }
+    .deficiencia-badge.intelectual  { background: #C6F6D5; color: #22543D; }
+    .deficiencia-badge.motora       { background: #FEEBC8; color: #744210; }
+    .deficiencia-badge.dislexia     { background: #FEFCBF; color: #744210; }
+    .deficiencia-badge.daltonismo   { background: #FED7D7; color: #742A2A; }
+    .deficiencia-badge.tea          { background: #B2F5EA; color: #234E52; }
+
+    .sem-deficiencia {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      font-style: italic;
+    }
+
+    .acoes-celula {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--espacamento-2xl);
+      color: var(--texto-terciario);
+    }
+
+    .empty-state .icone {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .resultados-count {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .resultados-count strong { color: var(--azul-profundo); }
+
+    @media (max-width: 900px) {
+      .filtros-card { grid-template-columns: 1fr; }
+      .tabela th:nth-child(4),
+      .tabela td:nth-child(4) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/admin/conteudistas.html" class="sidebar-item">👨‍🏫 Conteudistas</a>
+        <a href="/admin/alunos.html" class="sidebar-item ativo">👥 Alunos</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Alunos</h1>
+          <p class="conteudo-subtitulo">Gerencie todos os alunos cadastrados na plataforma</p>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-card">
+        <div class="filtro-grupo">
+          <label class="filtro-label">Buscar</label>
+          <input type="text" id="f-busca" placeholder="Nome ou email...">
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Tipo de deficiência</label>
+          <select id="f-deficiencia">
+            <option value="">Todos</option>
+            <option value="visual">Visual</option>
+            <option value="auditiva">Auditiva</option>
+            <option value="intelectual">Intelectual</option>
+            <option value="motora">Motora</option>
+            <option value="dislexia">Dislexia</option>
+            <option value="daltonismo">Daltonismo</option>
+            <option value="tea">TEA</option>
+            <option value="nenhuma">Sem deficiência declarada</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Status</label>
+          <select id="f-status">
+            <option value="">Todos</option>
+            <option value="ativo">Ativos</option>
+            <option value="bloqueado">Bloqueados</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="resultados-count" id="resultados-count"></div>
+
+      <!-- Tabela -->
+      <div class="tabela-card">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Aluno</th>
+              <th>Acessibilidade</th>
+              <th>Simulados</th>
+              <th>Último acesso</th>
+              <th>Status</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Paginação -->
+      <div class="paginacao">
+        <button class="paginacao-item">←</button>
+        <button class="paginacao-item ativo">1</button>
+        <button class="paginacao-item">2</button>
+        <button class="paginacao-item">3</button>
+        <button class="paginacao-item">...</button>
+        <button class="paginacao-item">125</button>
+        <button class="paginacao-item">→</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const alunos = HELEN_DATA.adminAlunosLista;
+
+    const DEF_LABELS = {
+      visual: 'Visual',
+      auditiva: 'Auditiva',
+      intelectual: 'Intelectual',
+      motora: 'Motora',
+      dislexia: 'Dislexia',
+      daltonismo: 'Daltonismo',
+      tea: 'TEA'
+    };
+
+    function iniciais(nome) {
+      return nome.split(' ').map(p => p[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+    }
+
+    function formatarData(d) {
+      const [ano, mes, dia] = d.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function renderTabela() {
+      const busca = document.getElementById('f-busca').value.toLowerCase();
+      const def = document.getElementById('f-deficiencia').value;
+      const status = document.getElementById('f-status').value;
+
+      const filtrados = alunos.filter(a => {
+        if (busca && !`${a.nome} ${a.email}`.toLowerCase().includes(busca)) return false;
+        if (def) {
+          if (def === 'nenhuma' && a.deficiencias.length > 0) return false;
+          if (def !== 'nenhuma' && !a.deficiencias.includes(def)) return false;
+        }
+        if (status && a.status !== status) return false;
+        return true;
+      });
+
+      const count = document.getElementById('resultados-count');
+      count.innerHTML = filtrados.length === alunos.length
+        ? `<strong>${filtrados.length}</strong> alunos cadastrados · ${alunos.filter(a => a.deficiencias.length > 0).length} PcD declarados`
+        : `Mostrando <strong>${filtrados.length}</strong> de ${alunos.length} alunos`;
+
+      const tbody = document.getElementById('tbody');
+
+      if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><span class="icone">🔍</span><p>Nenhum aluno encontrado</p></div></td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtrados.map(a => {
+        const badge = a.status === 'ativo'
+          ? '<span class="badge badge-ativo">Ativo</span>'
+          : '<span class="badge badge-bloqueado">Bloqueado</span>';
+
+        const btnBloqueio = a.status === 'ativo'
+          ? '<button class="btn btn-perigo btn-sm" onclick="toggleStatus(' + a.id + ')">🔒 Bloquear</button>'
+          : '<button class="btn btn-sucesso btn-sm" onclick="toggleStatus(' + a.id + ')">✓ Desbloquear</button>';
+
+        const acessibilidade = a.deficiencias.length > 0
+          ? `<div class="acessibilidade-badges">${a.deficiencias.map(d => `<span class="deficiencia-badge ${d}">${DEF_LABELS[d] || d}</span>`).join('')}</div>`
+          : '<span class="sem-deficiencia">— Não declarou</span>';
+
+        return `
+          <tr>
+            <td>
+              <div class="usuario-celula">
+                <div class="usuario-avatar">${iniciais(a.nome)}</div>
+                <div class="usuario-info">
+                  <div class="nome">${a.nome}</div>
+                  <div class="email">${a.email}</div>
+                </div>
+              </div>
+            </td>
+            <td>${acessibilidade}</td>
+            <td>
+              <strong style="color: var(--azul-profundo);">${a.simulados}</strong>
+              <span style="font-size: var(--fonte-tamanho-xs); color: var(--texto-secundario);">realizados</span>
+            </td>
+            <td style="font-size: var(--fonte-tamanho-xs); color: var(--texto-secundario);">${formatarData(a.ultimoAcesso)}</td>
+            <td>${badge}</td>
+            <td>
+              <div class="acoes-celula">
+                <a href="/admin/aluno-form.html?id=${a.id}" class="btn btn-secundario btn-sm">✏ Editar</a>
+                ${btnBloqueio}
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleStatus(id) {
+      const a = alunos.find(x => x.id === id);
+      a.status = a.status === 'ativo' ? 'bloqueado' : 'ativo';
+      renderTabela();
+    }
+
+    renderTabela();
+
+    ['f-busca', 'f-deficiencia', 'f-status'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderTabela);
+      document.getElementById(id).addEventListener('change', renderTabela);
+    });
+  </script>
+
+</body>
+</html>

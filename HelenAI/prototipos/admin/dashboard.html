@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Dashboard Admin</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* === Cards de métrica em destaque === */
+    .metricas-top {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .metrica-destaque {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      border-top: 4px solid var(--azul-medio);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transicao);
+    }
+
+    .metrica-destaque:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .metrica-destaque.alunos        { border-top-color: #2B6CB0; }
+    .metrica-destaque.conteudistas  { border-top-color: #805AD5; }
+    .metrica-destaque.questoes      { border-top-color: #38A169; }
+    .metrica-destaque.simulados-pub { border-top-color: #D69E2E; }
+    .metrica-destaque.realizacoes   { border-top-color: #3CC8D0; }
+
+    .metrica-destaque .icone {
+      position: absolute;
+      top: var(--espacamento-md);
+      right: var(--espacamento-md);
+      font-size: 2rem;
+      opacity: 0.2;
+    }
+
+    .metrica-destaque .label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .metrica-destaque .valor {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metrica-destaque .variacao {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--cor-sucesso);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .metrica-destaque .variacao.neutro { color: var(--texto-terciario); }
+
+    /* === Seção destacada de Inclusão (diferencial HelenAI) === */
+    .secao-inclusao {
+      background: linear-gradient(135deg, #EBF8FF 0%, #E6FFFA 100%);
+      border: 2px solid var(--azul-claro);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .secao-inclusao::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.15);
+      pointer-events: none;
+    }
+
+    .secao-inclusao-header {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .secao-inclusao-icone {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, var(--azul-profundo) 0%, var(--azul-medio) 100%);
+      color: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .secao-inclusao-titulo {
+      font-size: var(--fonte-tamanho-xl);
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .secao-inclusao-subtitulo {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+    }
+
+    .inclusao-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: var(--espacamento-lg);
+      position: relative;
+      z-index: 1;
+    }
+
+    .inclusao-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+    }
+
+    .inclusao-card h4 {
+      font-size: var(--fonte-tamanho-md);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inclusao-card .subtitulo-card {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .inclusao-card canvas {
+      max-height: 260px;
+    }
+
+    /* Barra horizontal de uso de acessibilidade */
+    .acessibilidade-bar-item {
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .acessibilidade-bar-item:last-child { margin-bottom: 0; }
+
+    .acessibilidade-bar-topo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .acessibilidade-bar-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--azul-profundo);
+      font-weight: 600;
+    }
+
+    .acessibilidade-bar-label .icone {
+      width: 28px;
+      height: 28px;
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .acessibilidade-bar-numeros {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .acessibilidade-bar-numeros strong {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .acessibilidade-bar-track {
+      height: 10px;
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .acessibilidade-bar-fill {
+      height: 100%;
+      border-radius: var(--borda-radius-full);
+      transition: width 0.5s ease;
+    }
+
+    /* === Gráficos normais === */
+    .graficos-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .grafico-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+    }
+
+    .grafico-card h4 {
+      font-size: var(--fonte-tamanho-md);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .grafico-card .subtitulo-card {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .grafico-card canvas { max-height: 280px; }
+
+    .grafico-full { grid-column: 1 / -1; }
+
+    /* === Top listas (maior acerto/erro) === */
+    .top-lista {
+      list-style: none;
+      padding: 0;
+    }
+
+    .top-lista li {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+      padding: var(--espacamento-sm) 0;
+      border-bottom: 1px solid var(--borda-cor);
+    }
+
+    .top-lista li:last-child { border-bottom: none; }
+
+    .top-lista .posicao {
+      width: 28px;
+      height: 28px;
+      background: var(--cinza-azulado);
+      color: var(--azul-profundo);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-xs);
+      flex-shrink: 0;
+    }
+
+    .top-lista li:first-child .posicao {
+      background: #F6E05E;
+      color: #744210;
+    }
+
+    .top-lista .info { flex: 1; min-width: 0; }
+
+    .top-lista .codigo {
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: var(--azul-medio);
+      font-weight: 600;
+    }
+
+    .top-lista .trecho {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-primario);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .top-lista .taxa {
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-md);
+      flex-shrink: 0;
+    }
+
+    .top-lista .taxa.alta { color: var(--cor-sucesso); }
+    .top-lista .taxa.baixa { color: var(--cor-erro); }
+
+    @media (max-width: 1100px) {
+      .metricas-top { grid-template-columns: repeat(3, 1fr); }
+      .inclusao-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .metricas-top { grid-template-columns: 1fr 1fr; }
+      .graficos-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI"><span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin/dashboard.html" class="sidebar-item ativo">📊 Dashboard</a>
+        <a href="/admin/conteudistas.html" class="sidebar-item">👨‍🏫 Conteudistas</a>
+        <a href="/admin/alunos.html" class="sidebar-item">👥 Alunos</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Dashboard Administrativo</h1>
+          <p class="conteudo-subtitulo">Visão geral da plataforma HelenAI</p>
+        </div>
+      </div>
+
+      <!-- 5 Métricas em destaque -->
+      <div class="metricas-top">
+        <div class="metrica-destaque alunos">
+          <span class="icone">👥</span>
+          <div class="label">Alunos cadastrados</div>
+          <div class="valor" id="met-alunos">0</div>
+          <div class="variacao">↑ +456 este mês</div>
+        </div>
+        <div class="metrica-destaque conteudistas">
+          <span class="icone">👨‍🏫</span>
+          <div class="label">Conteudistas</div>
+          <div class="valor" id="met-conteudistas">0</div>
+          <div class="variacao">↑ +4 este mês</div>
+        </div>
+        <div class="metrica-destaque questoes">
+          <span class="icone">❓</span>
+          <div class="label">Questões no banco</div>
+          <div class="valor" id="met-questoes">0</div>
+          <div class="variacao">↑ +312 este mês</div>
+        </div>
+        <div class="metrica-destaque simulados-pub">
+          <span class="icone">📝</span>
+          <div class="label">Simulados publicados</div>
+          <div class="valor" id="met-simulados">0</div>
+          <div class="variacao">↑ +8 este mês</div>
+        </div>
+        <div class="metrica-destaque realizacoes">
+          <span class="icone">✅</span>
+          <div class="label">Simulados realizados</div>
+          <div class="valor" id="met-realizacoes">0</div>
+          <div class="variacao">↑ +2.140 este mês</div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           SEÇÃO INCLUSÃO (diferencial HelenAI pro Centelha)
+           ==================================================== -->
+      <div class="secao-inclusao">
+        <div class="secao-inclusao-header">
+          <div class="secao-inclusao-icone">💙</div>
+          <div>
+            <h2 class="secao-inclusao-titulo">Impacto e Inclusão</h2>
+            <p class="secao-inclusao-subtitulo">
+              Métricas que mostram como a HelenAI está cumprindo sua missão de aprendizado sem barreiras
+            </p>
+          </div>
+        </div>
+
+        <div class="inclusao-grid">
+          <!-- Card: Alunos PcD por tipo -->
+          <div class="inclusao-card">
+            <h4>🎯 Alunos PcD por tipo de deficiência</h4>
+            <p class="subtitulo-card">Distribuição dos alunos que declararam deficiência no onboarding</p>
+            <canvas id="grafico-pcd"></canvas>
+          </div>
+
+          <!-- Card: Uso de recursos de acessibilidade -->
+          <div class="inclusao-card">
+            <h4>♿ Uso de recursos de acessibilidade</h4>
+            <p class="subtitulo-card">% de alunos que ativaram cada recurso DUA</p>
+            <div id="uso-acessibilidade-lista"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cadastros por mês -->
+      <div class="grafico-card" style="margin-bottom: var(--espacamento-lg);">
+        <h4>📈 Novos cadastros por mês</h4>
+        <p class="subtitulo-card">Crescimento da plataforma nos últimos 7 meses</p>
+        <canvas id="grafico-cadastros"></canvas>
+      </div>
+
+      <!-- Questões por área + Simulados mais realizados -->
+      <div class="graficos-row">
+        <div class="grafico-card">
+          <h4>📚 Questões por Área BNCC</h4>
+          <p class="subtitulo-card">Distribuição no banco público da plataforma</p>
+          <canvas id="grafico-areas"></canvas>
+        </div>
+        <div class="grafico-card">
+          <h4>🏆 Top 10 Simulados mais realizados</h4>
+          <p class="subtitulo-card">Simulados com mais engajamento na plataforma</p>
+          <canvas id="grafico-simulados"></canvas>
+        </div>
+      </div>
+
+      <!-- Questões mais acertadas / erradas -->
+      <div class="graficos-row">
+        <div class="grafico-card">
+          <h4>✅ Top 5 — Maior taxa de acerto</h4>
+          <p class="subtitulo-card">Questões que os alunos mais acertaram</p>
+          <ul class="top-lista" id="lista-acerto"></ul>
+        </div>
+        <div class="grafico-card">
+          <h4>⚠ Top 5 — Maior taxa de erro</h4>
+          <p class="subtitulo-card">Questões que geraram mais dificuldade</p>
+          <ul class="top-lista" id="lista-erro"></ul>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    // === Métricas topo (animação de contagem) ===
+    function animarValor(id, valor, formato = 'numero') {
+      const el = document.getElementById(id);
+      const duracao = 900;
+      const passos = 30;
+      const incremento = valor / passos;
+      let atual = 0;
+      const intervalo = setInterval(() => {
+        atual += incremento;
+        if (atual >= valor) {
+          atual = valor;
+          clearInterval(intervalo);
+        }
+        el.textContent = Math.floor(atual).toLocaleString('pt-BR');
+      }, duracao / passos);
+    }
+
+    animarValor('met-alunos', 1247);
+    animarValor('met-conteudistas', 23);
+    animarValor('met-questoes', 4580);
+    animarValor('met-simulados', 87);
+    animarValor('met-realizacoes', 12340);
+
+    // === Alunos PcD por tipo (donut) ===
+    const dadosPcd = HELEN_DATA.adminAlunosPcdPorTipo;
+    new Chart(document.getElementById('grafico-pcd'), {
+      type: 'doughnut',
+      data: {
+        labels: dadosPcd.labels,
+        datasets: [{
+          data: dadosPcd.valores,
+          backgroundColor: dadosPcd.cores,
+          borderWidth: 2,
+          borderColor: '#FFFFFF'
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: '62%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: {
+              padding: 10,
+              usePointStyle: true,
+              pointStyleWidth: 10,
+              font: { size: 11 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                const pct = Math.round((ctx.raw / total) * 100);
+                return `${ctx.label}: ${ctx.raw} alunos (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // === Uso de recursos de acessibilidade (barras horizontais) ===
+    const usoAc = HELEN_DATA.adminUsoAcessibilidade;
+    const listaAc = document.getElementById('uso-acessibilidade-lista');
+    listaAc.innerHTML = usoAc.map(r => `
+      <div class="acessibilidade-bar-item">
+        <div class="acessibilidade-bar-topo">
+          <div class="acessibilidade-bar-label">
+            <span class="icone">${r.icone}</span>
+            ${r.recurso}
+          </div>
+          <div class="acessibilidade-bar-numeros">
+            <strong>${r.percentual}%</strong> · ${r.usuarios} alunos
+          </div>
+        </div>
+        <div class="acessibilidade-bar-track">
+          <div class="acessibilidade-bar-fill" style="width: 0; background: ${r.cor};" data-target="${r.percentual}"></div>
+        </div>
+      </div>
+    `).join('');
+
+    // Animar barras de acessibilidade
+    setTimeout(() => {
+      document.querySelectorAll('.acessibilidade-bar-fill').forEach(el => {
+        el.style.width = el.dataset.target + '%';
+      });
+    }, 200);
+
+    // === Cadastros por mês (linha) ===
+    const cad = HELEN_DATA.adminCadastrosPorMes;
+    new Chart(document.getElementById('grafico-cadastros'), {
+      type: 'line',
+      data: {
+        labels: cad.labels,
+        datasets: [
+          {
+            label: 'Alunos',
+            data: cad.alunos,
+            borderColor: '#2B6CB0',
+            backgroundColor: 'rgba(43, 108, 176, 0.15)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#2B6CB0',
+            pointRadius: 5,
+            pointHoverRadius: 7
+          },
+          {
+            label: 'Conteudistas',
+            data: cad.conteudistas,
+            borderColor: '#805AD5',
+            backgroundColor: 'rgba(128, 90, 213, 0.15)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#805AD5',
+            pointRadius: 5,
+            pointHoverRadius: 7
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } }
+        },
+        scales: {
+          y: { beginAtZero: true, grid: { color: '#EDF2F7' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+
+    // === Questões por área (pizza) ===
+    const dadosAreas = HELEN_DATA.adminQuestoesPorArea;
+    new Chart(document.getElementById('grafico-areas'), {
+      type: 'pie',
+      data: {
+        labels: dadosAreas.labels,
+        datasets: [{
+          data: dadosAreas.valores,
+          backgroundColor: dadosAreas.cores,
+          borderWidth: 2,
+          borderColor: '#FFFFFF'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 14, usePointStyle: true } }
+        }
+      }
+    });
+
+    // === Top 10 simulados realizados (barras horizontais) ===
+    const dadosSim = HELEN_DATA.adminSimuladosMaisRealizados;
+    new Chart(document.getElementById('grafico-simulados'), {
+      type: 'bar',
+      data: {
+        labels: dadosSim.labels,
+        datasets: [{
+          label: 'Realizações',
+          data: dadosSim.valores,
+          backgroundColor: '#3CC8D0',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        indexAxis: 'y',
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: '#EDF2F7' } },
+          y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+        }
+      }
+    });
+
+    // === Top 5 maior acerto ===
+    const listaAcerto = document.getElementById('lista-acerto');
+    listaAcerto.innerHTML = HELEN_DATA.adminQuestoesMaiorAcerto.map((q, i) => `
+      <li>
+        <div class="posicao">${i + 1}</div>
+        <div class="info">
+          <div class="codigo">${q.codigo} · ${q.area}</div>
+          <div class="trecho">${q.trecho}</div>
+        </div>
+        <div class="taxa alta">${q.taxa}%</div>
+      </li>
+    `).join('');
+
+    // === Top 5 maior erro ===
+    const listaErro = document.getElementById('lista-erro');
+    listaErro.innerHTML = HELEN_DATA.adminQuestoesMaiorErro.map((q, i) => `
+      <li>
+        <div class="posicao">${i + 1}</div>
+        <div class="info">
+          <div class="codigo">${q.codigo} · ${q.area}</div>
+          <div class="trecho">${q.trecho}</div>
+        </div>
+        <div class="taxa baixa">${q.taxa}%</div>
+      </li>
+    `).join('');
+  </script>
+
+</body>
+</html>
