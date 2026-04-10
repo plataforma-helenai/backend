@@ -23,17 +23,83 @@
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  // Injetar estilos do AppBar de ações (apresentação)
+  function injetarEstilosApresentacao() {
+    if (document.getElementById('estilos-apresentacao')) return;
+    const style = document.createElement('style');
+    style.id = 'estilos-apresentacao';
+    style.textContent = `
+      .appbar-apresentacao {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 14px;
+        background: linear-gradient(135deg, #1A3A6B 0%, #2B6CB0 50%, #3CC8D0 100%);
+        color: #FFFFFF;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: var(--fonte-principal, 'Inter', sans-serif);
+        box-shadow: 0 2px 8px rgba(43, 108, 176, 0.25);
+        white-space: nowrap;
+      }
+      .appbar-apresentacao:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(43, 108, 176, 0.35);
+        filter: brightness(1.05);
+      }
+      .appbar-apresentacao.download {
+        background: #FFFFFF;
+        color: #1A3A6B;
+        border: 1.5px solid #BEE3F8;
+        padding: 6px 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      }
+      .appbar-apresentacao.download:hover {
+        background: #EBF8FF;
+        border-color: #2B6CB0;
+      }
+      .appbar-acoes-grupo {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 12px;
+        padding-right: 12px;
+        border-right: 1px solid var(--borda-cor, #E2E8F0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   // Injetar AppBar
   function criarAppBar() {
     const usuario = getUsuario();
     const iniciais = getIniciais(usuario.nome);
     const perfil = capitalizar(usuario.perfil);
 
+    injetarEstilosApresentacao();
+
     // Detectar página atual para breadcrumb
     const path = window.location.pathname;
     const partes = path.split('/').filter(Boolean);
     const pagina = partes[partes.length - 1]?.replace('.html', '').replace(/-/g, ' ') || 'Dashboard';
     const modulo = partes.length > 1 ? capitalizar(partes[partes.length - 2]) : '';
+
+    // Botões de apresentação (somente admin)
+    const botoesApresentacao = usuario.perfil === 'admin' ? `
+      <div class="appbar-acoes-grupo">
+        <a href="/apresentacao.html" target="_blank" rel="noopener" class="appbar-apresentacao" title="Abrir apresentação em nova aba">
+          🎯 Apresentação
+        </a>
+        <a href="/assets/apresentacao-helenai.pdf" download="HelenAI-Apresentacao-Centelha.pdf" class="appbar-apresentacao download" title="Baixar PDF da apresentação (5MB)">
+          ⬇ PDF
+        </a>
+      </div>
+    ` : '';
 
     const appbarHTML = `
       <div class="appbar">
@@ -44,6 +110,7 @@
           </span>
         </div>
         <div class="appbar-direita">
+          ${botoesApresentacao}
           <button class="appbar-notificacao" id="btn-notificacoes" title="Notificações">
             🔔
             <span class="notif-badge">3</span>

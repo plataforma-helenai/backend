@@ -253,6 +253,86 @@
       color: var(--azul-medio);
     }
 
+    /* === Banner de apresentação === */
+    .banner-apresentacao {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      margin-top: var(--espacamento-lg);
+      padding: 14px 18px;
+      background: linear-gradient(135deg, #1A3A6B 0%, #2B6CB0 50%, #3CC8D0 100%);
+      color: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      text-decoration: none;
+      transition: var(--transicao);
+      box-shadow: 0 6px 18px rgba(43, 108, 176, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner-apresentacao::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .banner-apresentacao:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(43, 108, 176, 0.35);
+      filter: brightness(1.05);
+    }
+
+    .banner-apresentacao-icone {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-apresentacao-texto {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-apresentacao-texto .titulo {
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: 2px;
+    }
+
+    .banner-apresentacao-texto .desc {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+    }
+
+    .banner-apresentacao-seta {
+      font-size: 1.4rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-apresentacao:hover .banner-apresentacao-seta {
+      transform: translateX(4px);
+    }
+
     .credenciais-teste .cred-item .perfil-badge {
       font-weight: 600;
       padding: 2px 8px;
@@ -430,6 +510,16 @@
             <span class="perfil-badge">Aluno</span>
           </div>
         </div>
+
+        <!-- Banner de apresentação (Centelha) -->
+        <a href="/apresentacao.html" target="_blank" rel="noopener" class="banner-apresentacao">
+          <div class="banner-apresentacao-icone">🎯</div>
+          <div class="banner-apresentacao-texto">
+            <div class="titulo">Conheça o projeto HelenAI</div>
+            <div class="desc">Apresentação navegável · Programa Centelha 2026</div>
+          </div>
+          <div class="banner-apresentacao-seta">→</div>
+        </a>
 
         <div class="login-footer">
           HelenAI — Educação inclusiva para todos
