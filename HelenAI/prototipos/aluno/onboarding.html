@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Bem-vinda à HelenAI</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Layout === */
+    .onboarding-page {
+      min-height: 100vh;
+      background: var(--cinza-azulado);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--espacamento-lg);
+      position: relative;
+    }
+
+    .onboarding-page::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 280px;
+      background: var(--gradiente-principal);
+    }
+
+    .onboarding-page::after {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -150px;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: rgba(60, 200, 208, 0.15);
+      pointer-events: none;
+    }
+
+    .onboarding-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-xl);
+      box-shadow: var(--sombra-modal);
+      max-width: 720px;
+      width: 100%;
+      padding: var(--espacamento-2xl);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* === Header com progresso === */
+    .onboarding-header {
+      text-align: center;
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .onboarding-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--espacamento-sm);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .onboarding-logo img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .onboarding-logo span {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+    }
+
+    .progress-steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .progress-step {
+      width: 48px;
+      height: 6px;
+      background: var(--borda-cor);
+      border-radius: var(--borda-radius-full);
+      transition: var(--transicao);
+    }
+
+    .progress-step.ativo {
+      background: var(--azul-medio);
+    }
+
+    .progress-step.completo {
+      background: var(--cor-sucesso);
+    }
+
+    .progress-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* === Conteúdo dos steps === */
+    .step {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .step.ativo {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step h2 {
+      font-size: var(--fonte-tamanho-2xl);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-sm);
+      text-align: center;
+    }
+
+    .step .subtitulo {
+      color: var(--texto-secundario);
+      text-align: center;
+      font-size: var(--fonte-tamanho-md);
+      line-height: 1.6;
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    /* === Step 1: Boas-vindas === */
+    .boas-vindas-icone {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto var(--espacamento-lg);
+      border-radius: 50%;
+      background: linear-gradient(135deg, #EBF8FF 0%, #D6F5F7 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      animation: pulse-bem-vinda 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-bem-vinda {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(60, 200, 208, 0.3); }
+      50%      { box-shadow: 0 0 0 15px rgba(60, 200, 208, 0); }
+    }
+
+    .boas-vindas-beneficios {
+      list-style: none;
+      max-width: 440px;
+      margin: 0 auto var(--espacamento-xl);
+      padding: 0;
+    }
+
+    .boas-vindas-beneficios li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-sm) 0;
+      font-size: var(--fonte-tamanho-md);
+      color: var(--texto-primario);
+      line-height: 1.5;
+    }
+
+    .boas-vindas-beneficios li .icone {
+      width: 32px;
+      height: 32px;
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1rem;
+    }
+
+    /* === Steps 2-3: Opções clicáveis === */
+    .opcoes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .opcao-card {
+      background: var(--branco);
+      border: 2px solid var(--borda-cor);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md);
+      cursor: pointer;
+      transition: var(--transicao);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--espacamento-md);
+      text-align: left;
+      position: relative;
+    }
+
+    .opcao-card:hover {
+      border-color: var(--azul-claro);
+      background: #F7FBFF;
+      transform: translateY(-2px);
+    }
+
+    .opcao-card.selecionada {
+      border-color: var(--azul-medio);
+      background: #EBF8FF;
+    }
+
+    .opcao-card.selecionada::after {
+      content: '✓';
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 24px;
+      height: 24px;
+      background: var(--azul-medio);
+      color: var(--branco);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .opcao-icone {
+      width: 48px;
+      height: 48px;
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      border-radius: var(--borda-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      transition: var(--transicao);
+    }
+
+    .opcao-card.selecionada .opcao-icone {
+      background: var(--azul-medio);
+      color: var(--branco);
+    }
+
+    .opcao-info { flex: 1; min-width: 0; }
+
+    .opcao-titulo {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: 2px;
+    }
+
+    .opcao-descricao {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      line-height: 1.4;
+    }
+
+    /* === Step 3: Switches de preferências === */
+    .preferencias-secao {
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .preferencias-secao h3 {
+      font-size: var(--fonte-tamanho-md);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .switches-lista {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-sm);
+    }
+
+    .switch-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      cursor: pointer;
+      transition: var(--transicao);
+    }
+
+    .switch-item:hover {
+      background: #E0E9F2;
+    }
+
+    .switch-item-info {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      flex: 1;
+    }
+
+    .switch-item-icone {
+      width: 36px;
+      height: 36px;
+      background: var(--branco);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+
+    .switch-item-texto .titulo {
+      font-weight: 600;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .switch-item-texto .desc {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    .switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #CBD5E0;
+      border-radius: 12px;
+      transition: var(--transicao);
+      flex-shrink: 0;
+    }
+
+    .switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: var(--branco);
+      border-radius: 50%;
+      transition: var(--transicao);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .switch-item.ativo .switch {
+      background: var(--azul-medio);
+    }
+
+    .switch-item.ativo .switch::after {
+      left: 22px;
+    }
+
+    .tecnologia-opcoes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-md);
+    }
+
+    .tec-opcao {
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border: 2px solid transparent;
+      border-radius: var(--borda-radius);
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transicao);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+    }
+
+    .tec-opcao:hover {
+      border-color: var(--azul-claro);
+    }
+
+    .tec-opcao.selecionada {
+      background: #EBF8FF;
+      border-color: var(--azul-medio);
+      color: var(--azul-profundo);
+      font-weight: 600;
+    }
+
+    .tec-opcao .icone {
+      display: block;
+      font-size: 1.5rem;
+      margin-bottom: 4px;
+    }
+
+    /* === Step 4: Resumo === */
+    .resumo-header {
+      text-align: center;
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .resumo-check {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto var(--espacamento-md);
+      background: #C6F6D5;
+      color: var(--cor-sucesso);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      animation: bounce-in 0.5s ease;
+    }
+
+    @keyframes bounce-in {
+      0%   { transform: scale(0); }
+      60%  { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    .resumo-configs {
+      background: #F0FFF4;
+      border: 1px solid #C6F6D5;
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .resumo-configs h3 {
+      color: var(--cor-sucesso);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .resumo-lista {
+      list-style: none;
+      padding: 0;
+    }
+
+    .resumo-lista li {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      padding: 8px 0;
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-primario);
+    }
+
+    .resumo-lista li .icone {
+      width: 28px;
+      height: 28px;
+      background: var(--branco);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .resumo-lista.nada {
+      text-align: center;
+      color: var(--texto-terciario);
+      font-size: var(--fonte-tamanho-sm);
+      padding: var(--espacamento-md) 0;
+    }
+
+    .resumo-dica {
+      background: #EBF8FF;
+      border-left: 4px solid var(--azul-medio);
+      padding: var(--espacamento-md);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .resumo-dica strong {
+      color: var(--azul-profundo);
+    }
+
+    /* === Footer de navegação === */
+    .onboarding-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: var(--espacamento-lg);
+      border-top: 1px solid var(--borda-cor);
+    }
+
+    .btn-pular {
+      background: none;
+      border: none;
+      color: var(--texto-terciario);
+      cursor: pointer;
+      font-size: var(--fonte-tamanho-sm);
+      text-decoration: underline;
+      font-family: var(--fonte-principal);
+      padding: 8px;
+    }
+
+    .btn-pular:hover {
+      color: var(--azul-medio);
+    }
+
+    .footer-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+    }
+
+    /* === Responsive === */
+    @media (max-width: 720px) {
+      .opcoes-grid { grid-template-columns: 1fr; }
+      .tecnologia-opcoes { grid-template-columns: 1fr; }
+      .onboarding-card { padding: var(--espacamento-lg); }
+      .progress-step { width: 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="onboarding-page">
+    <div class="onboarding-card">
+
+      <div class="onboarding-header">
+        <div class="onboarding-logo">
+          <img src="/assets/img/logo-helen.png" alt="HelenAI">
+          <span>helen.ai</span>
+        </div>
+        <div class="progress-steps">
+          <div class="progress-step ativo" data-step="1"></div>
+          <div class="progress-step" data-step="2"></div>
+          <div class="progress-step" data-step="3"></div>
+          <div class="progress-step" data-step="4"></div>
+        </div>
+        <div class="progress-label">Passo <span id="step-atual">1</span> de 4</div>
+      </div>
+
+      <!-- ====== STEP 1: Boas-vindas ====== -->
+      <div class="step ativo" data-step="1">
+        <div class="boas-vindas-icone">👋</div>
+        <h2>Olá! Que bom ter você aqui</h2>
+        <p class="subtitulo">
+          Vamos configurar a HelenAI juntas? Responda algumas perguntas rápidas
+          e a plataforma se adapta <strong>pra você</strong> desde o início.
+          Nada aqui é obrigatório — você pode pular e ajustar tudo depois nas configurações.
+        </p>
+
+        <ul class="boas-vindas-beneficios">
+          <li>
+            <span class="icone">🎯</span>
+            <div>Acessibilidade configurada automaticamente de acordo com suas preferências</div>
+          </li>
+          <li>
+            <span class="icone">📚</span>
+            <div>Conteúdo em <strong>Linguagem Simples</strong> (Lei 15.263/2025) quando você precisar</div>
+          </li>
+          <li>
+            <span class="icone">🤖</span>
+            <div>A IA da Helen te ajuda com dicas, explicações e trilhas personalizadas</div>
+          </li>
+          <li>
+            <span class="icone">💙</span>
+            <div>Um ambiente calmo, sem pressão, feito pra caber no seu ritmo</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ====== STEP 2: Tipo de deficiência ====== -->
+      <div class="step" data-step="2">
+        <h2>Como você se identifica?</h2>
+        <p class="subtitulo">
+          Você pode selecionar uma ou mais opções, ou escolher "Prefiro não informar".
+          Isso nos ajuda a configurar os recursos de acessibilidade certos pra você.
+        </p>
+
+        <div class="opcoes-grid">
+          <button class="opcao-card" data-tipo="visual">
+            <div class="opcao-icone">👁</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Visual</div>
+              <div class="opcao-descricao">Baixa visão ou cegueira</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="auditiva">
+            <div class="opcao-icone">👂</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Auditiva</div>
+              <div class="opcao-descricao">Surdez ou baixa audição</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="intelectual">
+            <div class="opcao-icone">🧠</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Intelectual</div>
+              <div class="opcao-descricao">Dificuldade de aprendizagem ou deficiência intelectual</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="motora">
+            <div class="opcao-icone">♿</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Motora</div>
+              <div class="opcao-descricao">Mobilidade reduzida</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="dislexia">
+            <div class="opcao-icone">📖</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Dislexia</div>
+              <div class="opcao-descricao">Dificuldade com leitura e escrita</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="daltonismo">
+            <div class="opcao-icone">🎨</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Daltonismo</div>
+              <div class="opcao-descricao">Dificuldade com distinção de cores</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="tea">
+            <div class="opcao-icone">💠</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">TEA</div>
+              <div class="opcao-descricao">Transtorno do Espectro Autista</div>
+            </div>
+          </button>
+
+          <button class="opcao-card" data-tipo="nenhuma">
+            <div class="opcao-icone">✨</div>
+            <div class="opcao-info">
+              <div class="opcao-titulo">Nenhuma / Prefiro não informar</div>
+              <div class="opcao-descricao">Vou configurar manualmente se precisar</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ====== STEP 3: Preferências ====== -->
+      <div class="step" data-step="3">
+        <h2>Como você prefere estudar?</h2>
+        <p class="subtitulo">
+          Ative o que faz sentido pra você. Você pode mudar tudo a qualquer momento
+          pela barra de acessibilidade (no canto inferior direito) ou nas configurações.
+        </p>
+
+        <div class="preferencias-secao">
+          <h3>Leitura e conteúdo</h3>
+          <div class="switches-lista">
+            <div class="switch-item" data-pref="linguagem-simples">
+              <div class="switch-item-info">
+                <div class="switch-item-icone">📝</div>
+                <div class="switch-item-texto">
+                  <div class="titulo">Prefiro textos simplificados</div>
+                  <div class="desc">Ativa Linguagem Simples por padrão nas questões</div>
+                </div>
+              </div>
+              <div class="switch"></div>
+            </div>
+
+            <div class="switch-item" data-pref="ledor">
+              <div class="switch-item-info">
+                <div class="switch-item-icone">🔊</div>
+                <div class="switch-item-texto">
+                  <div class="titulo">Prefiro ouvir o conteúdo</div>
+                  <div class="desc">Ativa o ledor (texto para voz)</div>
+                </div>
+              </div>
+              <div class="switch"></div>
+            </div>
+
+            <div class="switch-item" data-pref="libras">
+              <div class="switch-item-info">
+                <div class="switch-item-icone">🤟</div>
+                <div class="switch-item-texto">
+                  <div class="titulo">Preciso de LIBRAS</div>
+                  <div class="desc">Ativa o intérprete virtual de LIBRAS</div>
+                </div>
+              </div>
+              <div class="switch"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preferencias-secao">
+          <h3>Familiaridade com tecnologia</h3>
+          <p class="subtitulo" style="text-align:left; font-size: var(--fonte-tamanho-sm); margin-bottom: var(--espacamento-sm);">
+            Isso nos ajuda a saber se você quer um tutorial guiado no primeiro acesso.
+          </p>
+          <div class="tecnologia-opcoes">
+            <button class="tec-opcao" data-tec="alta">
+              <span class="icone">💻</span>
+              Uso com frequência
+            </button>
+            <button class="tec-opcao" data-tec="media">
+              <span class="icone">📱</span>
+              Uso de vez em quando
+            </button>
+            <button class="tec-opcao" data-tec="baixa">
+              <span class="icone">🌱</span>
+              Preciso de ajuda
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== STEP 4: Resumo ====== -->
+      <div class="step" data-step="4">
+        <div class="resumo-header">
+          <div class="resumo-check">✓</div>
+          <h2>Tudo pronto, Maria!</h2>
+          <p class="subtitulo">Configuramos a HelenAI pra você com base no que nos contou.</p>
+        </div>
+
+        <div class="resumo-configs">
+          <h3>✨ Configurações aplicadas automaticamente</h3>
+          <ul class="resumo-lista" id="resumo-lista"></ul>
+        </div>
+
+        <div class="resumo-dica">
+          💡 <strong>Dica:</strong> Você pode mudar todas essas preferências a qualquer
+          momento na <strong>barra de acessibilidade</strong> (canto inferior direito)
+          ou em <strong>Perfil → Configurações</strong>.
+        </div>
+      </div>
+
+      <!-- ====== Footer de navegação ====== -->
+      <div class="onboarding-footer">
+        <button class="btn-pular" onclick="pularOnboarding()">Pular por agora</button>
+        <div class="footer-acoes">
+          <button class="btn btn-secundario" id="btn-voltar" onclick="voltarStep()" style="display:none;">
+            ← Voltar
+          </button>
+          <button class="btn btn-primario" id="btn-proximo" onclick="avancarStep()">
+            Vamos começar →
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script>
+    // === Estado ===
+    let stepAtual = 1;
+    const totalSteps = 4;
+
+    const escolhas = {
+      deficiencias: new Set(),
+      preferencias: new Set(),
+      tecnologia: null
+    };
+
+    // === Navegação de steps ===
+    function mostrarStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('ativo'));
+      document.querySelector(`.step[data-step="${n}"]`).classList.add('ativo');
+
+      // Progress
+      document.querySelectorAll('.progress-step').forEach(p => {
+        const step = Number(p.dataset.step);
+        p.classList.remove('ativo', 'completo');
+        if (step < n) p.classList.add('completo');
+        else if (step === n) p.classList.add('ativo');
+      });
+
+      document.getElementById('step-atual').textContent = n;
+
+      // Botões
+      document.getElementById('btn-voltar').style.display = n === 1 ? 'none' : 'inline-flex';
+      const btnProx = document.getElementById('btn-proximo');
+
+      if (n === 1) {
+        btnProx.textContent = 'Vamos começar →';
+      } else if (n === totalSteps) {
+        btnProx.textContent = 'Entrar na HelenAI 🚀';
+      } else {
+        btnProx.textContent = 'Próximo →';
+      }
+
+      // Pular só faz sentido durante os steps de coleta
+      document.querySelector('.btn-pular').style.display = n === totalSteps ? 'none' : 'inline-block';
+
+      if (n === totalSteps) renderResumo();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function avancarStep() {
+      if (stepAtual < totalSteps) {
+        stepAtual++;
+        mostrarStep(stepAtual);
+      } else {
+        finalizarOnboarding();
+      }
+    }
+
+    function voltarStep() {
+      if (stepAtual > 1) {
+        stepAtual--;
+        mostrarStep(stepAtual);
+      }
+    }
+
+    function pularOnboarding() {
+      // Limpa escolhas e redireciona
+      window.location.href = '/aluno/dashboard.html';
+    }
+
+    // === Step 2: seleção de tipos de deficiência ===
+    document.querySelectorAll('.opcao-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const tipo = card.dataset.tipo;
+
+        // "Nenhuma" é exclusiva — limpa as outras
+        if (tipo === 'nenhuma') {
+          document.querySelectorAll('.opcao-card').forEach(c => c.classList.remove('selecionada'));
+          escolhas.deficiencias.clear();
+          card.classList.add('selecionada');
+          escolhas.deficiencias.add('nenhuma');
+          return;
+        }
+
+        // Qualquer outra seleção limpa "nenhuma"
+        const nenhuma = document.querySelector('.opcao-card[data-tipo="nenhuma"]');
+        if (nenhuma.classList.contains('selecionada')) {
+          nenhuma.classList.remove('selecionada');
+          escolhas.deficiencias.delete('nenhuma');
+        }
+
+        card.classList.toggle('selecionada');
+        if (card.classList.contains('selecionada')) {
+          escolhas.deficiencias.add(tipo);
+        } else {
+          escolhas.deficiencias.delete(tipo);
+        }
+      });
+    });
+
+    // === Step 3: switches de preferências ===
+    document.querySelectorAll('.switch-item').forEach(item => {
+      item.addEventListener('click', () => {
+        item.classList.toggle('ativo');
+        const pref = item.dataset.pref;
+        if (item.classList.contains('ativo')) {
+          escolhas.preferencias.add(pref);
+        } else {
+          escolhas.preferencias.delete(pref);
+        }
+      });
+    });
+
+    // === Step 3: nível de tecnologia ===
+    document.querySelectorAll('.tec-opcao').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tec-opcao').forEach(b => b.classList.remove('selecionada'));
+        btn.classList.add('selecionada');
+        escolhas.tecnologia = btn.dataset.tec;
+      });
+    });
+
+    // === Step 4: render do resumo ===
+    function renderResumo() {
+      const configs = calcularConfigs();
+      const lista = document.getElementById('resumo-lista');
+
+      if (configs.length === 0) {
+        lista.className = 'resumo-lista nada';
+        lista.innerHTML = 'Nenhuma configuração especial aplicada. Você pode ajustar manualmente quando quiser.';
+        return;
+      }
+
+      lista.className = 'resumo-lista';
+      lista.innerHTML = configs.map(c => `
+        <li>
+          <span class="icone">${c.icone}</span>
+          <span>${c.texto}</span>
+        </li>
+      `).join('');
+    }
+
+    function calcularConfigs() {
+      const configs = [];
+      const d = escolhas.deficiencias;
+      const p = escolhas.preferencias;
+
+      // Mapeamento direto: deficiências → recursos
+      if (d.has('daltonismo')) {
+        configs.push({ icone: '🎨', texto: 'Paleta <strong>Color Blind</strong> ativada' });
+      }
+      if (d.has('dislexia')) {
+        configs.push({ icone: '🔤', texto: 'Fonte <strong>OpenDyslexic</strong> ativada' });
+      }
+      if (d.has('visual')) {
+        configs.push({ icone: '◐', texto: 'Alto contraste, fonte grande e ledor ativados' });
+      }
+      if (d.has('auditiva')) {
+        configs.push({ icone: '🤟', texto: 'Intérprete de <strong>LIBRAS</strong> ativado' });
+      }
+      if (d.has('intelectual')) {
+        configs.push({ icone: '📝', texto: '<strong>Linguagem Simples</strong> e ledor ativados' });
+      }
+      if (d.has('tea')) {
+        configs.push({ icone: '💠', texto: 'Interface calma (animações reduzidas, cores suaves)' });
+      }
+      if (d.has('motora')) {
+        configs.push({ icone: '⌨️', texto: 'Navegação otimizada por teclado' });
+      }
+
+      // Preferências explícitas (adicionam se não foram inferidas)
+      if (p.has('linguagem-simples') && !d.has('intelectual')) {
+        configs.push({ icone: '📝', texto: '<strong>Linguagem Simples</strong> por padrão nas questões' });
+      }
+      if (p.has('ledor') && !d.has('visual') && !d.has('intelectual')) {
+        configs.push({ icone: '🔊', texto: 'Ledor (texto para voz) ativado' });
+      }
+      if (p.has('libras') && !d.has('auditiva')) {
+        configs.push({ icone: '🤟', texto: 'Intérprete de <strong>LIBRAS</strong> ativado' });
+      }
+
+      // Tecnologia baixa
+      if (escolhas.tecnologia === 'baixa') {
+        configs.push({ icone: '🎓', texto: 'Tutorial guiado no primeiro acesso' });
+      }
+
+      return configs;
+    }
+
+    // === Aplicar configs e finalizar ===
+    function finalizarOnboarding() {
+      const d = escolhas.deficiencias;
+      const p = escolhas.preferencias;
+
+      // Salva no localStorage pra barra de acessibilidade puxar
+      const prefsAcessibilidade = JSON.parse(localStorage.getItem('helenai_acessibilidade') || '{}');
+
+      if (d.has('daltonismo'))  prefsAcessibilidade.colorBlind = true;
+      if (d.has('dislexia'))    prefsAcessibilidade.dislexia = true;
+      if (d.has('visual'))    { prefsAcessibilidade.contraste = true; prefsAcessibilidade.ledor = true; prefsAcessibilidade.fonteGrande = true; }
+      if (d.has('auditiva'))    prefsAcessibilidade.libras = true;
+      if (d.has('intelectual')){ prefsAcessibilidade.linguagemSimples = true; prefsAcessibilidade.ledor = true; }
+      if (d.has('tea'))         prefsAcessibilidade.calma = true;
+
+      if (p.has('linguagem-simples')) prefsAcessibilidade.linguagemSimples = true;
+      if (p.has('ledor'))             prefsAcessibilidade.ledor = true;
+      if (p.has('libras'))            prefsAcessibilidade.libras = true;
+
+      localStorage.setItem('helenai_acessibilidade', JSON.stringify(prefsAcessibilidade));
+      localStorage.setItem('helenai_onboarding_feito', 'true');
+
+      // Garante que o usuário logado é aluno
+      const alunoUser = HELEN_DATA.usuarios.find(u => u.perfil === 'aluno');
+      if (!localStorage.getItem('helenai_usuario')) {
+        localStorage.setItem('helenai_usuario', JSON.stringify(alunoUser));
+      }
+
+      window.location.href = '/aluno/dashboard.html';
+    }
+
+    // === Atalhos de teclado ===
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.target.matches('button')) {
+        avancarStep();
+      }
+    });
+  </script>
+
+</body>
+</html>

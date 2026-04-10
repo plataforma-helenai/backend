@@ -378,8 +378,8 @@
         <div class="cadastro-sucesso" id="tela-sucesso">
           <div class="icone-sucesso">✓</div>
           <h3>Conta criada com sucesso!</h3>
-          <p>Você já pode acessar a plataforma HelenAI.</p>
-          <a href="/compartilhado/login.html" class="btn btn-primario btn-lg mt-lg">Ir para o Login</a>
+          <p>Agora vamos personalizar sua experiência. Leva menos de 1 minuto.</p>
+          <a href="/aluno/onboarding.html" class="btn btn-primario btn-lg mt-lg">Personalizar HelenAI →</a>
         </div>
 
         <div class="cadastro-footer">
@@ -521,11 +521,11 @@
       document.getElementById('tela-sucesso').classList.add('visivel');
     }
 
-    // Google → direto para aluno
+    // Google → direto para onboarding do aluno
     document.getElementById('btn-google').addEventListener('click', function () {
       const alunoUser = HELEN_DATA.usuarios.find(u => u.perfil === 'aluno');
       localStorage.setItem('helenai_usuario', JSON.stringify(alunoUser));
-      window.location.href = '/aluno/dashboard.html';
+      window.location.href = '/aluno/onboarding.html';
     });
   </script>
 
