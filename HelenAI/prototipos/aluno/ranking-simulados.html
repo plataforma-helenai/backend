@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Ranking · Por Simulado</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Header com posição (mesmo das outras) === */
+    .ranking-header-card {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-xl);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--espacamento-md);
+    }
+
+    .ranking-header-info h2 {
+      color: var(--branco);
+      margin-bottom: 4px;
+      font-size: var(--fonte-tamanho-2xl);
+    }
+
+    .ranking-header-info p { margin: 0; opacity: 0.9; font-size: var(--fonte-tamanho-sm); }
+
+    .ranking-minha-pos {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      text-align: center;
+      min-width: 180px;
+    }
+
+    .ranking-minha-pos-label {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .ranking-minha-pos-numero {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .ranking-minha-pos-texto {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    /* === Navegação entre as 3 páginas === */
+    .ranking-nav {
+      display: flex;
+      border-bottom: 2px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-lg);
+      gap: 0;
+    }
+
+    .ranking-nav-link {
+      padding: 14px 24px;
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transicao);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ranking-nav-link:hover { color: var(--azul-medio); }
+
+    .ranking-nav-link.ativo {
+      color: var(--azul-medio);
+      border-bottom-color: var(--azul-medio);
+    }
+
+    /* === Filtros === */
+    .simulados-filtro {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr;
+      gap: var(--espacamento-md);
+      align-items: end;
+    }
+
+    .filtro-grupo { display: flex; flex-direction: column; gap: 6px; }
+
+    .filtro-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filtro-grupo input,
+    .filtro-grupo select {
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      background: var(--branco);
+      color: var(--texto-primario);
+    }
+
+    /* === Cards de simulado === */
+    .simulado-rank-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-lg);
+      transition: var(--transicao);
+      border-left: 5px solid var(--azul-medio);
+    }
+
+    .simulado-rank-card:hover {
+      box-shadow: var(--sombra-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .simulado-rank-icone {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--borda-radius-lg);
+      background: #EBF8FF;
+      color: var(--azul-medio);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+
+    .simulado-rank-info { flex: 1; min-width: 0; }
+
+    .simulado-rank-nome {
+      font-size: var(--fonte-tamanho-md);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+    }
+
+    .simulado-rank-meta {
+      display: flex;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      flex-wrap: wrap;
+    }
+
+    .simulado-rank-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .simulado-rank-stats {
+      text-align: center;
+      padding: 0 var(--espacamento-lg);
+      border-left: 1px solid var(--borda-cor);
+      flex-shrink: 0;
+    }
+
+    .simulado-rank-stats .valor {
+      font-size: var(--fonte-tamanho-xl);
+      font-weight: 800;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .simulado-rank-stats.boa .valor   { color: var(--cor-sucesso); }
+    .simulado-rank-stats.media .valor { color: #B7791F; }
+    .simulado-rank-stats.baixa .valor { color: var(--cor-erro); }
+
+    .simulado-rank-stats .label {
+      font-size: 0.65rem;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* Modal ranking por simulado */
+    .modal-ranking-sim { max-width: 720px; }
+
+    .modal-ranking-sim .modal-titulo { margin-bottom: var(--espacamento-xs); }
+
+    .modal-ranking-sim .modal-subtitulo {
+      color: var(--texto-secundario);
+      font-size: var(--fonte-tamanho-sm);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .ranking-tabela {
+      width: 100%;
+      border-collapse: collapse;
+      max-height: 480px;
+      display: block;
+      overflow-y: auto;
+    }
+
+    .ranking-tabela th {
+      padding: 12px var(--espacamento-lg);
+      background: var(--cinza-azulado);
+      text-align: left;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ranking-tabela td {
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .ranking-tabela tr.eu-mesmo {
+      background: linear-gradient(90deg, #EBF8FF 0%, #E6FFFA 100%);
+    }
+
+    .ranking-tabela tr.eu-mesmo td {
+      border-top: 2px solid var(--azul-medio);
+      border-bottom: 2px solid var(--azul-medio);
+    }
+
+    .ranking-aluno {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .ranking-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+    }
+
+    .ranking-nome { font-weight: 600; color: var(--texto-primario); }
+
+    .ranking-tabela tr.eu-mesmo .ranking-aluno::after {
+      content: 'VOCÊ';
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: var(--borda-radius-full);
+      font-weight: 700;
+      margin-left: var(--espacamento-sm);
+      letter-spacing: 0.5px;
+    }
+
+    .ranking-pos { font-weight: 700; color: var(--azul-profundo); width: 60px; }
+    .ranking-pos.medalha-1 { color: #D69E2E; }
+    .ranking-pos.medalha-2 { color: #718096; }
+    .ranking-pos.medalha-3 { color: #C05621; }
+
+    .resultados-count {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .resultados-count strong {
+      color: var(--azul-profundo);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: var(--espacamento-2xl);
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+    }
+
+    .empty-state .icone {
+      font-size: 3rem;
+      margin-bottom: var(--espacamento-md);
+      display: block;
+    }
+
+    @media (max-width: 900px) {
+      .simulados-filtro { grid-template-columns: 1fr; }
+      .simulado-rank-card { flex-direction: column; align-items: flex-start; }
+      .simulado-rank-stats { border: none; padding: 0; }
+      .ranking-header-card { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Modal: Ranking por Simulado -->
+  <div class="modal-overlay" id="modal-ranking-sim">
+    <div class="modal modal-ranking-sim">
+      <h3 class="modal-titulo" id="modal-sim-titulo">Ranking do Simulado</h3>
+      <p class="modal-subtitulo" id="modal-sim-subtitulo"></p>
+
+      <table class="ranking-tabela">
+        <thead>
+          <tr>
+            <th>Posição</th>
+            <th>Aluno</th>
+            <th>Nota</th>
+            <th>Tempo</th>
+          </tr>
+        </thead>
+        <tbody id="modal-sim-tbody"></tbody>
+      </table>
+
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal('modal-ranking-sim')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item">📝 Meus Simulados</a>
+        <a href="/aluno/ranking.html" class="sidebar-item ativo">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Ranking</h1>
+          <p class="conteudo-subtitulo">Veja o ranking específico de cada simulado público</p>
+        </div>
+      </div>
+
+      <!-- Header com posição -->
+      <div class="ranking-header-card">
+        <div class="ranking-header-info">
+          <h2>🏆 Sua jornada de aprendizado</h2>
+          <p>Continue completando simulados para subir no ranking!</p>
+        </div>
+        <div class="ranking-minha-pos">
+          <div class="ranking-minha-pos-label">Sua posição</div>
+          <div class="ranking-minha-pos-numero">#5</div>
+          <div class="ranking-minha-pos-texto">de 1.247 alunos</div>
+        </div>
+      </div>
+
+      <!-- Nav entre as 3 páginas -->
+      <nav class="ranking-nav">
+        <a href="/aluno/ranking.html" class="ranking-nav-link">🌍 Ranking Geral</a>
+        <a href="/aluno/ranking-desafios.html" class="ranking-nav-link">⚔ Desafios</a>
+        <a href="/aluno/ranking-simulados.html" class="ranking-nav-link ativo">📝 Por Simulado</a>
+      </nav>
+
+      <!-- Filtros -->
+      <div class="simulados-filtro">
+        <div class="filtro-grupo">
+          <label class="filtro-label">Buscar</label>
+          <input type="text" id="sim-busca" placeholder="Nome do simulado...">
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Área</label>
+          <select id="sim-area">
+            <option value="">Todas as áreas</option>
+            <option>Matemática e suas Tecnologias</option>
+            <option>Linguagens, Códigos e suas Tecnologias</option>
+            <option>Ciências da Natureza e suas Tecnologias</option>
+            <option>Ciências Humanas e suas Tecnologias</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Ordenar por</label>
+          <select id="sim-ordem">
+            <option value="participantes">Mais participantes</option>
+            <option value="nota">Sua nota (maior)</option>
+            <option value="recentes">Mais recentes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="resultados-count" id="resultados-count"></div>
+
+      <!-- Lista de simulados -->
+      <div id="lista-simulados-rank"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const ALUNO_LOGADO = 'Maria Oliveira';
+
+    const simulados = HELEN_DATA.simulados.filter(s => s.status === 'publicado');
+
+    // Dados fake de stats por simulado
+    const simStats = {
+      1: { participantes: 120, minhaNota: 76, minhaPosicao: 28 },
+      2: { participantes: 84,  minhaNota: 85, minhaPosicao: 15 },
+      3: { participantes: 62,  minhaNota: 60, minhaPosicao: 32 }
+    };
+
+    function classeDaNota(n) {
+      if (n === null || n === undefined) return '';
+      if (n >= 70) return 'boa';
+      if (n >= 50) return 'media';
+      return 'baixa';
+    }
+
+    function renderSimulados() {
+      const lista = document.getElementById('lista-simulados-rank');
+      const count = document.getElementById('resultados-count');
+      const busca = document.getElementById('sim-busca').value.toLowerCase();
+      const area = document.getElementById('sim-area').value;
+
+      const filtrados = simulados.filter(s => {
+        if (busca && !s.nome.toLowerCase().includes(busca)) return false;
+        return true;
+      });
+
+      count.innerHTML = filtrados.length === simulados.length
+        ? `<strong>${filtrados.length}</strong> simulados públicos disponíveis`
+        : `Mostrando <strong>${filtrados.length}</strong> de ${simulados.length} simulados`;
+
+      if (filtrados.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-state">
+            <span class="icone">🔍</span>
+            <h3>Nenhum simulado encontrado</h3>
+            <p style="color: var(--texto-terciario);">Ajuste a busca ou os filtros.</p>
+          </div>
+        `;
+        return;
+      }
+
+      lista.innerHTML = filtrados.map(s => {
+        const stats = simStats[s.id] || { participantes: 0, minhaNota: null, minhaPosicao: null };
+        const temNota = stats.minhaNota !== null;
+        const classeNota = classeDaNota(stats.minhaNota);
+
+        return `
+          <div class="simulado-rank-card">
+            <div class="simulado-rank-icone">📝</div>
+            <div class="simulado-rank-info">
+              <div class="simulado-rank-nome">${s.nome}</div>
+              <div class="simulado-rank-meta">
+                <span>📄 ${s.qtdQuestoes} questões</span>
+                <span>${s.tempo ? '⏱ ' + s.tempo + ' min' : '⏱ Sem tempo'}</span>
+                <span>👥 ${stats.participantes} participantes</span>
+                <span>👤 ${s.criador}</span>
+              </div>
+            </div>
+            ${temNota ? `
+              <div class="simulado-rank-stats ${classeNota}">
+                <div class="valor">${stats.minhaNota}%</div>
+                <div class="label">Sua nota</div>
+              </div>
+              <div class="simulado-rank-stats">
+                <div class="valor">#${stats.minhaPosicao}</div>
+                <div class="label">Sua posição</div>
+              </div>
+            ` : `
+              <div class="simulado-rank-stats">
+                <div class="valor" style="color: var(--texto-terciario);">—</div>
+                <div class="label">Não fez</div>
+              </div>
+            `}
+            <button class="btn btn-primario" onclick="abrirRankingSimulado(${s.id}, '${s.nome.replace(/'/g, "\\'")}', ${stats.participantes})">
+              🏆 Ver ranking
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    renderSimulados();
+
+    document.getElementById('sim-busca').addEventListener('input', renderSimulados);
+    document.getElementById('sim-area').addEventListener('change', renderSimulados);
+    document.getElementById('sim-ordem').addEventListener('change', renderSimulados);
+
+    // Modal de ranking por simulado
+    function abrirRankingSimulado(id, nome, participantes) {
+      document.getElementById('modal-sim-titulo').textContent = `🏆 Ranking — ${nome}`;
+      document.getElementById('modal-sim-subtitulo').textContent = `${participantes} alunos participaram deste simulado`;
+
+      const rankingFake = HELEN_DATA.ranking.slice(0, 10).map((r, i) => ({
+        posicao: i + 1,
+        nome: r.nome,
+        avatar: r.avatar,
+        nota: Math.max(50, 100 - i * 4 - Math.floor(Math.random() * 5)),
+        tempo: `${20 + i * 2}min`
+      }));
+
+      const tbody = document.getElementById('modal-sim-tbody');
+      tbody.innerHTML = rankingFake.map(r => {
+        const medalhas = { 1: '🥇', 2: '🥈', 3: '🥉' };
+        const posTexto = medalhas[r.posicao] || `${r.posicao}º`;
+        const medalhaClass = r.posicao <= 3 ? `medalha-${r.posicao}` : '';
+        const euMesmo = r.nome === ALUNO_LOGADO ? 'eu-mesmo' : '';
+        return `
+          <tr class="${euMesmo}">
+            <td class="ranking-pos ${medalhaClass}">${posTexto}</td>
+            <td>
+              <div class="ranking-aluno">
+                <div class="ranking-avatar">${r.avatar}</div>
+                <span class="ranking-nome">${r.nome}</span>
+              </div>
+            </td>
+            <td><strong>${r.nota}%</strong></td>
+            <td>${r.tempo}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('modal-ranking-sim').classList.add('visivel');
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('visivel');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.visivel').forEach(m => m.classList.remove('visivel'));
+      }
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('visivel');
+      });
+    });
+  </script>
+
+</body>
+</html>

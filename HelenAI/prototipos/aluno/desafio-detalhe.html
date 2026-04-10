@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Detalhe do Desafio</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Header do desafio === */
+    .desafio-hero {
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-2xl) var(--espacamento-xl);
+      color: var(--branco);
+      margin-bottom: var(--espacamento-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .desafio-hero::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .desafio-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      pointer-events: none;
+    }
+
+    .desafio-hero-conteudo {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-xl);
+    }
+
+    .desafio-hero-icone {
+      width: 96px;
+      height: 96px;
+      border-radius: var(--borda-radius-xl);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+
+    .desafio-hero-texto { flex: 1; min-width: 0; }
+
+    .desafio-hero-criador {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .desafio-hero-nome {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--branco);
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .desafio-hero-desc {
+      font-size: var(--fonte-tamanho-md);
+      opacity: 0.95;
+      line-height: 1.5;
+      max-width: 680px;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .desafio-hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--espacamento-sm);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .desafio-hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      border-radius: var(--borda-radius-full);
+      font-weight: 500;
+    }
+
+    .desafio-hero-acoes {
+      display: flex;
+      gap: var(--espacamento-sm);
+    }
+
+    .btn-desafio-secundario {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--branco);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 10px 18px;
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transicao);
+      font-family: var(--fonte-principal);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-desafio-secundario:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* === Card "Seu progresso" === */
+    .progresso-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-lg);
+      margin-bottom: var(--espacamento-lg);
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: var(--espacamento-lg);
+      align-items: center;
+    }
+
+    .progresso-principal {
+      border-right: 1px solid var(--borda-cor);
+      padding-right: var(--espacamento-lg);
+    }
+
+    .progresso-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .progresso-numero {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .progresso-numero small {
+      font-size: 1rem;
+      color: var(--texto-secundario);
+      font-weight: 500;
+    }
+
+    .progresso-barra {
+      height: 12px;
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .progresso-barra-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--azul-medio) 0%, var(--ciano) 100%);
+      border-radius: var(--borda-radius-full);
+      transition: width 0.5s ease;
+    }
+
+    .progresso-stat {
+      text-align: center;
+    }
+
+    .progresso-stat .valor {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1;
+    }
+
+    .progresso-stat .label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .progresso-stat.posicao .valor {
+      color: var(--azul-medio);
+    }
+
+    /* === Seções === */
+    .secao {
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .secao-titulo {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* === Lista de simulados do desafio === */
+    .simulados-lista {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+    }
+
+    .simulado-linha {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      transition: var(--transicao);
+    }
+
+    .simulado-linha:last-child {
+      border-bottom: none;
+    }
+
+    .simulado-linha:hover {
+      background: var(--cinza-azulado);
+    }
+
+    .simulado-status-icone {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .simulado-status-icone.feito      { background: #C6F6D5; color: #22543D; }
+    .simulado-status-icone.andamento  { background: #FEEBC8; color: #C05621; }
+    .simulado-status-icone.pendente   { background: var(--cinza-azulado); color: var(--texto-terciario); }
+
+    .simulado-linha-info { flex: 1; min-width: 0; }
+
+    .simulado-linha-nome {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      margin-bottom: 4px;
+    }
+
+    .simulado-linha-meta {
+      display: flex;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      flex-wrap: wrap;
+    }
+
+    .simulado-linha-stats {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .simulado-linha-nota {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--cor-sucesso);
+    }
+
+    .simulado-linha-data {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    /* === Pódio (reusa do ranking mas em versão compacta) === */
+    .podio-desafio {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1fr;
+      gap: var(--espacamento-md);
+      align-items: end;
+      margin-bottom: var(--espacamento-xl);
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .podio-d-item {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-lg) var(--espacamento-md);
+      text-align: center;
+      box-shadow: var(--sombra-card);
+      position: relative;
+      transition: var(--transicao);
+    }
+
+    .podio-d-item:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .podio-d-medalha {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: var(--sombra-card);
+    }
+
+    .podio-d-1 .podio-d-medalha { background: linear-gradient(135deg, #F6E05E 0%, #D69E2E 100%); }
+    .podio-d-2 .podio-d-medalha { background: linear-gradient(135deg, #E2E8F0 0%, #A0AEC0 100%); }
+    .podio-d-3 .podio-d-medalha { background: linear-gradient(135deg, #F6AD55 0%, #C05621 100%); }
+
+    .podio-d-1 {
+      transform: scale(1.08);
+      border-top: 4px solid #F6E05E;
+    }
+    .podio-d-1:hover { transform: scale(1.08) translateY(-4px); }
+    .podio-d-2 { border-top: 4px solid #A0AEC0; }
+    .podio-d-3 { border-top: 4px solid #C05621; }
+
+    .podio-d-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 14px auto var(--espacamento-sm);
+      border: 3px solid var(--branco);
+      box-shadow: var(--sombra-card);
+    }
+
+    .podio-d-nome {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      margin-bottom: 4px;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .podio-d-pontos {
+      font-size: var(--fonte-tamanho-xl);
+      font-weight: 800;
+      color: var(--azul-medio);
+      line-height: 1;
+    }
+
+    .podio-d-pontos-label {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-top: 2px;
+    }
+
+    .podio-d-stats {
+      display: flex;
+      justify-content: center;
+      gap: var(--espacamento-sm);
+      margin-top: var(--espacamento-sm);
+      padding-top: var(--espacamento-sm);
+      border-top: 1px solid var(--borda-cor);
+      font-size: 0.7rem;
+      color: var(--texto-secundario);
+    }
+
+    /* === Tabela ranking do desafio === */
+    .ranking-desafio-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+    }
+
+    .ranking-desafio-header {
+      padding: var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ranking-desafio-tabela {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .ranking-desafio-tabela th {
+      padding: 12px var(--espacamento-lg);
+      background: var(--cinza-azulado);
+      text-align: left;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ranking-desafio-tabela td {
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-bottom: 1px solid var(--borda-cor);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .ranking-desafio-tabela tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ranking-desafio-tabela tr.eu-mesmo {
+      background: linear-gradient(90deg, #EBF8FF 0%, #E6FFFA 100%);
+    }
+
+    .ranking-desafio-tabela tr.eu-mesmo td {
+      border-top: 2px solid var(--azul-medio);
+      border-bottom: 2px solid var(--azul-medio);
+    }
+
+    .ranking-desafio-tabela tr.eu-mesmo .ranking-aluno::after {
+      content: 'VOCÊ';
+      background: var(--azul-medio);
+      color: var(--branco);
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: var(--borda-radius-full);
+      font-weight: 700;
+      margin-left: var(--espacamento-sm);
+      letter-spacing: 0.5px;
+    }
+
+    .ranking-aluno {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .ranking-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+    }
+
+    .pontuacao-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      background: #EBF8FF;
+      color: var(--azul-profundo);
+      border-radius: var(--borda-radius-full);
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-xs);
+    }
+
+    .pontuacao-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+    }
+
+    .pontuacao-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--cinza-azulado);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .pontuacao-bar-fill {
+      height: 100%;
+      background: var(--azul-medio);
+      border-radius: 3px;
+    }
+
+    @media (max-width: 900px) {
+      .desafio-hero-conteudo { flex-direction: column; text-align: center; }
+      .progresso-card { grid-template-columns: 1fr; gap: var(--espacamento-md); }
+      .progresso-principal { border-right: none; border-bottom: 1px solid var(--borda-cor); padding: 0 0 var(--espacamento-md) 0; }
+      .podio-desafio { grid-template-columns: 1fr; max-width: 300px; }
+      .podio-d-1 { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <!-- Modal sair -->
+  <div class="modal-overlay" id="modal-sair">
+    <div class="modal" style="max-width: 440px;">
+      <h3 class="modal-titulo">Sair deste desafio?</h3>
+      <p style="color: var(--texto-secundario); margin-bottom: var(--espacamento-md);">
+        Sua participação e pontuação serão removidas, mas os simulados que você já fez continuam no seu histórico.
+        Você pode entrar de novo a qualquer momento.
+      </p>
+      <div class="modal-acoes">
+        <button class="btn btn-secundario" onclick="fecharModal('modal-sair')">Cancelar</button>
+        <button class="btn btn-perigo" onclick="confirmarSair()">Sim, sair</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item">📝 Meus Simulados</a>
+        <a href="/aluno/ranking.html" class="sidebar-item ativo">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <a href="/aluno/ranking-desafios.html" style="font-size: var(--fonte-tamanho-sm); color: var(--texto-secundario); text-decoration: none;">← Voltar para Desafios</a>
+        </div>
+      </div>
+
+      <!-- Hero do desafio -->
+      <div class="desafio-hero" id="hero">
+        <div class="desafio-hero-conteudo">
+          <div class="desafio-hero-icone" id="hero-icone">🔢</div>
+          <div class="desafio-hero-texto">
+            <div class="desafio-hero-criador" id="hero-criador">Por Prof. Carlos Mendes · ENEM 2026 — Intensivo</div>
+            <h1 class="desafio-hero-nome" id="hero-nome">Revisão Intensiva — Matemática</h1>
+            <p class="desafio-hero-desc" id="hero-desc"></p>
+            <div class="desafio-hero-tags" id="hero-tags"></div>
+          </div>
+          <div class="desafio-hero-acoes">
+            <button class="btn-desafio-secundario" onclick="mostrarToast('Link copiado!')">🔗 Compartilhar</button>
+            <button class="btn-desafio-secundario" onclick="abrirModal('modal-sair')">🚪 Sair</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card Seu progresso -->
+      <div class="progresso-card" id="progresso-card">
+        <div class="progresso-principal">
+          <div class="progresso-label">Seu progresso</div>
+          <div class="progresso-numero" id="prog-feitos">3 <small>de 5 simulados</small></div>
+          <div class="progresso-barra">
+            <div class="progresso-barra-fill" id="prog-barra" style="width: 0%;"></div>
+          </div>
+        </div>
+        <div class="progresso-stat">
+          <div class="progresso-label">Pontuação</div>
+          <div class="valor" id="prog-pontos">223</div>
+          <div class="label" id="prog-pontos-max">de 500</div>
+        </div>
+        <div class="progresso-stat posicao">
+          <div class="progresso-label">Sua posição</div>
+          <div class="valor" id="prog-pos">#12</div>
+          <div class="label" id="prog-total">de 87 alunos</div>
+        </div>
+      </div>
+
+      <!-- Simulados do desafio -->
+      <div class="secao">
+        <h2 class="secao-titulo">📄 Simulados do Desafio</h2>
+        <div class="simulados-lista" id="simulados-lista"></div>
+      </div>
+
+      <!-- Ranking do desafio -->
+      <div class="secao">
+        <h2 class="secao-titulo">🏆 Ranking do Desafio</h2>
+
+        <!-- Pódio top 3 -->
+        <div class="podio-desafio" id="podio-desafio"></div>
+
+        <!-- Tabela completa -->
+        <div class="ranking-desafio-card">
+          <div class="ranking-desafio-header">
+            <h3 style="color: var(--azul-profundo); font-size: var(--fonte-tamanho-md);">📋 Classificação Completa</h3>
+            <span class="text-muted text-small" id="total-participantes">87 participantes</span>
+          </div>
+          <table class="ranking-desafio-tabela">
+            <thead>
+              <tr>
+                <th>Posição</th>
+                <th>Aluno</th>
+                <th>Feitos</th>
+                <th>Pontuação</th>
+                <th>% Média</th>
+              </tr>
+            </thead>
+            <tbody id="ranking-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--azul-profundo);color:var(--branco);padding:12px 20px;border-radius:var(--borda-radius);font-size:var(--fonte-tamanho-sm);box-shadow:var(--sombra-modal);z-index:3000;opacity:0;transition:opacity 0.3s ease;pointer-events:none;"></div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const ALUNO_LOGADO = 'Maria Oliveira';
+
+    // Pega ID do desafio da URL (default = 1)
+    const params = new URLSearchParams(window.location.search);
+    const desafioId = Number(params.get('id')) || 1;
+    const desafio = HELEN_DATA.desafios.find(d => d.id === desafioId) || HELEN_DATA.desafios[0];
+    const participacao = HELEN_DATA.minhasParticipacoes.find(p => p.desafioId === desafio.id);
+
+    // === Hero ===
+    document.getElementById('hero').style.background = `linear-gradient(135deg, ${desafio.cor} 0%, ${desafio.cor}CC 100%)`;
+    document.getElementById('hero-icone').textContent = desafio.icone;
+    document.getElementById('hero-nome').textContent = desafio.nome;
+    document.getElementById('hero-desc').textContent = desafio.descricao;
+    document.getElementById('hero-criador').textContent =
+      `Por ${desafio.criador}${desafio.turmaNome ? ' · ' + desafio.turmaNome : ''}`;
+
+    function formatarData(d) {
+      if (!d) return null;
+      const [ano, mes, dia] = d.split('-');
+      const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+      return `${dia} ${meses[Number(mes) - 1]} ${ano}`;
+    }
+
+    function diasRestantes(dataFim) {
+      if (!dataFim) return 'Contínuo';
+      const hoje = new Date('2026-04-09');
+      const fim = new Date(dataFim);
+      const diff = Math.ceil((fim - hoje) / (1000 * 60 * 60 * 24));
+      if (diff < 0) return 'Encerrado';
+      if (diff === 0) return 'Termina hoje';
+      return `${diff} dias restantes`;
+    }
+
+    const tags = [
+      `<span class="desafio-hero-tag">📄 ${desafio.simulados.length} simulados</span>`,
+      `<span class="desafio-hero-tag">👥 ${desafio.totalParticipantes} participantes</span>`,
+      `<span class="desafio-hero-tag">⏳ ${diasRestantes(desafio.dataFim)}</span>`,
+      `<span class="desafio-hero-tag">🎯 Até ${desafio.pontuacaoMaxima} pts</span>`
+    ];
+    if (desafio.dataFim) {
+      tags.push(`<span class="desafio-hero-tag">📅 ${formatarData(desafio.dataInicio)} — ${formatarData(desafio.dataFim)}</span>`);
+    }
+    document.getElementById('hero-tags').innerHTML = tags.join('');
+
+    // === Progresso ===
+    const totalSim = desafio.simulados.length;
+    const feitos = participacao ? participacao.simuladosFeitos.length : 0;
+    const pontuacaoAtual = participacao ? participacao.pontuacaoAtual : 0;
+    const posicao = participacao ? participacao.posicaoRanking : '—';
+    const pct = Math.round((feitos / totalSim) * 100);
+
+    document.getElementById('prog-feitos').innerHTML = `${feitos} <small>de ${totalSim} simulados</small>`;
+    document.getElementById('prog-pontos').textContent = pontuacaoAtual;
+    document.getElementById('prog-pontos-max').textContent = `de ${desafio.pontuacaoMaxima}`;
+    document.getElementById('prog-pos').textContent = typeof posicao === 'number' ? `#${posicao}` : posicao;
+    document.getElementById('prog-total').textContent = `de ${desafio.totalParticipantes} alunos`;
+    setTimeout(() => { document.getElementById('prog-barra').style.width = pct + '%'; }, 100);
+    document.getElementById('total-participantes').textContent = `${desafio.totalParticipantes} participantes`;
+
+    // === Simulados do desafio ===
+    const feitosMap = {};
+    if (participacao) {
+      participacao.simuladosFeitos.forEach(f => { feitosMap[f.simuladoId] = f; });
+    }
+
+    const listaSim = document.getElementById('simulados-lista');
+    listaSim.innerHTML = desafio.simulados.map((s, idx) => {
+      const feito = feitosMap[s.id];
+      let statusIcone, statusClasse, statsHtml, acaoHtml;
+
+      if (feito) {
+        statusIcone = '✓';
+        statusClasse = 'feito';
+        statsHtml = `
+          <div class="simulado-linha-nota">${feito.nota}%</div>
+          <div class="simulado-linha-data">Feito em ${formatarData(feito.data)}</div>
+        `;
+        acaoHtml = `<a href="/aluno/simulado-resultado.html" class="btn btn-secundario btn-sm">Ver resultado</a>`;
+      } else if (idx === feitos) {
+        statusIcone = '▶';
+        statusClasse = 'andamento';
+        statsHtml = '<span style="font-size: var(--fonte-tamanho-xs); color: #C05621; font-weight: 600;">Próximo</span>';
+        acaoHtml = `<a href="/aluno/simulado-inicio.html" class="btn btn-primario btn-sm">Fazer agora →</a>`;
+      } else {
+        statusIcone = idx + 1;
+        statusClasse = 'pendente';
+        statsHtml = '<span style="font-size: var(--fonte-tamanho-xs); color: var(--texto-terciario);">🔒 Não iniciado</span>';
+        acaoHtml = `<a href="/aluno/simulado-inicio.html" class="btn btn-secundario btn-sm">Fazer</a>`;
+      }
+
+      return `
+        <div class="simulado-linha">
+          <div class="simulado-status-icone ${statusClasse}">${statusIcone}</div>
+          <div class="simulado-linha-info">
+            <div class="simulado-linha-nome">${s.nome}</div>
+            <div class="simulado-linha-meta">
+              <span>📄 ${s.qtdQuestoes} questões</span>
+              <span>${s.tempo ? '⏱ ' + s.tempo + ' min' : '⏱ Sem tempo limite'}</span>
+              <span>📚 ${s.area}</span>
+            </div>
+          </div>
+          <div class="simulado-linha-stats">${statsHtml}</div>
+          ${acaoHtml}
+        </div>
+      `;
+    }).join('');
+
+    // === Pódio top 3 do desafio ===
+    const rankingDesafio = HELEN_DATA.rankingDesafio1;
+    const top3 = rankingDesafio.slice(0, 3);
+    const ordemPodio = [top3[1], top3[0], top3[2]]; // 2 / 1 / 3
+
+    document.getElementById('podio-desafio').innerHTML = ordemPodio.map((r, idx) => {
+      if (!r) return '';
+      const classe = `podio-d-${r.posicao}`;
+      const medalhas = { 1: '🥇', 2: '🥈', 3: '🥉' };
+      return `
+        <div class="podio-d-item ${classe}">
+          <div class="podio-d-medalha">${medalhas[r.posicao]}</div>
+          <div class="podio-d-avatar">${r.avatar}</div>
+          <div class="podio-d-nome">${r.nome}</div>
+          <div class="podio-d-pontos">${r.pontuacao}</div>
+          <div class="podio-d-pontos-label">pontos</div>
+          <div class="podio-d-stats">
+            <span><strong>${r.feitos}/${r.total}</strong> sim</span>
+            <span><strong>${r.media}%</strong> média</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // === Tabela de ranking do desafio ===
+    const tbody = document.getElementById('ranking-tbody');
+    tbody.innerHTML = rankingDesafio.map(r => {
+      const medalhas = { 1: '🥇 1º', 2: '🥈 2º', 3: '🥉 3º' };
+      const posTexto = medalhas[r.posicao] || `${r.posicao}º`;
+      const euMesmo = r.nome === ALUNO_LOGADO ? 'eu-mesmo' : '';
+      const pctPontos = Math.round((r.pontuacao / desafio.pontuacaoMaxima) * 100);
+      return `
+        <tr class="${euMesmo}">
+          <td><strong>${posTexto}</strong></td>
+          <td>
+            <div class="ranking-aluno">
+              <div class="ranking-avatar">${r.avatar}</div>
+              <span>${r.nome}</span>
+            </div>
+          </td>
+          <td>${r.feitos} / ${r.total}</td>
+          <td>
+            <div class="pontuacao-bar-wrap">
+              <span class="pontuacao-badge">${r.pontuacao}</span>
+              <div class="pontuacao-bar">
+                <div class="pontuacao-bar-fill" style="width:${pctPontos}%;"></div>
+              </div>
+            </div>
+          </td>
+          <td><strong>${r.media}%</strong></td>
+        </tr>
+      `;
+    }).join('');
+
+    // === Modal sair ===
+    function abrirModal(id) {
+      document.getElementById(id).classList.add('visivel');
+    }
+
+    function fecharModal(id) {
+      document.getElementById(id).classList.remove('visivel');
+    }
+
+    function confirmarSair() {
+      fecharModal('modal-sair');
+      mostrarToast('Você saiu do desafio.');
+      setTimeout(() => window.location.href = '/aluno/ranking-desafios.html', 1500);
+    }
+
+    // Toast
+    let toastTimer = null;
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.visivel').forEach(m => m.classList.remove('visivel'));
+      }
+    });
+
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('visivel');
+      });
+    });
+  </script>
+
+</body>
+</html>

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HelenAI — Ranking</title>
+  <title>HelenAI — Ranking · Geral</title>
   <link rel="stylesheet" href="/assets/css/global.css">
   <link rel="stylesheet" href="/assets/css/componentes.css">
   <link rel="stylesheet" href="/assets/css/acessibilidade.css">
   <style>
-    /* === Header com filtros === */
+    /* === Header com posição === */
     .ranking-header-card {
       background: var(--gradiente-principal);
       color: var(--branco);
@@ -63,22 +63,154 @@
       margin-top: 4px;
     }
 
-    /* === Filtros do ranking === */
-    .ranking-filtros {
+    /* === Navegação entre as 3 páginas (tabs em links) === */
+    .ranking-nav {
       display: flex;
-      gap: var(--espacamento-md);
+      border-bottom: 2px solid var(--borda-cor);
       margin-bottom: var(--espacamento-lg);
-      align-items: center;
+      gap: 0;
     }
 
-    .ranking-filtro-select {
-      padding: 10px 14px;
-      border: 1px solid var(--borda-cor);
-      border-radius: var(--borda-radius);
-      background: var(--branco);
+    .ranking-nav-link {
+      padding: 14px 24px;
       font-size: var(--fonte-tamanho-sm);
-      font-family: var(--fonte-principal);
+      font-weight: 600;
+      color: var(--texto-secundario);
       cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transicao);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ranking-nav-link:hover { color: var(--azul-medio); }
+
+    .ranking-nav-link.ativo {
+      color: var(--azul-medio);
+      border-bottom-color: var(--azul-medio);
+    }
+
+    /* === Cards de período (4 cards lado a lado) === */
+    .periodos-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-xl);
+    }
+
+    .periodo-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      overflow: hidden;
+      border-top: 4px solid var(--azul-medio);
+      transition: var(--transicao);
+    }
+
+    .periodo-card:hover {
+      box-shadow: var(--sombra-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .periodo-card.semana   { border-top-color: #ED8936; }
+    .periodo-card.quinzena { border-top-color: #805AD5; }
+    .periodo-card.mes      { border-top-color: #3CC8D0; }
+    .periodo-card.ano      { border-top-color: #D69E2E; }
+
+    .periodo-header {
+      padding: var(--espacamento-md);
+      background: var(--cinza-azulado);
+      border-bottom: 1px solid var(--borda-cor);
+      text-align: center;
+    }
+
+    .periodo-card.semana   .periodo-header { background: #FFFAF0; }
+    .periodo-card.quinzena .periodo-header { background: #FAF5FF; }
+    .periodo-card.mes      .periodo-header { background: #E6FFFA; }
+    .periodo-card.ano      .periodo-header { background: #FFFBEB; }
+
+    .periodo-titulo {
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .periodo-subtitulo {
+      font-size: 0.7rem;
+      color: var(--texto-terciario);
+      margin-top: 2px;
+    }
+
+    .periodo-lista {
+      padding: var(--espacamento-sm);
+    }
+
+    .periodo-linha {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: var(--borda-radius);
+      margin-bottom: 4px;
+      transition: var(--transicao);
+    }
+
+    .periodo-linha:hover { background: var(--cinza-azulado); }
+
+    .periodo-linha.eu {
+      background: linear-gradient(90deg, #EBF8FF 0%, #E6FFFA 100%);
+      border-left: 3px solid var(--azul-medio);
+    }
+
+    .periodo-pos {
+      width: 22px;
+      text-align: center;
+      font-weight: 700;
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      flex-shrink: 0;
+    }
+
+    .periodo-pos.top { color: #D69E2E; font-size: 0.95rem; }
+
+    .periodo-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .periodo-nome {
+      flex: 1;
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-primario);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .periodo-xp {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      flex-shrink: 0;
     }
 
     /* === Pódio Top 3 === */
@@ -193,9 +325,7 @@
       color: var(--texto-secundario);
     }
 
-    .podio-stats strong {
-      color: var(--azul-profundo);
-    }
+    .podio-stats strong { color: var(--azul-profundo); }
 
     /* === Tabela de ranking === */
     .ranking-tabela-card {
@@ -245,13 +375,9 @@
       color: var(--texto-primario);
     }
 
-    .ranking-tabela tr:last-child td {
-      border-bottom: none;
-    }
+    .ranking-tabela tr:last-child td { border-bottom: none; }
 
-    .ranking-tabela tr:hover td {
-      background: var(--cinza-azulado);
-    }
+    .ranking-tabela tr:hover td { background: var(--cinza-azulado); }
 
     .ranking-pos {
       font-weight: 700;
@@ -303,10 +429,9 @@
       color: var(--azul-profundo);
     }
 
-    /* === Linha do aluno logado === */
+    /* Linha do aluno logado */
     .ranking-tabela tr.eu-mesmo {
       background: linear-gradient(90deg, #EBF8FF 0%, #E6FFFA 100%);
-      position: sticky;
     }
 
     .ranking-tabela tr.eu-mesmo td {
@@ -330,7 +455,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* Linha separadora "..." */
     .ranking-separador td {
       text-align: center;
       color: var(--texto-terciario);
@@ -340,7 +464,18 @@
       background: var(--cinza-azulado) !important;
     }
 
+    .secao-titulo-todos {
+      color: var(--azul-profundo);
+      margin-bottom: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-lg);
+      text-align: center;
+    }
+
     /* === Responsivo === */
+    @media (max-width: 1024px) {
+      .periodos-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
     @media (max-width: 768px) {
       .podio { grid-template-columns: 1fr; max-width: 320px; }
       .podio-1 { transform: none; }
@@ -348,6 +483,7 @@
       .ranking-header-card { flex-direction: column; align-items: flex-start; }
       .ranking-tabela th:nth-child(5),
       .ranking-tabela td:nth-child(5) { display: none; }
+      .periodos-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -387,10 +523,8 @@
     </div>
   </div>
 
-  <!-- Layout -->
   <div class="layout">
 
-    <!-- Sidebar Aluno -->
     <aside class="sidebar">
       <div class="sidebar-logo">
         <img src="/assets/img/logo-helen.png" alt="HelenAI">
@@ -399,13 +533,12 @@
       <nav class="sidebar-nav">
         <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
         <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
-        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item">📝 Meus Simulados</a>
         <a href="/aluno/ranking.html" class="sidebar-item ativo">🏆 Ranking</a>
         <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
       </nav>
     </aside>
 
-    <!-- Conteúdo Principal -->
     <main class="conteudo-principal">
 
       <div class="conteudo-header">
@@ -428,32 +561,51 @@
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab ativo" onclick="trocarTab(this, 'geral')">🌍 Ranking Geral</button>
-        <button class="tab" onclick="trocarTab(this, 'simulado')">📝 Por Simulado</button>
-      </div>
+      <!-- Nav entre as 3 páginas -->
+      <nav class="ranking-nav">
+        <a href="/aluno/ranking.html" class="ranking-nav-link ativo">🌍 Ranking Geral</a>
+        <a href="/aluno/ranking-desafios.html" class="ranking-nav-link">⚔ Desafios</a>
+        <a href="/aluno/ranking-simulados.html" class="ranking-nav-link">📝 Por Simulado</a>
+      </nav>
 
-      <!-- Filtros -->
-      <div class="ranking-filtros">
-        <select class="ranking-filtro-select">
-          <option>Todos os tempos</option>
-          <option>Esta semana</option>
-          <option>Este mês</option>
-          <option>Últimos 3 meses</option>
-        </select>
-        <select class="ranking-filtro-select">
-          <option>Todas as áreas</option>
-          <option>Matemática</option>
-          <option>Linguagens</option>
-          <option>Ciências da Natureza</option>
-          <option>Ciências Humanas</option>
-        </select>
+      <!-- Cards de período (semana/quinzena/mês/ano) -->
+      <div class="periodos-grid">
+        <div class="periodo-card semana">
+          <div class="periodo-header">
+            <div class="periodo-titulo">🔥 Esta Semana</div>
+            <div class="periodo-subtitulo">Últimos 7 dias</div>
+          </div>
+          <div class="periodo-lista" id="lista-semana"></div>
+        </div>
+
+        <div class="periodo-card quinzena">
+          <div class="periodo-header">
+            <div class="periodo-titulo">📅 Quinzena</div>
+            <div class="periodo-subtitulo">Últimos 14 dias</div>
+          </div>
+          <div class="periodo-lista" id="lista-quinzena"></div>
+        </div>
+
+        <div class="periodo-card mes">
+          <div class="periodo-header">
+            <div class="periodo-titulo">🗓 Este Mês</div>
+            <div class="periodo-subtitulo">Abril 2026</div>
+          </div>
+          <div class="periodo-lista" id="lista-mes"></div>
+        </div>
+
+        <div class="periodo-card ano">
+          <div class="periodo-header">
+            <div class="periodo-titulo">🏆 Este Ano</div>
+            <div class="periodo-subtitulo">2026 inteiro</div>
+          </div>
+          <div class="periodo-lista" id="lista-ano"></div>
+        </div>
       </div>
 
       <!-- Pódio Top 3 -->
+      <h3 class="secao-titulo-todos">🏆 Ranking Geral — Todos os Tempos</h3>
       <div class="podio">
-        <!-- 2º lugar -->
         <div class="podio-item podio-2">
           <div class="podio-medalha">🥈</div>
           <div class="podio-avatar">RS</div>
@@ -467,7 +619,6 @@
           </div>
         </div>
 
-        <!-- 1º lugar -->
         <div class="podio-item podio-1">
           <div class="podio-medalha">🥇</div>
           <div class="podio-avatar">AB</div>
@@ -481,7 +632,6 @@
           </div>
         </div>
 
-        <!-- 3º lugar -->
         <div class="podio-item podio-3">
           <div class="podio-medalha">🥉</div>
           <div class="podio-avatar">CT</div>
@@ -665,7 +815,6 @@
         </table>
       </div>
 
-      <!-- Paginação -->
       <div class="paginacao">
         <button class="paginacao-item">←</button>
         <button class="paginacao-item ativo">1</button>
@@ -683,10 +832,30 @@
   <script src="/assets/js/acessibilidade.js"></script>
   <script src="/assets/js/navegacao.js"></script>
   <script>
-    function trocarTab(btn, id) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('ativo'));
-      btn.classList.add('ativo');
+    const ALUNO_LOGADO = 'Maria Oliveira';
+
+    function renderPeriodo(elId, lista) {
+      const el = document.getElementById(elId);
+      el.innerHTML = lista.map(item => {
+        const eu = item.nome === ALUNO_LOGADO ? 'eu' : '';
+        const posClasse = item.posicao <= 3 ? 'top' : '';
+        const medalhas = { 1: '🥇', 2: '🥈', 3: '🥉' };
+        const posTexto = medalhas[item.posicao] || `${item.posicao}º`;
+        return `
+          <div class="periodo-linha ${eu}">
+            <div class="periodo-pos ${posClasse}">${posTexto}</div>
+            <div class="periodo-avatar">${item.avatar}</div>
+            <div class="periodo-nome">${item.nome}</div>
+            <div class="periodo-xp">${item.xp}</div>
+          </div>
+        `;
+      }).join('');
     }
+
+    renderPeriodo('lista-semana', HELEN_DATA.rankingPeriodos.semana);
+    renderPeriodo('lista-quinzena', HELEN_DATA.rankingPeriodos.quinzena);
+    renderPeriodo('lista-mes', HELEN_DATA.rankingPeriodos.mes);
+    renderPeriodo('lista-ano', HELEN_DATA.rankingPeriodos.ano);
   </script>
 
 </body>

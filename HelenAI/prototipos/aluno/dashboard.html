@@ -620,6 +620,150 @@
       .continue-acoes { width: 100%; }
       .btn-continuar { width: 100%; justify-content: center; }
     }
+
+    /* === Card de desafios ativos === */
+    .desafios-ativos-secao {
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    .desafios-ativos-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .desafios-ativos-header h3 {
+      font-size: var(--fonte-tamanho-lg);
+      color: var(--azul-profundo);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .desafios-ativos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: var(--espacamento-md);
+    }
+
+    .dash-desafio-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      padding: var(--espacamento-lg);
+      border-left: 5px solid var(--azul-medio);
+      transition: var(--transicao);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dash-desafio-card:hover {
+      box-shadow: var(--sombra-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .dash-desafio-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(56, 161, 105, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .dash-desafio-top {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--espacamento-md);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .dash-desafio-icone {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--borda-radius);
+      background: #EBF8FF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .dash-desafio-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .dash-desafio-nome {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+      line-height: 1.3;
+      margin-bottom: 2px;
+    }
+
+    .dash-desafio-criador {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    .dash-desafio-prog {
+      background: var(--cinza-azulado);
+      border-radius: var(--borda-radius);
+      padding: var(--espacamento-sm) var(--espacamento-md);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .dash-desafio-prog-linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-bottom: 4px;
+    }
+
+    .dash-desafio-prog-linha strong {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .dash-desafio-barra {
+      height: 6px;
+      background: #E2E8F0;
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .dash-desafio-barra-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--azul-medio) 0%, var(--ciano) 100%);
+      border-radius: var(--borda-radius-full);
+      transition: width 0.4s ease;
+    }
+
+    .dash-desafio-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: var(--espacamento-md);
+    }
+
+    .dash-desafio-posicao {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background: var(--azul-medio);
+      color: var(--branco);
+      border-radius: var(--borda-radius-full);
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -670,7 +814,7 @@
       <nav class="sidebar-nav">
         <a href="/aluno/dashboard.html" class="sidebar-item ativo">📊 Dashboard</a>
         <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
-        <a href="#" class="sidebar-item disabled" title="Disponível em breve">📝 Meus Simulados <span class="em-breve">em breve</span></a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item">📝 Meus Simulados</a>
         <a href="/aluno/ranking.html" class="sidebar-item">🏆 Ranking</a>
         <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
       </nav>
@@ -720,6 +864,69 @@
             Continuar de onde parei →
           </a>
           <button class="btn-descartar">Descartar progresso</button>
+        </div>
+      </div>
+
+      <!-- Desafios ativos (Fase 11) -->
+      <div class="desafios-ativos-secao">
+        <div class="desafios-ativos-header">
+          <h3>⚔ Seus desafios ativos</h3>
+          <a href="/aluno/ranking-desafios.html" style="font-size: var(--fonte-tamanho-sm); color: var(--azul-medio); text-decoration: none;">Ver todos →</a>
+        </div>
+        <div class="desafios-ativos-grid">
+
+          <!-- Desafio 1: Matemática -->
+          <a href="/aluno/desafio-detalhe.html?id=1" class="dash-desafio-card" style="border-left-color:#3182CE; text-decoration: none; color: inherit;">
+            <div class="dash-desafio-top">
+              <div class="dash-desafio-icone" style="background:#3182CE20;color:#3182CE;">🔢</div>
+              <div class="dash-desafio-info">
+                <div class="dash-desafio-nome">Revisão Intensiva — Matemática</div>
+                <div class="dash-desafio-criador">Prof. Carlos Mendes · 21 dias restantes</div>
+              </div>
+            </div>
+            <div class="dash-desafio-prog">
+              <div class="dash-desafio-prog-linha">
+                <span>Progresso</span>
+                <strong>3 de 5 simulados</strong>
+              </div>
+              <div class="dash-desafio-barra">
+                <div class="dash-desafio-barra-fill" style="width: 60%;"></div>
+              </div>
+            </div>
+            <div class="dash-desafio-footer">
+              <span style="font-size: var(--fonte-tamanho-xs); color: var(--texto-secundario);">
+                <strong style="color: var(--azul-profundo);">223</strong> / 500 pts
+              </span>
+              <span class="dash-desafio-posicao">🏆 #12 de 87</span>
+            </div>
+          </a>
+
+          <!-- Desafio 2: Linguagens -->
+          <a href="/aluno/desafio-detalhe.html?id=2" class="dash-desafio-card" style="border-left-color:#805AD5; text-decoration: none; color: inherit;">
+            <div class="dash-desafio-top">
+              <div class="dash-desafio-icone" style="background:#805AD520;color:#805AD5;">📖</div>
+              <div class="dash-desafio-info">
+                <div class="dash-desafio-nome">Período de Estudos — Linguagens</div>
+                <div class="dash-desafio-criador">Prof. Ana Costa · Contínuo</div>
+              </div>
+            </div>
+            <div class="dash-desafio-prog">
+              <div class="dash-desafio-prog-linha">
+                <span>Progresso</span>
+                <strong>2 de 4 simulados</strong>
+              </div>
+              <div class="dash-desafio-barra">
+                <div class="dash-desafio-barra-fill" style="width: 50%;"></div>
+              </div>
+            </div>
+            <div class="dash-desafio-footer">
+              <span style="font-size: var(--fonte-tamanho-xs); color: var(--texto-secundario);">
+                <strong style="color: var(--azul-profundo);">137</strong> / 400 pts
+              </span>
+              <span class="dash-desafio-posicao">🏆 #9 de 54</span>
+            </div>
+          </a>
+
         </div>
       </div>
 

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HelenAI — Ranking · Desafios</title>
+  <link rel="stylesheet" href="/assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/componentes.css">
+  <link rel="stylesheet" href="/assets/css/acessibilidade.css">
+  <style>
+    /* === Header com posição (igual ao ranking.html) === */
+    .ranking-header-card {
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-xl);
+      margin-bottom: var(--espacamento-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--espacamento-md);
+    }
+
+    .ranking-header-info h2 {
+      color: var(--branco);
+      margin-bottom: 4px;
+      font-size: var(--fonte-tamanho-2xl);
+    }
+
+    .ranking-header-info p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .ranking-minha-pos {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      border-radius: var(--borda-radius);
+      text-align: center;
+      min-width: 180px;
+    }
+
+    .ranking-minha-pos-label {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .ranking-minha-pos-numero {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .ranking-minha-pos-texto {
+      font-size: var(--fonte-tamanho-xs);
+      opacity: 0.9;
+      margin-top: 4px;
+    }
+
+    /* === Navegação entre as 3 páginas (tabs em links) === */
+    .ranking-nav {
+      display: flex;
+      border-bottom: 2px solid var(--borda-cor);
+      margin-bottom: var(--espacamento-lg);
+      gap: 0;
+    }
+
+    .ranking-nav-link {
+      padding: 14px 24px;
+      font-size: var(--fonte-tamanho-sm);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transicao);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ranking-nav-link:hover {
+      color: var(--azul-medio);
+    }
+
+    .ranking-nav-link.ativo {
+      color: var(--azul-medio);
+      border-bottom-color: var(--azul-medio);
+    }
+
+    /* === Header da aba Desafios === */
+    .desafios-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--espacamento-md);
+      flex-wrap: wrap;
+      gap: var(--espacamento-md);
+    }
+
+    .desafios-header h2 {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-xl);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* === Filtros === */
+    .desafios-filtros {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      padding: var(--espacamento-md) var(--espacamento-lg);
+      box-shadow: var(--sombra-card);
+      margin-bottom: var(--espacamento-lg);
+      display: grid;
+      grid-template-columns: 2.5fr 1fr 1fr 1fr;
+      gap: var(--espacamento-md);
+      align-items: end;
+    }
+
+    .filtro-grupo { display: flex; flex-direction: column; gap: 6px; }
+
+    .filtro-label {
+      font-size: var(--fonte-tamanho-xs);
+      font-weight: 600;
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filtro-grupo input,
+    .filtro-grupo select {
+      padding: 10px 12px;
+      border: 1px solid var(--borda-cor);
+      border-radius: var(--borda-radius);
+      font-size: var(--fonte-tamanho-sm);
+      font-family: var(--fonte-principal);
+      background: var(--branco);
+      color: var(--texto-primario);
+    }
+
+    /* === Cards de desafio === */
+    .desafios-lista {
+      display: flex;
+      flex-direction: column;
+      gap: var(--espacamento-md);
+    }
+
+    .desafio-card {
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+      border-left: 8px solid var(--borda-cor);
+      padding: var(--espacamento-lg);
+      display: flex;
+      gap: var(--espacamento-lg);
+      transition: var(--transicao);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .desafio-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--sombra-card-hover);
+    }
+
+    .desafio-card.em-andamento-meu {
+      box-shadow: 0 4px 14px rgba(49, 130, 206, 0.12);
+    }
+
+    .desafio-card.encerrado {
+      opacity: 0.75;
+    }
+
+    .desafio-card.encerrado .desafio-icone-grande {
+      filter: saturate(0.5);
+    }
+
+    /* Ícone grande (esquerda) */
+    .desafio-icone-grande {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--borda-radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Meio: conteúdo principal */
+    .desafio-meio { flex: 1; min-width: 0; }
+
+    .desafio-topo {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--espacamento-md);
+      margin-bottom: 6px;
+    }
+
+    .desafio-titulo {
+      font-size: var(--fonte-tamanho-lg);
+      font-weight: 700;
+      color: var(--azul-profundo);
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .desafio-criador {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-terciario);
+    }
+
+    /* Badge de "meu status" */
+    .meu-status-badge {
+      padding: 4px 12px;
+      border-radius: var(--borda-radius-full);
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .meu-status-badge.em-andamento { background: #C6F6D5; color: #22543D; }
+    .meu-status-badge.feito        { background: #BEE3F8; color: #2A4365; }
+    .meu-status-badge.disponivel   { background: #FEEBC8; color: #C05621; }
+    .meu-status-badge.encerrado    { background: var(--cinza-azulado); color: var(--texto-terciario); }
+
+    .desafio-descricao {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      line-height: 1.4;
+      margin-bottom: var(--espacamento-sm);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .desafio-meta-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .desafio-meta-chips span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Avatares sobrepostos */
+    .avatares-stack {
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-sm);
+    }
+
+    .avatares-lista {
+      display: flex;
+    }
+
+    .avatares-lista .mini-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--gradiente-principal);
+      color: var(--branco);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      border: 2px solid var(--branco);
+      margin-left: -10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    }
+
+    .avatares-lista .mini-avatar:first-child { margin-left: 0; }
+
+    .avatares-info {
+      font-size: var(--fonte-tamanho-xs);
+      color: var(--texto-secundario);
+    }
+
+    /* Progresso (em andamento pelo aluno) */
+    .desafio-progresso-box {
+      background: #F0FFF4;
+      border: 1px solid #C6F6D5;
+      border-radius: var(--borda-radius);
+      padding: 10px 14px;
+      margin-top: var(--espacamento-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--espacamento-md);
+      flex-wrap: wrap;
+    }
+
+    .desafio-progresso-barra {
+      flex: 1;
+      min-width: 180px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: var(--borda-radius-full);
+      overflow: hidden;
+    }
+
+    .desafio-progresso-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--azul-medio) 0%, var(--ciano) 100%);
+      border-radius: var(--borda-radius-full);
+    }
+
+    .desafio-progresso-meta {
+      display: flex;
+      gap: var(--espacamento-md);
+      font-size: var(--fonte-tamanho-xs);
+      white-space: nowrap;
+    }
+
+    .desafio-progresso-meta .item strong {
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-sm);
+    }
+
+    .desafio-progresso-meta .item .label {
+      color: var(--texto-secundario);
+      display: block;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Resultado (feito pelo aluno) */
+    .desafio-resultado-box {
+      background: #EBF8FF;
+      border: 1px solid #BEE3F8;
+      border-radius: var(--borda-radius);
+      padding: 10px 14px;
+      margin-top: var(--espacamento-sm);
+      display: flex;
+      gap: var(--espacamento-lg);
+      flex-wrap: wrap;
+    }
+
+    .desafio-resultado-box .item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .desafio-resultado-box .item .label {
+      color: var(--texto-secundario);
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.5px;
+    }
+
+    .desafio-resultado-box .item .valor {
+      font-weight: 700;
+      color: var(--azul-profundo);
+      font-size: var(--fonte-tamanho-md);
+    }
+
+    .desafio-resultado-box .item .valor.destaque {
+      color: var(--cor-sucesso);
+    }
+
+    /* Coluna direita (ação) */
+    .desafio-direita {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: var(--espacamento-sm);
+      flex-shrink: 0;
+      min-width: 160px;
+    }
+
+    .desafio-direita .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Vazio */
+    .empty-state {
+      text-align: center;
+      padding: var(--espacamento-2xl);
+      background: var(--branco);
+      border-radius: var(--borda-radius-lg);
+      box-shadow: var(--sombra-card);
+    }
+
+    .empty-state .icone {
+      font-size: 4rem;
+      margin-bottom: var(--espacamento-md);
+      display: block;
+    }
+
+    .empty-state h3 {
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-sm);
+    }
+
+    .empty-state p {
+      color: var(--texto-terciario);
+      margin-bottom: var(--espacamento-lg);
+    }
+
+    /* Contador de resultados */
+    .resultados-count {
+      font-size: var(--fonte-tamanho-sm);
+      color: var(--texto-secundario);
+      margin-bottom: var(--espacamento-md);
+    }
+
+    .resultados-count strong {
+      color: var(--azul-profundo);
+    }
+
+    @media (max-width: 900px) {
+      .ranking-header-card { flex-direction: column; align-items: flex-start; }
+      .desafios-filtros { grid-template-columns: 1fr; }
+      .desafio-card { flex-direction: column; }
+      .desafio-direita { min-width: 0; width: 100%; flex-direction: row; }
+      .desafio-direita .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de Acessibilidade -->
+  <div class="acessibilidade-bar">
+    <button class="acessibilidade-btn" id="btn-contraste" title="Alto Contraste">◐</button>
+    <button class="acessibilidade-btn" id="btn-dislexia" title="Fonte Dislexia">Aa</button>
+    <div class="fonte-controles">
+      <button class="acessibilidade-btn" id="btn-fonte-menos" title="Diminuir fonte">A-</button>
+      <button class="acessibilidade-btn" id="btn-fonte-mais" title="Aumentar fonte">A+</button>
+    </div>
+    <div class="acessibilidade-separador"></div>
+    <button class="acessibilidade-btn" id="btn-colorblind" title="Color Blind">👁</button>
+    <button class="acessibilidade-btn" id="btn-ledor" title="Ledor">▶</button>
+    <button class="acessibilidade-btn" id="btn-libras" title="LIBRAS">🤟</button>
+  </div>
+
+  <div class="ledor-player">
+    <button id="ledor-play">▶ Ler</button><button id="ledor-pause">⏸ Pausar</button><button id="ledor-stop">⏹ Parar</button>
+    <div class="acessibilidade-separador"></div>
+    <button id="ledor-vel-menos">−</button><span class="velocidade-atual">1x</span><button id="ledor-vel-mais">+</button>
+  </div>
+
+  <div class="libras-janela">
+    <div class="libras-janela-header"><span>LIBRAS</span><button id="libras-fechar">✕</button></div>
+    <div class="libras-janela-corpo"><p>Intérprete virtual<br>de LIBRAS<br>(em desenvolvimento)</p></div>
+  </div>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="/assets/img/logo-helen.png" alt="HelenAI">
+        <span>helen.ai</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/aluno/dashboard.html" class="sidebar-item">📊 Dashboard</a>
+        <a href="/aluno/explorar-simulados.html" class="sidebar-item">🔍 Explorar Simulados</a>
+        <a href="/aluno/meus-simulados.html" class="sidebar-item">📝 Meus Simulados</a>
+        <a href="/aluno/ranking.html" class="sidebar-item ativo">🏆 Ranking</a>
+        <a href="/aluno/perfil.html" class="sidebar-item">👤 Perfil</a>
+      </nav>
+    </aside>
+
+    <main class="conteudo-principal">
+
+      <div class="conteudo-header">
+        <div>
+          <h1 class="conteudo-titulo">Ranking</h1>
+          <p class="conteudo-subtitulo">Participe de desafios temáticos e compita com outros alunos</p>
+        </div>
+      </div>
+
+      <!-- Header com posição -->
+      <div class="ranking-header-card">
+        <div class="ranking-header-info">
+          <h2>🏆 Sua jornada de aprendizado</h2>
+          <p>Continue completando simulados para subir no ranking!</p>
+        </div>
+        <div class="ranking-minha-pos">
+          <div class="ranking-minha-pos-label">Sua posição</div>
+          <div class="ranking-minha-pos-numero">#5</div>
+          <div class="ranking-minha-pos-texto">de 1.247 alunos</div>
+        </div>
+      </div>
+
+      <!-- Navegação entre as 3 páginas -->
+      <nav class="ranking-nav">
+        <a href="/aluno/ranking.html" class="ranking-nav-link">🌍 Ranking Geral</a>
+        <a href="/aluno/ranking-desafios.html" class="ranking-nav-link ativo">⚔ Desafios</a>
+        <a href="/aluno/ranking-simulados.html" class="ranking-nav-link">📝 Por Simulado</a>
+      </nav>
+
+      <!-- Header Desafios -->
+      <div class="desafios-header">
+        <h2>⚔ Desafios</h2>
+        <a href="/aluno/criar-desafio.html" class="btn btn-primario">+ Criar desafio</a>
+      </div>
+
+      <!-- Filtros -->
+      <div class="desafios-filtros">
+        <div class="filtro-grupo">
+          <label class="filtro-label">Buscar</label>
+          <input type="text" id="f-busca" placeholder="Nome do desafio...">
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Meu status</label>
+          <select id="f-status">
+            <option value="">Todos</option>
+            <option value="em_andamento">Em andamento por mim</option>
+            <option value="feito">Feitos por mim</option>
+            <option value="disponivel">Disponíveis</option>
+            <option value="encerrado">Encerrados</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Área</label>
+          <select id="f-area">
+            <option value="">Todas</option>
+            <option>Matemática</option>
+            <option>Linguagens</option>
+            <option>Ciências da Natureza</option>
+            <option>Ciências Humanas</option>
+            <option>Mista</option>
+          </select>
+        </div>
+        <div class="filtro-grupo">
+          <label class="filtro-label">Criador</label>
+          <select id="f-criador">
+            <option value="">Todos</option>
+            <option value="conteudista">Professor</option>
+            <option value="aluno">Aluno</option>
+            <option value="admin">HelenAI oficial</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="resultados-count" id="resultados-count"></div>
+
+      <!-- Lista de desafios -->
+      <div class="desafios-lista" id="desafios-lista"></div>
+
+    </main>
+  </div>
+
+  <script src="/assets/js/fake-data.js"></script>
+  <script src="/assets/js/acessibilidade.js"></script>
+  <script src="/assets/js/navegacao.js"></script>
+  <script>
+    const ALUNO_LOGADO = 'Maria Oliveira';
+    const HOJE = new Date('2026-04-09');
+
+    // === Construção da lista completa ===
+    // Pega os desafios do fake-data e adiciona 2 exemplos extras (feito + encerrado)
+    const desafiosBase = [...HELEN_DATA.desafios];
+
+    // Desafio FEITO pelo aluno (novo)
+    desafiosBase.push({
+      id: 50,
+      nome: 'Revisão ENEM 2025 — Novembro',
+      descricao: 'Desafio que completei em novembro passado. Maratona de 8 simulados focada nos temas mais recorrentes do ENEM.',
+      icone: '🎯',
+      cor: '#38A169',
+      criador: 'Prof. Carlos Mendes',
+      tipoCriador: 'conteudista',
+      turmaNome: 'ENEM 2025 — Intensivo',
+      area: 'Mista',
+      simulados: new Array(8),
+      dataInicio: '2025-11-01',
+      dataFim: '2025-11-30',
+      visibilidade: 'publico',
+      status: 'encerrado',
+      pontuacaoMaxima: 800,
+      totalParticipantes: 142,
+      topAvatares: ['AB', 'RS', 'CT', 'DN']
+    });
+
+    // Desafio ENCERRADO (que a Maria não participou)
+    desafiosBase.push({
+      id: 51,
+      nome: 'Simulado Nacional HelenAI — Janeiro',
+      descricao: 'Desafio oficial da HelenAI que aconteceu em janeiro. Ranking congelado.',
+      icone: '🏆',
+      cor: '#D69E2E',
+      criador: 'HelenAI Oficial',
+      tipoCriador: 'admin',
+      turmaNome: null,
+      area: 'Mista',
+      simulados: new Array(6),
+      dataInicio: '2026-01-01',
+      dataFim: '2026-01-31',
+      visibilidade: 'publico',
+      status: 'encerrado',
+      pontuacaoMaxima: 600,
+      totalParticipantes: 2_847,
+      topAvatares: ['MV', 'JL', 'PB']
+    });
+
+    // Atualizar desafios existentes com área + avatares
+    desafiosBase[0].area = 'Matemática';
+    desafiosBase[0].topAvatares = ['AB', 'DN', 'RS', 'CT'];
+    desafiosBase[1].area = 'Linguagens';
+    desafiosBase[1].topAvatares = ['AB', 'LS', 'FC'];
+    desafiosBase[2].area = 'Ciências Humanas';
+    desafiosBase[2].topAvatares = ['JL', 'CT', 'AB'];
+    desafiosBase[3].area = 'Mista';
+    desafiosBase[3].topAvatares = ['MO', 'PS', 'GL'];
+
+    // Determinar "meu status" baseado nas minhas participações e no status do desafio
+    const participacoes = HELEN_DATA.minhasParticipacoes;
+
+    // Dados fake de resultados finais (desafios feitos pela Maria)
+    const meusResultados = {
+      50: { pontuacao: 648, posicaoFinal: 14, mediaAcerto: 81, simuladosFeitos: 8 }
+    };
+
+    desafiosBase.forEach(d => {
+      const p = participacoes.find(x => x.desafioId === d.id);
+      const result = meusResultados[d.id];
+
+      if (d.status === 'encerrado' && result) {
+        d.meuStatus = 'feito';
+        d.meuResultado = result;
+      } else if (d.status === 'encerrado') {
+        d.meuStatus = 'encerrado';
+      } else if (p) {
+        d.meuStatus = 'em_andamento';
+        d.minhaParticipacao = p;
+      } else {
+        d.meuStatus = 'disponivel';
+      }
+    });
+
+    // Ordem dos status — prioridade pra aluno ver o que tá fazendo primeiro
+    const ORDEM_STATUS = {
+      em_andamento: 0,
+      disponivel: 1,
+      feito: 2,
+      encerrado: 3
+    };
+
+    desafiosBase.sort((a, b) => {
+      const diff = ORDEM_STATUS[a.meuStatus] - ORDEM_STATUS[b.meuStatus];
+      if (diff !== 0) return diff;
+      // dentro do mesmo status, ordena por participantes (mais populares primeiro)
+      return (b.totalParticipantes || 0) - (a.totalParticipantes || 0);
+    });
+
+    // === Utils ===
+    function diasRestantes(dataFim) {
+      if (!dataFim) return 'Contínuo';
+      const fim = new Date(dataFim);
+      const diff = Math.ceil((fim - HOJE) / (1000 * 60 * 60 * 24));
+      if (diff < 0) return 'Encerrado';
+      if (diff === 0) return 'Termina hoje';
+      if (diff === 1) return '1 dia restante';
+      return `${diff} dias restantes`;
+    }
+
+    function formatarData(d) {
+      if (!d) return '';
+      const [ano, mes, dia] = d.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    const STATUS_META = {
+      em_andamento: { label: '⚡ Em andamento', classe: 'em-andamento' },
+      feito:        { label: '✓ Concluído',    classe: 'feito' },
+      disponivel:   { label: '🌟 Disponível',   classe: 'disponivel' },
+      encerrado:    { label: '🔒 Encerrado',    classe: 'encerrado' }
+    };
+
+    const CRIADOR_ICONES = {
+      conteudista: '👨‍🏫',
+      aluno: '👤',
+      admin: '⭐'
+    };
+
+    function renderCard(d) {
+      const meta = STATUS_META[d.meuStatus];
+      const criadorIcone = CRIADOR_ICONES[d.tipoCriador] || '';
+      const extraClasse = d.meuStatus === 'em_andamento' ? 'em-andamento-meu' :
+                          d.status === 'encerrado' ? 'encerrado' : '';
+
+      const corBorda = d.cor;
+      const iconeBackground = d.status === 'encerrado' ? '#EDF2F7' : `${d.cor}20`;
+      const iconeColor = d.status === 'encerrado' ? '#718096' : d.cor;
+
+      // Meio — descrição contextual
+      const infoExtra = d.turmaNome
+        ? `${criadorIcone} ${d.criador} · 👥 ${d.turmaNome}`
+        : `${criadorIcone} ${d.criador}${d.tipoCriador === 'admin' ? ' · ⭐ Oficial' : ''}`;
+
+      // Chips de metadados
+      const chips = [
+        `<span>📄 ${d.simulados.length} simulados</span>`,
+        `<span>👥 ${d.totalParticipantes.toLocaleString('pt-BR')} participantes</span>`,
+        `<span>📚 ${d.area}</span>`,
+        `<span>⏳ ${diasRestantes(d.dataFim)}</span>`,
+        `<span>🎯 ${d.pontuacaoMaxima} pts</span>`
+      ];
+
+      // Avatares sobrepostos
+      const avatares = (d.topAvatares || []).slice(0, 4).map(a =>
+        `<div class="mini-avatar">${a}</div>`
+      ).join('');
+      const outros = Math.max(0, d.totalParticipantes - (d.topAvatares?.length || 0));
+
+      // Bloco inferior varia por status
+      let blocoInferior = '';
+      if (d.meuStatus === 'em_andamento') {
+        const p = d.minhaParticipacao;
+        const feitos = p.simuladosFeitos.length;
+        const total = d.simulados.length;
+        const pct = Math.round((feitos / total) * 100);
+        blocoInferior = `
+          <div class="desafio-progresso-box">
+            <div class="desafio-progresso-barra">
+              <div class="desafio-progresso-fill" style="width:${pct}%;"></div>
+            </div>
+            <div class="desafio-progresso-meta">
+              <div class="item">
+                <strong>${feitos}/${total}</strong>
+                <span class="label">Simulados</span>
+              </div>
+              <div class="item">
+                <strong>${p.pontuacaoAtual}</strong>
+                <span class="label">de ${d.pontuacaoMaxima} pts</span>
+              </div>
+              <div class="item">
+                <strong>#${p.posicaoRanking}</strong>
+                <span class="label">Sua posição</span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (d.meuStatus === 'feito') {
+        const r = d.meuResultado;
+        blocoInferior = `
+          <div class="desafio-resultado-box">
+            <div class="item">
+              <span class="label">Sua pontuação</span>
+              <span class="valor destaque">${r.pontuacao} / ${d.pontuacaoMaxima}</span>
+            </div>
+            <div class="item">
+              <span class="label">% Média</span>
+              <span class="valor">${r.mediaAcerto}%</span>
+            </div>
+            <div class="item">
+              <span class="label">Posição final</span>
+              <span class="valor">#${r.posicaoFinal} de ${d.totalParticipantes.toLocaleString('pt-BR')}</span>
+            </div>
+            <div class="item">
+              <span class="label">Período</span>
+              <span class="valor">${formatarData(d.dataInicio)} — ${formatarData(d.dataFim)}</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Ação direita varia por status
+      let acao = '';
+      if (d.meuStatus === 'em_andamento') {
+        acao = `<a href="/aluno/desafio-detalhe.html?id=${d.id}" class="btn btn-primario">Continuar →</a>
+                <a href="/aluno/desafio-detalhe.html?id=${d.id}" class="btn btn-secundario btn-sm">Ver ranking</a>`;
+      } else if (d.meuStatus === 'feito') {
+        acao = `<a href="/aluno/desafio-detalhe.html?id=${d.id}" class="btn btn-primario">📊 Ver resultado</a>`;
+      } else if (d.meuStatus === 'disponivel') {
+        acao = `<a href="/aluno/desafio-detalhe.html?id=${d.id}&participar=1" class="btn btn-sucesso">Participar</a>
+                <a href="/aluno/desafio-detalhe.html?id=${d.id}" class="btn btn-secundario btn-sm">Ver detalhes</a>`;
+      } else if (d.meuStatus === 'encerrado') {
+        acao = `<a href="/aluno/desafio-detalhe.html?id=${d.id}" class="btn btn-secundario">Ver ranking final</a>`;
+      }
+
+      return `
+        <div class="desafio-card ${extraClasse}" style="border-left-color:${corBorda};">
+          <div class="desafio-icone-grande" style="background:${iconeBackground};color:${iconeColor};">
+            ${d.icone}
+          </div>
+          <div class="desafio-meio">
+            <div class="desafio-topo">
+              <div>
+                <div class="desafio-titulo">${d.nome}</div>
+                <div class="desafio-criador">${infoExtra}</div>
+              </div>
+              <span class="meu-status-badge ${meta.classe}">${meta.label}</span>
+            </div>
+            <div class="desafio-descricao">${d.descricao}</div>
+            <div class="desafio-meta-chips">${chips.join('')}</div>
+            <div class="avatares-stack">
+              <div class="avatares-lista">${avatares}</div>
+              <span class="avatares-info">${outros > 0 ? `+ ${outros.toLocaleString('pt-BR')} outros` : 'Seja o primeiro!'}</span>
+            </div>
+            ${blocoInferior}
+          </div>
+          <div class="desafio-direita">
+            ${acao}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderLista() {
+      const busca = document.getElementById('f-busca').value.toLowerCase();
+      const status = document.getElementById('f-status').value;
+      const area = document.getElementById('f-area').value;
+      const criador = document.getElementById('f-criador').value;
+
+      const filtrados = desafiosBase.filter(d => {
+        if (busca && !d.nome.toLowerCase().includes(busca)) return false;
+        if (status && d.meuStatus !== status) return false;
+        if (area && d.area !== area) return false;
+        if (criador && d.tipoCriador !== criador) return false;
+        return true;
+      });
+
+      const lista = document.getElementById('desafios-lista');
+      const count = document.getElementById('resultados-count');
+
+      count.innerHTML = filtrados.length === desafiosBase.length
+        ? `<strong>${filtrados.length}</strong> desafios no total`
+        : `Mostrando <strong>${filtrados.length}</strong> de ${desafiosBase.length} desafios`;
+
+      if (filtrados.length === 0) {
+        lista.innerHTML = `
+          <div class="empty-state">
+            <span class="icone">⚔</span>
+            <h3>Nenhum desafio encontrado</h3>
+            <p>Ajuste os filtros ou crie um novo desafio.</p>
+            <a href="/aluno/criar-desafio.html" class="btn btn-primario">+ Criar desafio</a>
+          </div>
+        `;
+        return;
+      }
+
+      lista.innerHTML = filtrados.map(renderCard).join('');
+    }
+
+    renderLista();
+
+    ['f-busca', 'f-status', 'f-area', 'f-criador'].forEach(id => {
+      document.getElementById(id).addEventListener('input', renderLista);
+      document.getElementById(id).addEventListener('change', renderLista);
+    });
+  </script>
+
+</body>
+</html>
