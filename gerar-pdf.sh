@@ -154,8 +154,18 @@ crop_h = min(fim + 50, h)
 crop_h = max(crop_h, crop_top + 700)
 
 cropped = img.crop((0, crop_top, w, crop_h))
-cropped.save(pdf_path, "PDF", resolution=150.0)
-print(f"  ✓ {pdf_path.split('/')[-1]} ({cropped.size[0]}x{cropped.size[1]})")
+
+# Cola a barra de acessibilidade (position:fixed; bottom:0) no rodapé do PDF.
+# Ela vive nos últimos ~60px do screenshot original e é cortada pelo crop.
+BAR_H = 60
+bar = img.crop((0, h - BAR_H, w, h))
+final_h = cropped.size[1] + BAR_H
+final = Image.new("RGB", (w, final_h), (245, 247, 250))
+final.paste(cropped, (0, 0))
+final.paste(bar, (0, cropped.size[1]))
+
+final.save(pdf_path, "PDF", resolution=150.0)
+print(f"  ✓ {pdf_path.split('/')[-1]} ({final.size[0]}x{final.size[1]})")
 PYEOF
 
   rm -f "$png_tmp"

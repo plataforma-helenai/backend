@@ -10,8 +10,14 @@ def prototipo_view(request, path='compartilhado/login.html'):
     return serve(request, path, document_root=prototipos_dir)
 
 
+def pdf_view(request, path):
+    pdfs_dir = os.path.join(settings.BASE_DIR, 'HelenAI', 'pdfs')
+    return serve(request, path, document_root=pdfs_dir)
+
+
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('', prototipo_view, name='home'),
+    path('pdfs/<path:path>', pdf_view, name='pdfs'),
     path('<path:path>', prototipo_view, name='prototipo'),
 ]
