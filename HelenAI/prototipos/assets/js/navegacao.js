@@ -23,6 +23,85 @@
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+// Move a barra de acessibilidade (atualmente position:fixed bottom-right)
+  // para dentro do AppBar e neutraliza o estilo flutuante via overrides.
+  function injetarOverridesAcessibilidadeNoAppBar() {
+    if (document.getElementById('estilos-acessibilidade-appbar')) return;
+    const style = document.createElement('style');
+    style.id = 'estilos-acessibilidade-appbar';
+    style.textContent = `
+      .appbar .acessibilidade-bar {
+        position: static !important;
+        bottom: auto !important;
+        right: auto !important;
+        background: linear-gradient(135deg, #1A3A6B 0%, #2B6CB0 60%, #3CC8D0 100%) !important;
+        backdrop-filter: none !important;
+        border-radius: 999px !important;
+        padding: 5px 10px !important;
+        margin-right: 10px !important;
+        gap: 4px !important;
+        z-index: auto !important;
+        box-shadow: 0 2px 10px rgba(43, 108, 176, 0.28);
+        position: relative !important;
+      }
+      .appbar .acessibilidade-bar::before {
+        content: "♿";
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        margin-right: 4px;
+        background: rgba(255,255,255,0.18);
+        border-radius: 50%;
+        color: #FFFFFF;
+        font-size: 14px;
+      }
+      .appbar .acessibilidade-bar .acessibilidade-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        background: rgba(255,255,255,0.12);
+        border: 1.5px solid rgba(255,255,255,0.28);
+        color: #FFFFFF;
+        transition: all 0.15s ease;
+      }
+      .appbar .acessibilidade-bar .acessibilidade-btn:hover {
+        background: rgba(255,255,255,0.28);
+        border-color: rgba(255,255,255,0.6);
+        color: #FFFFFF;
+        transform: translateY(-1px);
+      }
+      .appbar .acessibilidade-bar .acessibilidade-btn.ativo {
+        background: #FFFFFF;
+        color: #1A3A6B;
+        border-color: #FFFFFF;
+        box-shadow: 0 0 0 2px rgba(60,200,208,0.5);
+      }
+      .appbar .acessibilidade-bar .fonte-controles {
+        display: inline-flex;
+        gap: 2px;
+      }
+      .appbar .acessibilidade-bar .acessibilidade-separador {
+        background: rgba(255,255,255,0.3);
+        height: 18px;
+        margin: 0 4px;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function moverBarraAcessibilidadeParaAppBar() {
+    const bar = document.querySelector('.acessibilidade-bar');
+    const direita = document.querySelector('.appbar .appbar-direita');
+    if (!bar || !direita) return;
+    if (bar.parentElement === direita) return;
+    injetarOverridesAcessibilidadeNoAppBar();
+    const refNotif = direita.querySelector('#btn-notificacoes');
+    if (refNotif) direita.insertBefore(bar, refNotif);
+    else direita.insertBefore(bar, direita.firstChild);
+  }
+
   // Injetar AppBar
   function criarAppBar() {
     const usuario = getUsuario();
@@ -176,6 +255,7 @@
   // Inicializar
   function init() {
     criarAppBar();
+    moverBarraAcessibilidadeParaAppBar();
     initDropdown();
     initLogout();
   }
