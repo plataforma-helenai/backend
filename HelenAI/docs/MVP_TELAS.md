@@ -17,6 +17,7 @@ Documento de referência para todas as telas, fluxos, interações e validaçõe
 9. [Estruturas de Dados (Referência)](#9-estruturas-de-dados-referência)
 10. [Regras de Negócio](#10-regras-de-negócio)
 11. [Fluxos Principais](#11-fluxos-principais)
+12. [Módulo Pais/Responsáveis (planejado)](#12-módulo-paisresponsáveis-planejado)
 
 ---
 
@@ -27,6 +28,7 @@ Documento de referência para todas as telas, fluxos, interações e validaçõe
 | **Admin**     | Email + Senha          | Gerencia toda a plataforma: usuários, métricas gerais, configurações      |
 | **Conteudista** | Email + Senha        | Professor/curador. Importa PDFs, gerencia questões, simulados e seus alunos |
 | **Aluno**     | Email + Senha ou Gmail | Faz simulados, cria simulados próprios, importa PDFs, compartilha         |
+| **Pais/Responsável** ⏳ | Email + Senha ou convite do aluno | Acompanha o progresso de um ou mais alunos vinculados (ler-somente). Planejado — ver [Fase 13](#fase-13--módulo-paisresponsáveis) |
 
 ---
 
@@ -460,6 +462,7 @@ Presente em **todas as telas**, fixa no topo ou lateral. Contém toggles/botões
 | **Paleta Color Blind** | Toggle on/off                                 | Ativa paleta acessível para daltonismo             |
 | **Ledor (TTS)**        | Botão play/pause + controle de velocidade + tom | Lê o conteúdo da tela em voz alta                 |
 | **LIBRAS**             | Toggle on/off                                 | Ativa intérprete virtual de LIBRAS (avatar/janela) |
+| **Comando de Voz** ⏳  | Toggle on/off (ativa microfone)               | Navegação e interação por voz (planejado — ver [Fase 12](#fase-12--comando-de-voz-acessibilidade)) |
 
 ### 6.2 Comportamento
 
@@ -543,6 +546,24 @@ O DUA define 3 princípios que devem estar presentes em TODAS as telas do aluno:
   - Em vez de "Nota baixa" → "Você está progredindo! Foque nessas habilidades para melhorar."
 - **Interface calma** — espaçamento generoso, cores suaves, animações sutis, sem sobrecarga visual
 - **Tempo sem pressão** — o cronômetro é sempre opcional, nunca obrigatório
+
+### 6.5.5 Comando de Voz (planejado — Fase 12)
+
+> Funcionalidade planejada, ainda não implementada. Atende principalmente alunos com deficiência motora (que não usam teclado/mouse com facilidade) e alunos com baixa visão.
+
+- **7º toggle na barra de acessibilidade:** `🎤 Voz` — ativa o microfone e começa a escutar comandos
+- **Indicador visual:** ícone de microfone pulsante quando está escutando + transcrição parcial em tempo real num rodapé discreto
+- **Comandos essenciais (escopo inicial):**
+  - **Navegação:** "próxima questão", "anterior", "ir pra dashboard", "abrir meus simulados", "sair"
+  - **Resposta:** "marcar alternativa A/B/C/D/E", "mudar pra B", "limpar resposta"
+  - **IA Helen:** "simplificar", "palavras-chave", "me dê uma dica", "ouvir questão"
+  - **Acessibilidade:** "aumentar fonte", "alto contraste", "ativar libras"
+  - **Controle da sessão:** "pausar simulado", "continuar", "finalizar"
+- **Feedback por voz opcional** (complementa o ledor): a Helen confirma a ação em áudio ("Alternativa B marcada", "Indo pra questão 5")
+- **Idioma:** PT-BR exclusivamente na primeira versão
+- **Fallback:** se o reconhecimento não entender, a Helen sugere em texto "Não entendi, você quis dizer X ou Y?" (sem travar o fluxo)
+- **Privacidade:** microfone só fica ativo com o toggle ligado; áudio processado localmente (Web Speech API) sempre que possível, sem envio pra servidor
+- **Integração com onboarding:** Fase 13 adicionará pergunta "você prefere usar comando de voz?" no passo de preferências; se sim, o toggle já nasce ativo
 
 ---
 
@@ -1036,3 +1057,115 @@ Login → Dashboard Admin → Gerenciamento de Usuários → Conteudistas
 - Meus Simulados
 - Ranking (inclui aba de Desafios)
 - Perfil
+
+### Menu Pais/Responsáveis (planejado — Fase 13)
+- Dashboard (visão consolidada dos filhos vinculados)
+- Progresso do filho (seletor de filho)
+- Acompanhamento de desafios
+- 💙 Criar simulado
+- 📄 Importar PDF
+- Meus simulados (criados e importados)
+- Relatórios
+- Perfil
+
+---
+
+## 12. Módulo Pais/Responsáveis (planejado)
+
+> ⏳ **Status:** planejado, ainda não implementado. Detalhes no [ROADMAP — Fase 13](#fase-13--módulo-paisresponsáveis).
+>
+> O objetivo é dar aos pais/responsáveis uma janela **somente leitura** para acompanhar o progresso do filho (aluno PcD) sem interferir na autonomia dele nem ter acesso a respostas ou poder de configurar a conta.
+
+### 12.1 Perfil e login
+
+- **Login:** email + senha (mesmo padrão dos outros perfis)
+- **Cadastro:** apenas por **convite do aluno**. O aluno, no perfil, gera um "código de vínculo" de 6 dígitos com validade de 24h e envia pros responsáveis (WhatsApp, email). Ao criar conta com o código, o pai já vira vinculado
+- **Múltiplos filhos:** um pai/responsável pode ter N alunos vinculados (ex: dois filhos na plataforma). Um aluno pode ter até 2 responsáveis
+- **Revogação:** o aluno pode remover o vínculo a qualquer momento em "Perfil → Responsáveis vinculados"
+
+### 12.2 Dashboard Pais/Responsáveis
+
+- **Saudação:** "Olá, [Nome]! Acompanhando: [avatares dos filhos]"
+- **Seletor de filho** no topo (se tiver mais de um vinculado) — troca o contexto de todas as seções abaixo
+- **Resumo do filho (cards):**
+  - Último acesso ("Há 2 horas estudando")
+  - Simulados realizados (semana / total)
+  - Média de acertos
+  - Streak (dias seguidos)
+  - Nível / XP
+- **Gráfico de evolução** (últimas 4 semanas): acertos por semana
+- **Radar BNCC:** desempenho por área (igual ao dashboard do aluno, em visualização espelhada)
+- **Desafios ativos do filho:** cards com progresso (ler-somente, sem botão "entrar no desafio")
+- **Últimos 5 simulados:** nota + data + tempo, sem ver as respostas
+
+### 12.3 Progresso detalhado
+
+- Aba por área BNCC (Matemática, Linguagens, Ciências da Natureza, Ciências Humanas)
+- Em cada área: lista de habilidades com % de acerto + evolução ao longo do tempo
+- **Alertas automáticos (cards):**
+  - "Seu filho não estuda há 5 dias"
+  - "Queda de 15% no desempenho em Matemática nas últimas 2 semanas"
+  - "Parabéns! 7 dias seguidos estudando"
+- Tom sempre acolhedor, nunca punitivo com o aluno
+
+### 12.4 Relatórios
+
+- **Relatório mensal** (gerado automaticamente): horas de estudo, simulados, áreas fortes/fracas, conquistas. Pode ser exportado em PDF
+- **Comparativo com média da turma** (opcional — o aluno precisa ter ativado "permitir comparativos" no perfil)
+
+### 12.5 Criar simulado para o filho
+
+> Pais/responsáveis **podem criar simulados exclusivos** pros filhos vinculados — diferencial forte do módulo. Não é puro "ler-somente": o pai atua como co-educador, montando revisões personalizadas a partir do que observa no progresso.
+
+- **Tela:** `responsavel/criar-simulado.html` — layout similar ao `aluno/criar-simulado.html` (config topo + grid de questões + composição sticky)
+- **Fontes de questões disponíveis:**
+  - **Banco público** — todas as questões curadas pela plataforma
+  - **Minhas importações** — PDFs que o próprio responsável importou (ver 12.6)
+  - **⛔ Não disponível:** questões privadas do filho (privacidade do aluno)
+- **Destinatários:** seletor "Para quem?" — se o pai tem N filhos vinculados, escolhe um ou vários
+- **Visibilidade:**
+  - **Privado do filho** (padrão) — fica só na conta do filho, não aparece em ranking público
+  - **Compartilhado com outros responsáveis do mesmo filho** (se o filho tiver 2 responsáveis)
+  - **Não pode** solicitar publicação pública (esse fluxo continua exclusivo de alunos e conteudistas)
+- **Onde aparece pro filho:** nova aba **"Recomendado pelos meus responsáveis"** em `aluno/meus-simulados.html`, com ícone 💙 e nome de quem criou. Card traz a mensagem opcional escrita pelo pai ("Mãe: achei que você precisava reforçar Matemática, bora? 💪")
+- **O aluno pode:**
+  - Fazer o simulado normalmente (XP, BNCC contam no desempenho dele)
+  - Ocultar da lista (direito à autonomia — o pai vê na própria tela que "foi ocultado")
+  - Recusar / aceitar feedback se quiser agradecer
+- **Importante:** o simulado do pai **não é obrigatório** — o aluno decide se faz. Isso preserva a autonomia, mesmo com o apoio familiar
+
+### 12.6 Importar PDF (Pais/Responsáveis)
+
+- **Tela:** `responsavel/importar-pdf.html` (mesmo padrão do `aluno/importar-pdf.html`)
+- Pai pode importar PDFs de apostilas antigas, listas de exercícios, provas tiradas do arquivo de casa
+- Questões extraídas pela IA ficam no banco pessoal do responsável
+- Pai monta simulado com essas questões e manda pro filho (via 12.5)
+- **Regra:** questões importadas pelo pai **não entram no banco público**, ficam vinculadas ao responsável
+
+### 12.7 Perfil Pais/Responsáveis
+
+- Dados básicos: nome, email, foto, senha
+- Preferências de notificação:
+  - Email semanal com resumo do filho (on/off)
+  - Notificação se o filho ficar N dias sem estudar
+  - Notificação quando o filho completar um desafio
+- Filhos vinculados (lista com botão "Desvincular")
+
+### 12.8 Restrições e privacidade
+
+- **Não pode:** responder simulados pelo filho, alterar configurações do filho (especialmente acessibilidade — só o aluno altera), ver o gabarito das questões que o filho respondeu, ver questões marcadas como privadas do filho
+- **Pode:** acompanhar desempenho (notas, acertos/erros por habilidade), criar simulados pro filho (ver 12.5), importar PDFs (ver 12.6), gerar relatórios, receber notificações
+- **Transparência pro aluno:**
+  - No dashboard do aluno aparece "Seus responsáveis acompanham este mês: [avatares]" pra ele saber quem está vendo
+  - Quando um responsável cria um simulado, o aluno recebe notificação ("A Mãe criou um simulado pra você: Revisão de Matemática")
+  - Aluno pode revogar o vínculo de um responsável a qualquer momento
+
+### 12.9 Integração com módulos existentes
+
+- **Módulo Admin:** nova lista "Pais/Responsáveis" no sidebar admin, com total de responsáveis cadastrados e quantos alunos vinculados. Filtro por "tem responsável / sem responsável"
+- **Módulo Aluno:**
+  - Nova seção "Responsáveis vinculados" em `aluno/perfil.html` com geração do código de vínculo + lista de pais ativos + botão "Revogar acesso"
+  - Nova aba "💙 Recomendado pelos meus responsáveis" em `aluno/meus-simulados.html` (além de Criados/Importados/Realizados)
+- **Dashboard Admin:** duas novas métricas na seção "Impacto e Inclusão" — diferencial pro Centelha:
+  - "Alunos com acompanhamento familiar: X% (N alunos)"
+  - "Simulados criados por responsáveis: N este mês"

@@ -32,7 +32,12 @@ Ao iniciar uma nova conversa, leia este arquivo + `MVP_TELAS.md` + `ROADMAP_PROT
 
 ## Progresso do Protótipo (atualizado 2026-04-20)
 
-> **Status:** MVP 100% completo. Fases 0, 1, 3–9, 11 concluídas. Única pendência é a Fase 10 (IA no Conteudista/Admin), marcada como pós-MVP.
+> **Status:** MVP 100% completo. Fases 0, 1, 3–9, 11 concluídas.
+>
+> **Pós-MVP planejadas:**
+> - **Fase 10** — IA no Conteudista/Admin (classificação BNCC, dashboards IA, detecção de duplicatas)
+> - **Fase 12** — Comando de voz na barra de acessibilidade (7º toggle, Web Speech API, comandos de navegação/resposta/Helen) — atende principalmente deficiência motora e baixa visão
+> - **Fase 13** — Módulo Pais/Responsáveis (4º perfil; acompanha progresso do filho E cria simulados exclusivos pra ele; vínculo por código de 6 dígitos gerado pelo aluno; simulados de pais entram em aba própria "Recomendado pelos meus responsáveis" do aluno, não-obrigatórios)
 >
 > **Status detalhado por fase está em `ROADMAP_PROTOTIPO.md`** — este arquivo mantém só as decisões de arquitetura e UX, não o checklist.
 

@@ -269,6 +269,67 @@ HelenAI/
 
 ---
 
+### Fase 12 — Comando de voz (acessibilidade)
+
+> **Status:** ⏳ planejado, não iniciado.
+> Adicionar um 7º recurso na barra de acessibilidade: navegação e interação por voz — atende principalmente alunos com deficiência motora e com baixa visão.
+
+| # | Item | Arquivo | Referência MVP_TELAS.md | Status |
+|---|------|---------|-------------------------|--------|
+| 12.1 | 7º toggle `🎤 Voz` na barra de acessibilidade (ícone + estado ativo pulsante) | `assets/css/acessibilidade.css` + `acessibilidade.js` | Seção 6.1 + 6.5.5 | [ ] |
+| 12.2 | Integração com Web Speech API (reconhecimento offline quando suportado pelo navegador) | `assets/js/comando-voz.js` (novo) | Seção 6.5.5 | [ ] |
+| 12.3 | Comandos de navegação (próxima, anterior, ir pra, sair) | `comando-voz.js` + handler global | Seção 6.5.5 | [ ] |
+| 12.4 | Comandos de resposta na tela de questão (marcar A/B/C/D/E, limpar) | integração em `simulado-questao.html` | Seção 6.5.5 | [ ] |
+| 12.5 | Comandos da IA Helen (simplificar, dica, ouvir, palavras-chave) | integração com IA toolbar | Seção 6.5.5 | [ ] |
+| 12.6 | Comandos de acessibilidade (alto contraste, aumentar fonte, libras) | integração com acessibilidade.js | Seção 6.5.5 | [ ] |
+| 12.7 | Feedback por voz opcional (Helen confirma ação em áudio) | integração com ledor/TTS | Seção 6.5.5 | [ ] |
+| 12.8 | Rodapé com transcrição parcial + fallback "não entendi" | `comando-voz.js` | Seção 6.5.5 | [ ] |
+| 12.9 | Pergunta no onboarding "você prefere comando de voz?" + ativa toggle auto | `aluno/onboarding.html` | Seção 6.5.5 + 6.5.4 | [ ] |
+| 12.10 | Documentação de comandos (help in-app "quais comandos a Helen entende?") | `aluno/perfil.html` seção IA | Seção 6.5.5 | [ ] |
+
+**Prioridade:** Média — diferencial forte de acessibilidade, tecnicamente complexo (reconhecimento de voz, tolerância a ruído, sotaques). Entrar depois do MVP funcional com backend.
+
+**Dependências:** Web Speech API (nativa do Chrome/Edge). Para navegadores sem suporte, exibir mensagem "Seu navegador não suporta reconhecimento de voz — tente o Chrome".
+
+---
+
+### Fase 13 — Módulo Pais/Responsáveis
+
+> **Status:** ⏳ planejado, não iniciado.
+> Novo 4º perfil de acesso. Pais/responsáveis acompanham o progresso do filho (aluno PcD) **e podem criar simulados exclusivos pra ele** — atuam como co-educadores. Reforça o diferencial de inclusão e aumenta o engajamento familiar.
+
+| # | Tela | Arquivo | Referência MVP_TELAS.md | Status |
+|---|------|---------|-------------------------|--------|
+| 13.1 | Login adaptado (4º perfil) + redirect por perfil | `compartilhado/login.html` | Seção 2.1 + 12.1 | [ ] |
+| 13.2 | Cadastro por convite do aluno (código de 6 dígitos) | `compartilhado/cadastro-pais.html` | Seção 12.1 | [ ] |
+| 13.3 | Seção "Responsáveis vinculados" no perfil do aluno (gerar código, revogar acesso) | `aluno/perfil.html` (expandir) | Seção 12.1 + 12.9 | [ ] |
+| 13.4 | Dashboard Pais/Responsáveis (seletor de filho + resumo + radar + desafios + últimos simulados) | `responsavel/dashboard.html` | Seção 12.2 | [ ] |
+| 13.5 | Progresso detalhado por área BNCC (com alertas automáticos) | `responsavel/progresso.html` | Seção 12.3 | [ ] |
+| 13.6 | Relatórios mensais (exportável em PDF) | `responsavel/relatorios.html` | Seção 12.4 | [ ] |
+| 13.7 | **Criar simulado pro filho** (config + grid de questões + composição sticky + seletor de filho + mensagem opcional) | `responsavel/criar-simulado.html` | Seção 12.5 | [ ] |
+| 13.8 | **Importar PDF (responsável)** — extração IA + revisão + banco pessoal | `responsavel/importar-pdf.html` + `responsavel/revisao-questoes.html` | Seção 12.6 | [ ] |
+| 13.9 | **Lista "Meus simulados" do responsável** (criados e importados, com status de aceitação do filho) | `responsavel/meus-simulados.html` | Seção 12.5 | [ ] |
+| 13.10 | Aba "💙 Recomendado pelos meus responsáveis" em Meus Simulados do aluno | `aluno/meus-simulados.html` (expandir tabs) | Seção 12.9 | [ ] |
+| 13.11 | Perfil do responsável + preferências de notificação | `responsavel/perfil.html` | Seção 12.7 | [ ] |
+| 13.12 | Transparência pro aluno: "Seus responsáveis acompanham" no dashboard + notificação quando pai cria simulado | `aluno/dashboard.html` | Seção 12.8 | [ ] |
+| 13.13 | Admin: nova lista de Pais/Responsáveis + filtros + 2 métricas no dashboard (% alunos com responsável + simulados de pais no mês) | `admin/responsaveis.html` + `admin/dashboard.html` | Seção 12.9 | [ ] |
+| 13.14 | Sidebar/menu do 4º perfil (Dashboard / Acompanhamento / Criar simulado / Importar PDF / Meus simulados / Relatórios / Perfil) | `assets/js/navegacao.js` | Seção 10 | [ ] |
+
+**Prioridade:** Alta (pós-MVP) — conecta famílias à jornada do aluno, diferencial social forte pro Centelha e potencial de parcerias com APAEs/ONGs.
+
+**Regras críticas:**
+- Pai **não** pode: responder simulados pelo filho, alterar config do filho (especialmente acessibilidade), ver gabarito das questões respondidas, ver questões marcadas como privadas pelo filho
+- Pai **pode**: acompanhar desempenho, criar simulados exclusivos pro filho, importar PDFs, gerar relatórios
+- Simulados criados pelo pai vão direto pra uma aba específica do filho ("Recomendado pelos meus responsáveis") — **não são obrigatórios**, aluno decide se faz
+- Aluno pode ocultar simulado do pai da lista (preserva autonomia) — pai vê na própria tela que foi ocultado
+- Questões importadas pelo pai ficam no banco pessoal dele — nunca vão pro banco público
+- Vínculo só por convite do aluno (nunca o pai cadastra "às escuras" um filho)
+- Máximo 2 responsáveis por aluno
+
+**Dependências:** backend completo (Fase 2 do plano de execução em `APRESENTACAO_CENTELHA.md` — "MVP técnico"). Sem backend real, o fluxo de código de vínculo e a criação de simulados "entre contas" não funcionam (só protótipo fake).
+
+---
+
 ## Resumo por Fase
 
 | Fase | Descrição | Itens | Prioridade | Status |
@@ -285,8 +346,10 @@ HelenAI/
 | **9** | Admin (movido da Fase 2) | 5 | Baixa | ✅ Completa |
 | **10** | IA no Conteudista/Admin (futuro) | 5 | Baixa | ⏳ Futuro |
 | **11** | Desafios e Ranking Periodizado | 10 | **Alta** | ✅ Completa |
+| **12** | Comando de voz (acessibilidade) | 10 | Média | ⏳ Planejada |
+| **13** | Módulo Pais/Responsáveis (com criação de simulados) | 14 | **Alta** (pós-MVP) | ⏳ Planejada |
 
-**Total: 65 itens** — Fases 0, 1, 3, 4, 5, 6, 7, 8, 9, 11 completas. Fase 10 (IA Conteudista/Admin) é pós-MVP opcional.
+**Total: 89 itens** — 65 do MVP completos (Fases 0, 1, 3, 4, 5, 6, 7, 8, 9, 11); 24 planejados pós-MVP (Fases 10, 12, 13).
 
 ---
 
@@ -296,10 +359,13 @@ HelenAI/
 ✅ Fase 0 (base) → ✅ Fase 1 (login) → ✅ Fase 3 (importação/questões) → ✅ Fase 4 (simulados/gestão)
 → ✅ Fase 5 (dashboard/explorar/perfil/ranking) → ✅ Fase 6 (realizar simulado + IA/DUA da Fase 8)
 → ✅ Fase 7 (aluno criando) → ✅ Fase 8 (onboarding fecha IA/DUA) → ✅ Fase 11 (desafios e ranking)
-→ ✅ Fase 9 (admin com cards de inclusão) → Fase 10 (futuro pós-MVP)
+→ ✅ Fase 9 (admin com cards de inclusão)
+→ ⏳ Fase 13 (Pais/Responsáveis — precisa de backend pro fluxo de código de vínculo)
+→ ⏳ Fase 12 (Comando de voz — depois da IA integrada pra cobrir comandos da Helen)
+→ ⏳ Fase 10 (IA no Conteudista/Admin — menor prioridade, cobre perfis internos)
 ```
 
-**🎉 MVP completo** — todas as fases obrigatórias estão finalizadas. Só sobra a Fase 10 (IA no Conteudista/Admin), que é pós-MVP.
+**🎉 MVP completo** — todas as fases obrigatórias estão finalizadas. Três fases pós-MVP planejadas: 10 (IA Conteudista/Admin), 12 (Comando de voz) e 13 (Pais/Responsáveis).
 
 **IMPORTANTE:** As funcionalidades da Fase 8 (IA, Linguagem Simples, DUA) devem ser integradas nas telas das Fases 5 e 6 ao construí-las. Não são telas separadas — são componentes e interações dentro das telas do aluno.
 
