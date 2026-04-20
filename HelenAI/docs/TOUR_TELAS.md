@@ -3,6 +3,8 @@
 Guia rápido pra quem está vendo o protótipo pela primeira vez. Siga os fluxos na ordem — dá pra ver o produto inteiro em ~20 minutos.
 
 > 🎯 **Quer ver o pitch direto?** Acesse `/apresentacao.html` no servidor (`http://127.0.0.1:8020/apresentacao.html`) — apresentação navegável de 14 slides com setas do teclado, ou abra `HelenAI/pdfs/apresentacao-completa.pdf` (5MB, 14 páginas).
+>
+> 📄 **PDF completo do protótipo** (todas as 36 telas em ordem de fluxo, com bookmarks hierárquicos por módulo): `HelenAI/pdfs/helenai-completo.pdf` (5,1 MB, 36 páginas). Também disponível como botão de download verde na tela de login.
 
 ---
 

@@ -426,15 +426,19 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.sidebar-logo {
+  justify-content: center;
+  padding: var(--espacamento-md) var(--espacamento-lg);
+}
+
 .sidebar-logo img {
-  width: 40px;
-  height: 40px;
+  height: 76px;
+  width: auto;
+  max-width: 100%;
 }
 
 .sidebar-logo span {
-  font-size: var(--fonte-tamanho-xl);
-  font-weight: 700;
-  color: var(--branco);
+  display: none;
 }
 
 .sidebar-nav {

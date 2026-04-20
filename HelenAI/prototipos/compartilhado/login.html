@@ -52,20 +52,10 @@
     }
 
     .login-branding .logo-grande {
-      width: 120px;
-      height: 120px;
+      width: auto;
+      height: 180px;
+      max-width: 100%;
       margin-bottom: var(--espacamento-lg);
-      filter: brightness(0) invert(1);
-      position: relative;
-      z-index: 1;
-    }
-
-    .login-branding h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--branco);
-      text-align: center;
-      margin-bottom: var(--espacamento-sm);
       position: relative;
       z-index: 1;
     }
@@ -136,7 +126,8 @@
 
     .login-card .logo-mobile {
       display: none;
-      width: 60px;
+      height: 96px;
+      width: auto;
       margin: 0 auto var(--espacamento-md);
     }
 
@@ -288,6 +279,16 @@
       filter: brightness(1.05);
     }
 
+    .banner-apresentacao.banner-pdf {
+      margin-top: var(--espacamento-sm);
+      background: linear-gradient(135deg, #38A169 0%, #3CC8D0 100%);
+      box-shadow: 0 6px 18px rgba(56, 161, 105, 0.25);
+    }
+
+    .banner-apresentacao.banner-pdf:hover {
+      box-shadow: 0 10px 24px rgba(56, 161, 105, 0.35);
+    }
+
     .banner-apresentacao-icone {
       width: 44px;
       height: 44px;
@@ -416,8 +417,7 @@
 
     <!-- Lado esquerdo — Branding -->
     <div class="login-branding">
-      <img src="/assets/img/logo-helen.png" alt="HelenAI Logo" class="logo-grande">
-      <h1>helen.ai</h1>
+      <img src="/assets/img/helenai-logo-white-vertical.png" alt="helen.ai" class="logo-grande">
       <p class="slogan">Aprendizado sem barreiras</p>
       <div class="tagline">A tecnologia a favor da inclusão</div>
 
@@ -435,7 +435,7 @@
       <div class="login-card">
 
         <!-- Logo mobile -->
-        <img src="/assets/img/logo-helen.png" alt="HelenAI" class="logo-mobile">
+        <img src="/assets/img/helenai-logo-color-vertical.png" alt="helen.ai" class="logo-mobile">
 
         <h2>Bem-vindo!</h2>
         <p class="subtitulo">Faça login para acessar a plataforma</p>
@@ -519,6 +519,16 @@
             <div class="desc">Apresentação navegável · Programa Centelha 2026</div>
           </div>
           <div class="banner-apresentacao-seta">→</div>
+        </a>
+
+        <!-- Banner PDF completo -->
+        <a href="/pdfs/helenai-completo.pdf" download="helenai-completo.pdf" class="banner-apresentacao banner-pdf">
+          <div class="banner-apresentacao-icone">📄</div>
+          <div class="banner-apresentacao-texto">
+            <div class="titulo">Baixar PDF completo</div>
+            <div class="desc">Todas as 36 telas em fluxo · 5 MB</div>
+          </div>
+          <div class="banner-apresentacao-seta">↓</div>
         </a>
 
         <div class="login-footer">

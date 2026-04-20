@@ -10,6 +10,7 @@ Documento estruturado para apresentação do projeto **HelenAI** ao programa Cen
 |---|---|---|
 | **Apresentação navegável** (14 slides HTML) | `HelenAI/prototipos/apresentacao.html` | Pitch ao vivo no projetor — abre no navegador, navegação por setas, F = tela cheia, M = menu |
 | **PDF da apresentação** (14 páginas) | `HelenAI/pdfs/apresentacao-completa.pdf` | Anexar em emails, formulários, distribuir como PDF |
+| **PDF completo do protótipo** (36 páginas) | `HelenAI/pdfs/helenai-completo.pdf` | Todas as telas em ordem de fluxo, com bookmarks por módulo. Botão "📄 Baixar PDF completo" na tela de login |
 | **Documento estruturado** (este arquivo) | `HelenAI/docs/APRESENTACAO_CENTELHA.md` | Conteúdo completo escrito (4500+ palavras) |
 | **Tour pelas telas** | `HelenAI/docs/TOUR_TELAS.md` | Guia narrado pelos 6 fluxos principais (20 min) |
 | **Prompt para NotebookLM** | `HelenAI/docs/PROMPT_LLM.md` | Gerar pitch automaticamente via IA com os 36 PDFs |

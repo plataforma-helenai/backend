@@ -13,9 +13,10 @@ Documento de referência para todas as telas, fluxos, interações e validaçõe
 5. [Módulo Aluno](#5-módulo-aluno)
 6. [Acessibilidade (Global)](#6-acessibilidade-global)
 7. [Gamificação](#7-gamificação)
-8. [Estruturas de Dados (Referência)](#8-estruturas-de-dados-referência)
-9. [Regras de Negócio](#9-regras-de-negócio)
-10. [Fluxos Principais](#10-fluxos-principais)
+8. [Desafios (Períodos de Estudo)](#8-desafios-períodos-de-estudo)
+9. [Estruturas de Dados (Referência)](#9-estruturas-de-dados-referência)
+10. [Regras de Negócio](#10-regras-de-negócio)
+11. [Fluxos Principais](#11-fluxos-principais)
 
 ---
 
@@ -610,24 +611,24 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 
 ---
 
-## 11. Desafios (Períodos de Estudo)
+## 8. Desafios (Períodos de Estudo)
 
 > Desafios são pacotes temáticos de estudo que agrupam vários simulados, com ranking próprio. É uma forma de gamificar períodos de preparação específicos (ex: "Revisão de Matemática — Janeiro") e criar competições saudáveis entre alunos.
 
-### 11.1 Conceito
+### 8.1 Conceito
 
 - Um **Desafio** agrupa **N simulados** em torno de um tema ou período
 - Cada desafio tem **seu próprio ranking**, calculado pela **soma da % de acerto** do aluno em cada simulado do desafio (máximo = N × 100 pontos)
 - Desafios podem ter **prazo opcional** (data início / fim) ou ser **contínuos** (sem prazo)
 - Status possíveis: `em_andamento` | `encerrado` | `nao_iniciado`
 
-### 11.2 Quem pode criar
+### 8.2 Quem pode criar
 
 - **Conteudista:** cria pra turma específica (vinculado a uma turma — só alunos da turma participam) ou público (todos os alunos). É a principal ferramenta pedagógica do professor pra criar períodos de revisão
 - **Aluno:** cria privado, compartilhado (por link/email) ou solicita publicação pública (vai pra curadoria do conteudista, mesma lógica dos simulados do aluno)
 - **Admin:** cria desafios oficiais da plataforma (ex: "Simulado Nacional HelenAI 2026")
 
-### 11.3 Lista de Desafios (aba dentro de Ranking)
+### 8.3 Lista de Desafios (aba dentro de Ranking)
 
 - **Desafios em andamento** (cards destacados) — desafios que o aluno está participando agora, com:
   - Nome, ícone, cor de destaque
@@ -639,7 +640,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 - **Desafios disponíveis** — públicos que o aluno ainda não entrou (cards com botão `Participar`)
 - **Botão `+ Criar desafio`** no canto superior — abre `aluno/criar-desafio.html`
 
-### 11.4 Detalhe do Desafio
+### 8.4 Detalhe do Desafio
 
 - **Header:**
   - Nome, descrição, ícone, cor/gradient de destaque
@@ -662,7 +663,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
   - `Compartilhar desafio` (link ou email)
   - `Sair do desafio` (confirmação)
 
-### 11.5 Criar Desafio (aluno)
+### 8.5 Criar Desafio (aluno)
 
 - **Campos:**
   - Nome do desafio
@@ -679,7 +680,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 - **Preview:** mostra pontuação máxima calculada (N × 100), duração, áreas cobertas
 - **Botões:** `Salvar rascunho` | `Criar desafio` | `Cancelar`
 
-### 11.6 Desafios (conteudista)
+### 8.6 Desafios (conteudista)
 
 - **Lista (`conteudista/desafios.html`):**
   - Tabela ou cards dos desafios criados pelo conteudista
@@ -690,11 +691,11 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
   - Mesmos campos do aluno + extra: dropdown `Vincular à turma` (com as turmas do conteudista) ou "Público para todos"
   - Conteudista pode publicar direto sem passar por curadoria
 
-### 11.7 Integração com Dashboard
+### 8.7 Integração com Dashboard
 
 - **Dashboard do aluno:** card "Desafios ativos" mostra 1-2 desafios em andamento do aluno entre o "Continue de onde parou" e as métricas gerais
 
-### 11.8 Ranking Global vs Ranking do Desafio
+### 8.8 Ranking Global vs Ranking do Desafio
 
 - **Ranking global** (aba Geral do `ranking.html`): XP total do aluno na plataforma inteira, independente de desafios
 - **Ranking do desafio** (dentro de cada desafio): pontuação calculada só pelos simulados daquele desafio
@@ -702,9 +703,9 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 
 ---
 
-## 8. Estruturas de Dados (Referência)
+## 9. Estruturas de Dados (Referência)
 
-### 8.1 Questão
+### 9.1 Questão
 
 ```
 {
@@ -733,7 +734,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.2 Importação
+### 9.2 Importação
 
 ```
 {
@@ -748,7 +749,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.3 Simulado
+### 9.3 Simulado
 
 ```
 {
@@ -770,7 +771,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.4 Compartilhamento
+### 9.4 Compartilhamento
 
 ```
 {
@@ -783,7 +784,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.5 Resultado do Simulado
+### 9.5 Resultado do Simulado
 
 ```
 {
@@ -802,7 +803,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.6 Usuário
+### 9.6 Usuário
 
 ```
 {
@@ -835,7 +836,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.7 Conteudista-Aluno (Sala)
+### 9.7 Conteudista-Aluno (Sala)
 
 ```
 {
@@ -846,7 +847,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.8 Desafio
+### 9.8 Desafio
 
 ```
 {
@@ -871,7 +872,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 }
 ```
 
-### 8.9 Participação em Desafio
+### 9.9 Participação em Desafio
 
 ```
 {
@@ -888,9 +889,9 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 
 ---
 
-## 9. Regras de Negócio
+## 10. Regras de Negócio
 
-### 9.1 Importação e Questões
+### 10.1 Importação e Questões
 
 1. Ao importar PDF, todas as questões são extraídas e classificadas automaticamente (simulação de IA)
 2. Um simulado é criado automaticamente com as questões da importação (status: rascunho)
@@ -900,7 +901,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 6. Questão travada pode ser **reutilizada** em outros simulados, mas não pode ser alterada
 7. Código da questão: `[CÓDIGO_IMPORTAÇÃO]-Q[NÚMERO]` para importadas, ou código manual
 
-### 9.2 Simulados do Aluno
+### 10.2 Simulados do Aluno
 
 1. Aluno pode importar PDF e criar simulados para uso pessoal
 2. Simulados do aluno nascem com status `privado`
@@ -909,27 +910,27 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 5. Curadoria pode aprovar o simulado completo ou questão por questão
 6. Se rejeitado, aluno recebe o motivo e pode corrigir e reenviar
 
-### 9.3 Compartilhamento
+### 10.3 Compartilhamento
 
 1. **Por link:** Qualquer pessoa com o link acessa. Se não tiver conta, é direcionada ao cadastro. Após cadastro, tem acesso ao simulado
 2. **Por email/username:** Somente os destinatários acessam. Se o email não está cadastrado, a pessoa recebe convite para se cadastrar
 3. Simulados compartilhados aparecem na aba "Compartilhados comigo" do destinatário
 
-### 9.4 Curadoria
+### 10.4 Curadoria
 
 1. Itens são direcionados para conteudistas com competência na área das questões
 2. Conteudista pode aprovar/rejeitar questão individual ou simulado completo
 3. Rejeição obriga preenchimento de motivo
 4. Aluno é notificado do resultado da curadoria
 
-### 9.5 Gamificação
+### 10.5 Gamificação
 
 1. XP é concedido ao finalizar simulado (não ao abandonar)
 2. Streak conta dias consecutivos com pelo menos 1 simulado finalizado
 3. Badges são concedidos automaticamente quando o critério é atingido
 4. Ranking é atualizado em tempo real
 
-### 9.6 Desafios
+### 10.6 Desafios
 
 1. Desafios precisam de **no mínimo 2 simulados**
 2. **Pontuação no desafio = soma da % de acerto de cada simulado feito pelo aluno** (máximo N × 100)
@@ -944,7 +945,7 @@ O sistema de ranking é dividido em **3 páginas separadas** com URLs próprias 
 
 ---
 
-## 10. Fluxos Principais
+## 11. Fluxos Principais
 
 ### Fluxo 1: Conteudista importa PDF e publica simulado
 

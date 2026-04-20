@@ -30,27 +30,11 @@ Ao iniciar uma nova conversa, leia este arquivo + `MVP_TELAS.md` + `ROADMAP_PROT
 
 ---
 
-## Progresso do Protótipo (atualizado 2026-04-09)
+## Progresso do Protótipo (atualizado 2026-04-20)
 
-### Completas
-- **Fase 0:** Base (CSS global, componentes, acessibilidade, dados fake, navegação)
-- **Fase 1:** Login (3 usuários fake), Cadastro, Recuperação de senha
-- **Fase 3:** Conteudista — Dashboard, Importações (listagem + modal upload + loading), Revisão de questões, Banco de questões (Select2, filtros), Formulário (Quill.js)
-- **Fase 4:** Conteudista — Simulados (lista + detalhes modal + form com composição), Resultados (Chart.js), Meus Alunos (turmas múltiplas), Curadoria (questão por questão)
-- **Fase 5:** Aluno — Dashboard (continue de onde parou + trilha IA + resumo semanal IA + habilidades fracas/fortes + radar BNCC + simulados recentes com acertos/erros/em-andamento + simulados disponíveis), Explorar Simulados, Perfil (configs IA + acessibilidade), Ranking (top 3 + posição do aluno)
-- **Fase 6:** Realizar Simulado — Início (com instruções DUA + toggle cronômetro + recursos ativos), Tela de Questão (modo focado sem sidebar regular, top bar com cronômetro, IA toolbar com Simplificar/Palavras-chave/Dica/Ouvir, painel de navegação lateral com mapa de questões), Resultado (header de comemoração, badge desbloqueado animado, comparativo com média, gabarito comentado com explicação IA por questão errada — Fase 8.5)
-- **Fase 7:** Aluno — Meus Simulados (3 tabs: Criados/Importados/Realizados, mini-métricas, cards com status colorido por border-left, modal de compartilhamento com 3 opções + modal de exclusão), Criar Simulado (config topo, grid questões + composição sticky lateral, modal de seleção com tabs Público/Minhas Importações + filtros BNCC + checkboxes, drag & drop pra reordenar), Importar PDF (info box de privacidade explicando que vai pro banco pessoal, upload inline com dropzone, loading com etapas, histórico de importações anteriores), Revisão de questões do aluno (versão específica com info box da IA + card verde com versão em Linguagem Simples gerada automaticamente + modal "Salvar no meu banco" que cria simulado privado)
-- **Fase 8:** Onboarding inclusivo — 4 steps com progress bar (boas-vindas → tipo de deficiência múltipla → preferências + familiaridade com tecnologia → resumo das configs aplicadas). Configura automaticamente os toggles da barra de acessibilidade com base nas respostas e salva em `localStorage`. Acessado após cadastro (form normal ou Google). Todas as outras funcionalidades da Fase 8 (IA, Linguagem Simples, DUA, feedback humanizado) já estão integradas nas telas das Fases 5, 6 e 7.
-- **Fase 11:** Desafios e Ranking Periodizado — **Ranking dividido em 3 páginas separadas com URLs distintas** (não é SPA com tabs JS): `aluno/ranking.html` (Geral com 4 cards de período + pódio + tabela), `aluno/ranking-desafios.html` (lista única ordenada por meu status + filtros), `aluno/ranking-simulados.html` (lista de simulados + modal de ranking). As "tabs" são `<a href>` reais — URL compartilhável, back/forward do navegador funciona. Novo sistema de **Desafios** (períodos de estudo que agrupam N simulados com ranking próprio): `desafio-detalhe.html` (header hero colorido + card de progresso + lista de simulados com status + pódio + ranking), `criar-desafio.html` (aluno, com seletor de ícone/cor/visibilidade + modal de seleção), `conteudista/desafios.html` (lista com métricas topo + filtros + cards coloridos), `conteudista/desafio-form.html` (form completo com seletor de turma vinculada). Cards de desafios ativos no dashboard do aluno. Entrada "⚔ Desafios" no menu do conteudista.
-
-- **Fase 9:** Admin — Dashboard com 5 métricas principais + **seção "Impacto e Inclusão"** em destaque (diferencial pro Centelha) mostrando donut de alunos PcD por tipo de deficiência + barras horizontais animadas do uso de recursos de acessibilidade (% de alunos que ativaram cada toggle do DUA). Cadastros por mês (linha dupla alunos/conteudistas), questões por área BNCC (pizza), top 10 simulados mais realizados (barras horizontais), top 5 maior acerto/erro (listas). Lista de conteudistas com áreas de atuação em tags coloridas, filtros e ações (editar/bloquear). Form de conteudista com seletor de áreas em cards clicáveis grandes. Lista de alunos com **badges de tipo de deficiência coloridas** + filtro por deficiência (permite admin identificar facilmente quantos PcD estão ativos por tipo). Edição de aluno com painel lateral **somente leitura** mostrando acessibilidade declarada no onboarding (só o aluno pode alterar no próprio perfil).
-
-### 🎉 MVP 100% completo
-
-Todas as fases obrigatórias do MVP estão finalizadas. Fase 10 (IA no Conteudista/Admin) fica como pós-MVP futuro.
-
-### Próximas opcionais
-- **Fase 10:** IA no Conteudista/Admin (futuro pós-MVP)
+> **Status:** MVP 100% completo. Fases 0, 1, 3–9, 11 concluídas. Única pendência é a Fase 10 (IA no Conteudista/Admin), marcada como pós-MVP.
+>
+> **Status detalhado por fase está em `ROADMAP_PROTOTIPO.md`** — este arquivo mantém só as decisões de arquitetura e UX, não o checklist.
 
 ---
 
@@ -376,6 +360,22 @@ Com base nas respostas, a plataforma configura automaticamente:
 - Menu varia por perfil (Admin, Conteudista, Aluno)
 - Badge de notificação em "Curadoria"
 
+### Logo Helen.ai
+- **Fonte:** `HelenAI/docs/Helen.Ai.png` (grid 2×2 gerado via ChatGPT) dividido em 5 variantes transparentes em `HelenAI/prototipos/assets/img/`:
+  - `helenai-logo-color-vertical.png` (346×353) — azul sólido, vertical, pra fundos claros
+  - `helenai-logo-color-horizontal.png` (677×229) — azul sólido, horizontal, reserva
+  - `helenai-logo-white-vertical.png` (346×353) — branco sólido, vertical, pra sidebar e branding escuro
+  - `helenai-logo-white-horizontal.png` (677×229) — branco sólido, horizontal, reserva
+  - `helenai-logo-white-vertical-alt.png` (675×387) — branco com acento lateral, reserva
+- **Aplicação atual:**
+  - Sidebar das 32 telas com `sidebar-logo`: white-vertical, altura 76px, centralizado no header
+  - Login e cadastro branding (gradient azul esquerdo): white-vertical, altura 180px
+  - Login e cadastro mobile (card branco): color-vertical, altura 96px
+  - Recuperar senha (card branco): color-vertical, altura 110px
+  - Onboarding (card branco): color-vertical, altura 80px
+- **Decisão:** não usar `filter: brightness(0) invert(1)` — as variantes já nascem na cor certa. Fundo transparente gerado via Python/Pillow (pixels brancos → alpha 0 para color; pixels do azul do canvas → alpha 0 para white; anti-aliasing preservado).
+- **Nome antigo:** `logo-helen.png` (mascote apenas) e `helenai-logo.png` (combinado RGB sem transparência) foram aposentados. Mantidos no repo como fallback caso precise reverter.
+
 ---
 
 ## Estrutura de Arquivos do Protótipo
@@ -392,7 +392,11 @@ HelenAI/prototipos/
 │   │   ├── navegacao.js        # AppBar (breadcrumb, notificações, perfil dropdown)
 │   │   └── fake-data.js        # Dados mockados
 │   └── img/
-│       └── logo-helen.png
+│       ├── helenai-logo-color-vertical.png    # azul, vertical — fundos claros (mobile, onboarding, recuperar-senha)
+│       ├── helenai-logo-color-horizontal.png  # azul, horizontal — reserva
+│       ├── helenai-logo-white-vertical.png    # branco, vertical — sidebar + branding escuro
+│       ├── helenai-logo-white-horizontal.png  # branco, horizontal — reserva
+│       └── helenai-logo-white-vertical-alt.png # branco com acento — reserva
 ├── compartilhado/
 │   ├── login.html
 │   ├── cadastro.html

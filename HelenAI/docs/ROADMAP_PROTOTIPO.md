@@ -20,7 +20,7 @@ HelenAI/
     │   │   ├── navegacao.js         # Navegação entre telas, tabs, sidebar
     │   │   └── fake-data.js         # Dados mockados (questões, simulados, alunos)
     │   └── img/
-    │       └── logo-helen.png
+    │       └── helenai-logo-*.png  # 5 variantes (color/white × horizontal/vertical + alt)
     ├── compartilhado/
     │   ├── login.html
     │   ├── cadastro.html
@@ -90,22 +90,9 @@ HelenAI/
 
 ---
 
-### Fase 2 — Módulo Admin
-> Gerenciamento da plataforma.
+### Fase 2 — Módulo Admin (substituída pela Fase 9)
 
-| # | Tela | Arquivo | Referência MVP_TELAS.md | Status |
-|---|------|---------|-------------------------|--------|
-| 2.1 | Dashboard Admin | `admin/dashboard.html` | Seção 3.1 | [ ] |
-| 2.2 | Lista de Conteudistas | `admin/conteudistas.html` | Seção 3.2.1 | [ ] |
-| 2.3 | Cadastro/Edição de Conteudista | `admin/conteudista-form.html` | Seção 3.2.2 | [ ] |
-| 2.4 | Lista de Alunos | `admin/alunos.html` | Seção 3.2.3 | [ ] |
-| 2.5 | Edição de Aluno | `admin/aluno-form.html` | Seção 3.2.4 | [ ] |
-
-**Interações fake:**
-- Cards com números estáticos
-- Gráficos com Chart.js ou estáticos (imagem)
-- Tabelas com dados mockados, filtros visuais, paginação fake
-- Botões de ação abrem formulários
+> ⚠ Fase reorganizada. O módulo Admin foi movido pro fim do roadmap (ver **Fase 9**) para entrar depois do fluxo completo do aluno, já com a seção "Impacto e Inclusão" — diferencial do Centelha.
 
 ---
 
@@ -288,7 +275,7 @@ HelenAI/
 |------|-----------|-------|------------|--------|
 | **0** | Base e Componentes | 6 | Obrigatória | ✅ Completa |
 | **1** | Autenticação | 3 | Obrigatória | ✅ Completa |
-| **2** | Admin | 5 | Baixa | ⏳ Pendente (virou Fase 9) |
+| **2** | Admin | — | — | ♻️ Substituída pela Fase 9 |
 | **3** | Conteudista: Importação e Questões | 5 | Alta | ✅ Completa |
 | **4** | Conteudista: Simulados e Gestão | 5 | Alta | ✅ Completa |
 | **5** | Aluno: Dashboard e Explorar | 4 | Alta | ✅ Completa |

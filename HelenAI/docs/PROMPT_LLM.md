@@ -211,6 +211,7 @@ Depois que o NotebookLM gerar o pitch, você pode:
 - Protótipo rodando local: `http://127.0.0.1:8020/compartilhado/login.html` (usuários de teste: `admin@helen.ai/admin`, `conteudista@helen.ai/conteudista`, `aluno@helen.ai/aluno`)
 - **Apresentação navegável:** `http://127.0.0.1:8020/apresentacao.html` — 14 slides já prontos com setas do teclado
 - **PDF da apresentação:** `HelenAI/pdfs/apresentacao-completa.pdf` (14 páginas, 5MB)
+- **PDF completo do protótipo:** `HelenAI/pdfs/helenai-completo.pdf` (36 páginas, 5,1MB) — todas as telas em fluxo, com bookmarks hierárquicos (Compartilhado → Aluno → Conteudista → Admin). Disponível também como botão verde "📄 Baixar PDF completo" na tela de login.
 - Documentação completa: `HelenAI/docs/MVP_TELAS.md` (todas as telas e regras de negócio)
 - Decisões de design: `HelenAI/docs/DECISOES_CLAUDE.md`
 - Roadmap do protótipo: `HelenAI/docs/ROADMAP_PROTOTIPO.md`
