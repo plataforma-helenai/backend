@@ -81,9 +81,11 @@ python manage.py runserver
 HelenAI/
 ├── HelenAI/              # Configurações Django
 │   └── docs/             # Documentação do projeto
-│       ├── DECISOES_CLAUDE.md
-│       ├── MVP_TELAS.md
-│       └── ROADMAP_PROTOTIPO.md
+│       ├── apresentacao/     # Materiais para pitch Centelha
+│       ├── produto/          # Especificação, roadmap, decisões de design
+│       ├── planejamento/     # Cronograma físico, estimativa de desenvolvimento
+│       ├── referencias/      # Exemplos e inputs externos
+│       └── imagens/          # Logos e assets visuais
 ├── prototipos/           # Protótipos HTML/CSS/JS
 │   ├── assets/           # CSS, JS, imagens
 │   ├── compartilhado/    # Login, cadastro, recuperar senha

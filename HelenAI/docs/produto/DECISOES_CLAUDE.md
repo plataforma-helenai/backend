@@ -366,7 +366,7 @@ Com base nas respostas, a plataforma configura automaticamente:
 - Badge de notificação em "Curadoria"
 
 ### Logo Helen.ai
-- **Fonte:** `HelenAI/docs/Helen.Ai.png` (grid 2×2 gerado via ChatGPT) dividido em 5 variantes transparentes em `HelenAI/prototipos/assets/img/`:
+- **Fonte:** `HelenAI/docs/imagens/Helen.Ai.png` (grid 2×2 gerado via ChatGPT) dividido em 5 variantes transparentes em `HelenAI/prototipos/assets/img/`:
   - `helenai-logo-color-vertical.png` (346×353) — azul sólido, vertical, pra fundos claros
   - `helenai-logo-color-horizontal.png` (677×229) — azul sólido, horizontal, reserva
   - `helenai-logo-white-vertical.png` (346×353) — branco sólido, vertical, pra sidebar e branding escuro
